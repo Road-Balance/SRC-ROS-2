@@ -1,0 +1,3 @@
+ros2 pkg create --build-type ament_cmake mw_ahrsv1_ros2 --dependencies rclcpp std_msgs sensor_msgs tf geometry_msgs tf2 tf2_ros tf2_msgs
+
+
