@@ -20,6 +20,7 @@ private:
 
   // TODO: src_msg params & yaml file (for accel, daccel, etc...)
   SRCMsg src_msg;
+  uint steering_offset = 20;
 
 public:
   CmdToSRC() : Node("cmd_vel_to_src_msg") {
@@ -39,14 +40,15 @@ public:
     src_msg.light = false;
     src_msg.direction = true;
     src_msg.lcd_msg = "";
-    src_msg.accel = 0.4;
-    src_msg.deaccel = 0.4;
+    src_msg.accel = 0.8;
+    src_msg.deaccel = 0.8;
     src_msg.scale = 80;
   }
 
   void sub_callback(const Twist::SharedPtr msg) {
     src_msg.speed = msg->linear.x;
-    src_msg.steering = msg->angular.z;
+    // TODO: Find Zero point
+    src_msg.steering = -((msg->angular.z)/2 * steering_offset) + steering_offset;
     // TODO: Check direction
     // TODO: Light On Off mode
   }
