@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
-<robot name="racecar" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="src_ackermann" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find sw_ros2_control_gazebo)/urdf/clean_racecar/macros.xacro" />
-  <xacro:include filename="$(find sw_ros2_control_gazebo)/urdf/clean_racecar/clean_racecar.gazebo" />
-  <xacro:include filename="$(find sw_ros2_control_gazebo)/urdf/clean_racecar/materials.xacro" />
+  <xacro:include filename="$(find src_gazebo)/urdf/macros.xacro" />
+  <xacro:include filename="$(find src_gazebo)/urdf/src_ackermann.gazebo" />
+  <xacro:include filename="$(find src_gazebo)/urdf/materials.xacro" />
 
   <!-- Add chassis and it's inertia link -->
   <link name="base_link" />
 
   <link name="chassis">
     <visual>
-      <xacro:chassis_geometry/>
+      <xacro:chassis_geometry />
       <material name="blue" />
     </visual>
   </link>
@@ -56,10 +56,6 @@
     <limit effort="10" velocity="100" />
   </joint>
 
-  <xacro:wheel_transmission name="left_rear_wheel" />
-
-  <!-- Add the right rear wheel with its joints and tranmissions -->
-
   <link name="right_rear_wheel">
     <inertial>
       <xacro:right_wheels_inertial_params />
@@ -81,10 +77,6 @@
     <limit effort="10" velocity="100" />
   </joint>
 
-  <xacro:wheel_transmission name="right_rear_wheel" />
-
-  <!-- Add the left steering hinge with its joints and tranmissions -->
-
   <link name="left_steering_hinge">
     <inertial>
       <xacro:steering_hinge_inertial_params />
@@ -103,10 +95,6 @@
     <limit lower="-1.0" upper="1.0" effort="10" velocity="100" />
   </joint>
 
-  <xacro:steering_hinge_transmission name="left_steering_hinge" />
-
-  <!-- Add the right steering hinge with its joints and tranmissions -->
-
   <link name="right_steering_hinge">
     <inertial>
       <xacro:steering_hinge_inertial_params />
@@ -124,10 +112,6 @@
     <axis xyz="-1 0 0" />
     <limit lower="-1.0" upper="1.0" effort="10" velocity="100" />
   </joint>
-
-  <xacro:steering_hinge_transmission name="right_steering_hinge" />
-
-  <!-- Add the left front wheel with its joints and tranmissions -->
 
   <link name="left_front_wheel">
     <inertial>
@@ -150,10 +134,6 @@
     <limit effort="10" velocity="100" />
   </joint>
 
-  <xacro:wheel_transmission name="left_front_wheel" />
-
-  <!-- Add the left front wheel with its joints and tranmissions -->
-
   <link name="right_front_wheel">
     <inertial>
       <xacro:right_wheels_inertial_params />
@@ -172,34 +152,30 @@
     <parent link="right_steering_hinge" />
     <child link="right_front_wheel" />
     <axis xyz="0 0 -1" />
-    <limit effort="10" velocity="100"/>
+    <limit effort="10" velocity="100" />
   </joint>
-  
-  <xacro:wheel_transmission name="right_front_wheel" />
-
-  <!-- Add Hokuyo laser scanner -->
 
   <link name="laser">
     <inertial>
       <xacro:hokuyo_inertial_params />
     </inertial>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.1 0.1 0.1"/>
+        <box size="0.1 0.1 0.1" />
       </geometry>
     </collision>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="$(find sw_ros2_control_gazebo)/meshes/hokuyo.dae"/>
+        <mesh filename="$(find src_gazebo)/meshes/hokuyo.dae" />
         <material name="grey" />
       </geometry>
     </visual>
   </link>
 
   <joint name="hokuyo_joint" type="fixed">
-    <origin xyz="0.265 0.0 0.075" rpy="0 0 0"/>
+    <origin xyz="0.265 0.0 0.075" rpy="0 0 0" />
     <parent link="chassis" />
     <child link="laser" />
     <axis xyz="0 0 1" />
@@ -210,28 +186,28 @@
   <link name="zed_camera_link">
     <inertial>
       <mass value="1e-5" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
     </inertial>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.033 0.175 0.030"/>
+        <box size="0.033 0.175 0.030" />
       </geometry>
     </collision>
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.033 0.175 0.030"/>
+        <box size="0.033 0.175 0.030" />
       </geometry>
-      <material name="red"/>
+      <material name="red" />
     </visual>
   </link>
 
   <joint name="zed_camera_joint" type="fixed">
-    <origin xyz="0.390 0 0.04" rpy="0 0 0"/>
-    <parent link="chassis"/>
-    <child link="zed_camera_link"/>
+    <origin xyz="0.390 0 0.04" rpy="0 0 0" />
+    <parent link="chassis" />
+    <child link="zed_camera_link" />
     <axis xyz="0 0 1" />
     <!-- <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0" /> -->
   </joint>
@@ -239,45 +215,46 @@
 
   <!-- zed camera lenses -->
   <!-- It seems these have to have a non-zero mass to have a camera attached? -->
-  <link name="camera_link"><!-- this needs to match the name in zed_wrapper/zed_tf.launch -->
+  <link name="camera_link">
+    <!-- this needs to match the name in zed_wrapper/zed_tf.launch -->
     <inertial>
       <mass value="1e-5" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
     </inertial>
   </link>
   <link name="zed_camera_right_link">
     <inertial>
       <mass value="1e-5" />
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
     </inertial>
   </link>
 
   <joint name="zed_camera_left_joint" type="fixed">
-    <origin xyz="0 0.06 0" rpy="0 0 0"/>
-    <parent link="zed_camera_link"/>
-    <child link="camera_link"/>
+    <origin xyz="0 0.06 0" rpy="0 0 0" />
+    <parent link="zed_camera_link" />
+    <child link="camera_link" />
     <axis xyz="0 0 1" />
   </joint>
   <joint name="zed_camera_right_joint" type="fixed">
-    <origin xyz="0 -0.06 0" rpy="0 0 0"/>
-    <parent link="zed_camera_link"/>
-    <child link="zed_camera_right_link"/>
+    <origin xyz="0 -0.06 0" rpy="0 0 0" />
+    <parent link="zed_camera_link" />
+    <child link="zed_camera_right_link" />
     <axis xyz="0 0 1" />
   </joint>
 
   <link name="imu_link">
     <inertial>
-      <mass value="0.01"/>
-      <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+      <mass value="0.01" />
+      <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0" />
     </inertial>
   </link>
 
   <joint name="imu_joint" type="fixed">
-    <origin xyz="0.01 0 0" rpy="0 0 0"/>
-    <parent link="zed_camera_link"/>
-    <child link="imu_link"/>
+    <origin xyz="0.01 0 0" rpy="0 0 0" />
+    <parent link="zed_camera_link" />
+    <child link="imu_link" />
     <!-- <axis xyz="0 0 1" /> -->
   </joint>
 

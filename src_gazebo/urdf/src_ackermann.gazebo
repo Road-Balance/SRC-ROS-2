@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
-<robot name="racecar" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="src_ackermann" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Gazebo references -->
-
   <gazebo reference="chassis">
     <mu1 value="0.0" />
     <mu2 value="0.0" />
@@ -85,36 +84,6 @@
           <frame_name>laser</frame_name>
         </plugin>
       </sensor>
-
-      <!-- <material>Gazebo/Grey</material>
-      <sensor type="ray" name="hokuyo_sensor">
-        <pose>0 0 0.0124 0 0 0</pose>
-        <visualize>false</visualize>
-        <update_rate>40</update_rate>
-        <ray>
-          <scan>
-            <horizontal>
-              <samples>1081</samples>
-              <resolution>1</resolution>
-              <min_angle>-2.3561944902</min_angle>
-              <max_angle>2.3561944902</max_angle>
-            </horizontal>
-          </scan>
-          <range>
-            <min>0.1</min>
-            <max>10.0</max>
-            <resolution>0.01</resolution>
-          </range>
-          <noise>
-            <mean>0.0</mean>
-            <stddev>0.01</stddev>
-          </noise>
-        </ray>
-        <plugin name="gazebo_ros_hokuyo_controller" filename="libgazebo_ros_laser.so">
-          <topicName>/scan</topicName>
-          <frameName>laser</frameName>
-        </plugin>
-      </sensor> -->
     </gazebo>
   </xacro:unless>
 
@@ -252,28 +221,28 @@
     </hardware>
     <!-- velocity controller -->
     <joint name="left_rear_wheel_joint">
-      <command_interface name="velocity"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
+      <command_interface name="velocity" />
+      <state_interface name="position" />
+      <state_interface name="velocity" />
+      <state_interface name="effort" />
     </joint>
     <joint name="right_rear_wheel_joint">
-      <command_interface name="velocity"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
+      <command_interface name="velocity" />
+      <state_interface name="position" />
+      <state_interface name="velocity" />
+      <state_interface name="effort" />
     </joint>
     <joint name="left_front_wheel_joint">
-      <command_interface name="velocity"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
+      <command_interface name="velocity" />
+      <state_interface name="position" />
+      <state_interface name="velocity" />
+      <state_interface name="effort" />
     </joint>
     <joint name="right_front_wheel_joint">
-      <command_interface name="velocity"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
+      <command_interface name="velocity" />
+      <state_interface name="position" />
+      <state_interface name="velocity" />
+      <state_interface name="effort" />
     </joint>
     <!-- position controller for steering -->
     <joint name="left_steering_hinge_joint">
@@ -281,18 +250,18 @@
         <param name="min">-0.5</param>
         <param name="max">0.5</param>
       </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
+      <state_interface name="position" />
+      <state_interface name="velocity" />
+      <state_interface name="effort" />
     </joint>
     <joint name="right_steering_hinge_joint">
       <command_interface name="position">
         <param name="min">-0.5</param>
         <param name="max">0.5</param>
       </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
+      <state_interface name="position" />
+      <state_interface name="velocity" />
+      <state_interface name="effort" />
     </joint>
     <!-- wanted to add ros2 control's imu -->
     <!-- but there's no option for imu covariance setting -->
@@ -312,7 +281,7 @@
 
   <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <parameters>$(find sw_ros2_control_gazebo)/config/racecar_controller.yaml</parameters>
+      <parameters>$(find src_gazebo)/config/ackermann_controller.yaml</parameters>
     </plugin>
   </gazebo>
 
