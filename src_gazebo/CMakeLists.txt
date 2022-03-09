@@ -54,8 +54,9 @@ install(
     launch
     urdf
     config
-    # worlds
-    # models
+    meshes
+    worlds
+    models
     # models/walker_racecourse
   DESTINATION
     share/${PROJECT_NAME}/

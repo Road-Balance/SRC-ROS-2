@@ -22,11 +22,12 @@ def generate_launch_description():
                     pkg_gazebo_ros, 'launch', 'gazebo.launch.py'))
             )
 
-    # Racecar controller launch 
-    # controller_pkg_path = FindPackageShare(package='sw_ros2_control').find('sw_ros2_control')
-    # racecar_control_launch = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(os.path.join(controller_pkg_path, 'launch', 'racecar_control.launch.py'))
-    # )
+    # Racecar controller launch
+    racecar_control = Node(
+        package='src_gazebo_controller',
+        executable='racecar_controller',
+        output='screen',
+    )
 
     # Robot State Publisher
     pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
@@ -56,22 +57,26 @@ def generate_launch_description():
                                    '-entity', 'racecar'],
                         output='screen')
 
-    load_forward_position_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
-             'forward_position_controller'],
-        output='screen'
+
+    load_forward_position_controller = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["forward_position_controller"],
+        output="screen",
     )
 
-    load_velocity_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
-             'velocity_controller'],
-        output='screen'
+    load_velocity_controller = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["velocity_controller"],
+        output="screen",
     )
 
-    load_joint_state_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
-             'joint_state_broadcaster'],
-        output='screen'
+    load_joint_state_broadcaster = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["joint_state_broadcaster"],
+        output="screen",
     )
 
     # rqt robot steering
@@ -86,12 +91,12 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=spawn_entity,
-                on_exit=[load_joint_state_controller],
+                on_exit=[load_joint_state_broadcaster],
             )
         ),
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=load_joint_state_controller,
+                target_action=load_joint_state_broadcaster,
                 on_exit=[load_forward_position_controller],
             )
         ),
@@ -101,12 +106,12 @@ def generate_launch_description():
                 on_exit=[load_velocity_controller],
             )
         ),
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=load_velocity_controller,
-        #         on_exit=[racecar_control_launch],
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_velocity_controller,
+                on_exit=[racecar_control],
+            )
+        ),
         gazebo,
         robot_state_publisher,
         joint_state_publisher,
