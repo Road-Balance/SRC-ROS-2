@@ -229,7 +229,7 @@
       </geometry>
     </visual>
   </link>
-  <joint name="hokuyo_joint" type="fixed">
+  <joint name="hokuyo_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0.265 0.0 0.075"/>
     <parent link="chassis"/>
     <child link="laser"/>
@@ -255,7 +255,7 @@
       <material name="red"/>
     </visual>
   </link>
-  <joint name="zed_camera_joint" type="fixed">
+  <joint name="zed_camera_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0.390 0 0.04"/>
     <parent link="chassis"/>
     <child link="zed_camera_link"/>
@@ -297,7 +297,7 @@
       <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
     </inertial>
   </link>
-  <joint name="imu_joint" type="fixed">
+  <joint name="imu_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0.01 0 0"/>
     <parent link="zed_camera_link"/>
     <child link="imu_link"/>
