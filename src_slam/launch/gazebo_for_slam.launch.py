@@ -115,7 +115,7 @@ def generate_launch_description():
             'base_frame_id' : 'base_link',
             'odom_frame_id' : 'odom',
             'init_pose_from_topic' : '',
-            'freq' : 10.0}],
+            'freq' : 20.0}],
     )
 
     rviz_config_file = os.path.join(pkg_path, 'rviz', 'gazebo_world.rviz')
@@ -154,12 +154,6 @@ def generate_launch_description():
             event_handler=OnProcessExit(
                 target_action=load_forward_position_controller,
                 on_exit=[load_velocity_controller],
-            )
-        ),
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=load_velocity_controller,
-                on_exit=[rviz],
             )
         ),
         RegisterEventHandler(
