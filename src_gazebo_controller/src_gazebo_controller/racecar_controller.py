@@ -20,6 +20,10 @@ class RacecarController(Node):
     ):
         super().__init__("racecar_controller")
 
+        self.declare_parameter('verbose', True)
+
+        self._verbose = self.get_parameter('verbose').value
+
         # initial velocity and tire angle are 0
         self.x = 0
         self.z = 0
@@ -88,13 +92,15 @@ class RacecarController(Node):
         # We limit the minimum value of the Steering Radius
         # Todo Process negatives
 
-        self.get_logger().info("self.linear_velocity=" + str(self.linear_velocity))
-        self.get_logger().info("data.angular.z=" + str(data.angular.z))
+        if self._verbose:
+            self.get_logger().info("self.linear_velocity=" + str(self.linear_velocity))
+            self.get_logger().info("data.angular.z=" + str(data.angular.z))
 
         if data.angular.z != 0.0:
             steering_radius_raw = abs(self.linear_velocity / data.angular.z)
-            self.get_logger().info("steering_radius_raw=" + str(steering_radius_raw))
-            self.get_logger().info("R_Min_baselink=" + str(self.R_Min_baselink))
+            if self._verbose:
+                self.get_logger().info("steering_radius_raw=" + str(steering_radius_raw))
+                self.get_logger().info("R_Min_baselink=" + str(self.R_Min_baselink))
 
             self.steering_radius = max(abs(steering_radius_raw), self.R_Min_baselink)
             # We consider that turning left should be positive
@@ -208,33 +214,33 @@ class RacecarController(Node):
             alfa_left_front_wheel = 0.0
         #### END FRONT WHeel Calculations
 
-        # os.system('clear')
-        print("#####################")
-        print("@ INPUT VALUES @")
-        print("vel_base_link=" + str(vel_base_link))
-        print("omega_base_link=" + str(omega_base_link))
-        print("turning_radius_base_link=" + str(turning_radius_base_link))
-        print("@ TURNING SPEEDS @")
-        print(
-            "wheel_turnig_speed_right_rear_wheel="
-            + str(wheel_turnig_speed_right_rear_wheel)
-        )
-        print(
-            "wheel_turnig_speed_left_rear_wheel="
-            + str(wheel_turnig_speed_left_rear_wheel)
-        )
-        print(
-            "wheel_turnig_speed_right_front_wheel="
-            + str(wheel_turnig_speed_right_front_wheel)
-        )
-        print(
-            "wheel_turnig_speed_left_front_wheel="
-            + str(wheel_turnig_speed_left_front_wheel)
-        )
-        print("@ ANGLES @")
-        print("alfa_right_front_wheel=" + str(alfa_right_front_wheel))
-        print("alfa_left_front_wheel=" + str(alfa_left_front_wheel))
-        print("####### END #########")
+        if self._verbose:
+            print("#####################")
+            print("@ INPUT VALUES @")
+            print("vel_base_link=" + str(vel_base_link))
+            print("omega_base_link=" + str(omega_base_link))
+            print("turning_radius_base_link=" + str(turning_radius_base_link))
+            print("@ TURNING SPEEDS @")
+            print(
+                "wheel_turnig_speed_right_rear_wheel="
+                + str(wheel_turnig_speed_right_rear_wheel)
+            )
+            print(
+                "wheel_turnig_speed_left_rear_wheel="
+                + str(wheel_turnig_speed_left_rear_wheel)
+            )
+            print(
+                "wheel_turnig_speed_right_front_wheel="
+                + str(wheel_turnig_speed_right_front_wheel)
+            )
+            print(
+                "wheel_turnig_speed_left_front_wheel="
+                + str(wheel_turnig_speed_left_front_wheel)
+            )
+            print("@ ANGLES @")
+            print("alfa_right_front_wheel=" + str(alfa_right_front_wheel))
+            print("alfa_left_front_wheel=" + str(alfa_left_front_wheel))
+            print("####### END #########")
 
         # Step 3 Publish all the data in the corresponding topics
         self.steering_msg.data = [
