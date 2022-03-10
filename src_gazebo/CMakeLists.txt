@@ -52,12 +52,12 @@ endif()
 install(
   DIRECTORY
     launch
+    rviz
     urdf
     config
     meshes
     worlds
     models
-    # models/walker_racecourse
   DESTINATION
     share/${PROJECT_NAME}/
 )

@@ -40,11 +40,6 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py'))
     )
 
-    # Racecar controller launch 
-    racecar_control_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(controller_pkg_path, 'launch', 'racecar_control.launch.py'))
-    )
-
     # Robot State Publisher
     urdf_file = os.path.join(pkg_path, 'urdf', 'src_ackermann.urdf')
     
@@ -74,22 +69,38 @@ def generate_launch_description():
         arguments=['-topic', 'robot_description', '-entity', 'racecar'],
     )
 
-    load_forward_position_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
-             'forward_position_controller'],
-        output='screen'
+    # ROS 2 controller
+    load_forward_position_controller = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["forward_position_controller"],
+        output="screen",
     )
 
-    load_velocity_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
-             'velocity_controller'],
-        output='screen'
+    load_velocity_controller = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["velocity_controller"],
+        output="screen",
     )
 
-    load_joint_state_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
-             'joint_state_broadcaster'],
-        output='screen'
+    load_joint_state_broadcaster = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["joint_state_broadcaster"],
+        output="screen",
+    )
+
+    # Racecar controller launch
+    racecar_control = Node(
+        package='src_gazebo_controller',
+        executable='racecar_controller',
+        output='screen',
+        parameters=[
+            {
+                "verbose": False,
+            }
+        ],
     )
 
     rf2o_laser_odometry = Node(
@@ -107,7 +118,7 @@ def generate_launch_description():
             'freq' : 10.0}],
     )
 
-    rviz_config_file = os.path.join(pkg_path, 'rviz', 'gazebo.rviz')
+    rviz_config_file = os.path.join(pkg_path, 'rviz', 'gazebo_world.rviz')
 
     # Launch RViz
     rviz = Node(
@@ -130,12 +141,12 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=spawn_entity,
-                on_exit=[load_joint_state_controller],
+                on_exit=[load_joint_state_broadcaster],
             )
         ),
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=load_joint_state_controller,
+                target_action=load_joint_state_broadcaster,
                 on_exit=[load_forward_position_controller],
             )
         ),
@@ -154,7 +165,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=load_velocity_controller,
-                on_exit=[racecar_control_launch],
+                on_exit=[racecar_control],
             )
         ),
         start_gazebo_server_cmd,

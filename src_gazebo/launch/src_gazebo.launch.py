@@ -22,13 +22,6 @@ def generate_launch_description():
                     pkg_gazebo_ros, 'launch', 'gazebo.launch.py'))
             )
 
-    # Racecar controller launch
-    racecar_control = Node(
-        package='src_gazebo_controller',
-        executable='racecar_controller',
-        output='screen',
-    )
-
     # Robot State Publisher
     pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
     urdf_file = os.path.join(pkg_path, 'urdf', 'src_ackermann.urdf')
@@ -57,7 +50,7 @@ def generate_launch_description():
                                    '-entity', 'racecar'],
                         output='screen')
 
-
+    # ROS 2 controller
     load_forward_position_controller = Node(
         package="controller_manager",
         executable="spawner.py",
@@ -77,6 +70,18 @@ def generate_launch_description():
         executable="spawner.py",
         arguments=["joint_state_broadcaster"],
         output="screen",
+    )
+
+    # Racecar controller launch
+    racecar_control = Node(
+        package='src_gazebo_controller',
+        executable='racecar_controller',
+        output='screen',
+        parameters=[
+            {
+                "verbose": False,
+            }
+        ],
     )
 
     # rqt robot steering
