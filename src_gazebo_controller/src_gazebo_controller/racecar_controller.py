@@ -60,6 +60,10 @@ class RacecarController(Node):
         self.steering_pub = self.create_publisher(
             Float64MultiArray, "/forward_position_controller/commands", 10
         )
+        # For Odometry Implementation
+        self.steering_pub_middle = self.create_publisher(
+            Float64MultiArray, "/steering_angle_middle", 10
+        )
         self.throttling_pub = self.create_publisher(
             Float64MultiArray, "/velocity_controller/commands", 10
         )
@@ -68,6 +72,7 @@ class RacecarController(Node):
 
         self.steering_msg = Float64MultiArray()
         self.throttling_msg = Float64MultiArray()
+        self.steering_msg_middle = Float64MultiArray()
 
     # def _check_cmd_vel_ready(self):
     #     data = None
@@ -176,6 +181,21 @@ class RacecarController(Node):
 
         # Step 2: Calculate the Wheel Turning Speed for the Front wheels and the STeering angle
         if self.steering_radius >= 0:
+            turning_radius_middle = turning_radius_base_link
+            distance_to_turning_point_middle_wheel = math.sqrt(
+                pow(self.L, 2) + pow(turning_radius_middle, 2)
+            )
+            vel_middle_front_wheel = (
+                omega_base_link * distance_to_turning_point_middle_wheel
+            )
+
+            wheel_turnig_speed_middle_wheel = self.limit_wheel_speed(
+                vel_middle_front_wheel / self.wheel_radius
+            )
+            alfa_middle_wheel = math.atan(
+                self.L / turning_radius_middle
+            )
+
             turning_radius_right_front_wheel = turning_radius_right_rear_wheel
             distance_to_turning_point_right_front_wheel = math.sqrt(
                 pow(self.L, 2) + pow(turning_radius_right_front_wheel, 2)
@@ -203,6 +223,11 @@ class RacecarController(Node):
             )
             alfa_left_front_wheel = math.atan(self.L / turning_radius_left_front_wheel)
         else:
+            wheel_turnig_speed_middle_wheel = self.limit_wheel_speed(
+                vel_base_link / self.wheel_radius
+            )
+            alfa_middle_wheel = 0.0
+
             wheel_turnig_speed_right_front_wheel = self.limit_wheel_speed(
                 vel_base_link / self.wheel_radius
             )
@@ -253,10 +278,13 @@ class RacecarController(Node):
             wheel_turnig_speed_left_front_wheel,
             wheel_turnig_speed_right_front_wheel,
         ]
+        self.steering_msg_middle.data = [
+            -1 * self.turning_sign * self.linear_sign * alfa_middle_wheel,
+        ]
 
         self.steering_pub.publish(self.steering_msg)
+        self.steering_pub_middle.publish(self.steering_msg_middle)
         self.throttling_pub.publish(self.throttling_msg)
-
 
 def main(args=None):
 

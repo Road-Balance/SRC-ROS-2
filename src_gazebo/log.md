@@ -39,3 +39,65 @@ ros2 launch src_gazebo compare_odom.launch.py
 ? 하다보니 또 맞을 때도 있네?
 
 => 일단 실제 로봇으로 가서 얼마나 잘되는지 실제 해보자.
+
+# odom 제작
+
+```
+# The state of each joint (revolute or prismatic) is defined by:
+#  * the position of the joint (rad or m),
+#  * the velocity of the joint (rad/s or m/s) and
+#  * the effort that is applied in the joint (Nm or N).
+```
+
+* ros2 topic echo /joint_states => 여기서의 vel은 각속도
+
+예를 들어
+* cmd_vel 0.1
+* wheel_radius 0.05
+일때, joint_states/velocity는 약 2가 된다.
+
+* ros2 topic echo /joint_states => 여기서의 position은 radian이다.
+
+5초간 0.1m/s 주면서 joint_state 모니터링
+
+```
+ros2 launch src_gazebo src_gazebo.launch.py
+ros2 run src_gazebo_controller odom_test
+ros2 topic echo /joint_states
+=> 9.13정도 나옴
+```
+
+* ros2 topic echo /joint_states => 여기서의 position[4], position[5]는 radian이다.
+
+```
+ros2 topic echo /forward_position_controller/commands
+- 0.36339788226173847
+- 0.46082218765954414
+
+ros2 topic echo /joint_states
+position:
+- 61.25404326045237
+- 54.23001027119805
+- 74.04593021112117
+- 68.46704466435011
+- 0.3621952714064074
+- 0.46161041640775213
+```
+
+소수점 아래 2자리까지 믿을 만 하다.
+대신 현재 좌우 angle이 다름에 주의
+
+현재 사용하고자 하는 odom은 front angle을 좌우 구별하지 않는다.
+
+
+```
+$ ros2 topic info /joint_states
+Type: sensor_msgs/msg/JointState
+Publisher count: 2
+Subscription count: 1
+```
+
+sensor_msgs/msg/JointState => 이걸 받아서 odometry를 만들자.
+
+실제 SRC는 servo 각도와 (피드백 없음) / 뒷바퀴 엔코더로 odom을 만든다.
+
