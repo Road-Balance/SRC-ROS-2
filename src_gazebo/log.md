@@ -95,6 +95,14 @@ $ ros2 topic info /joint_states
 Type: sensor_msgs/msg/JointState
 Publisher count: 2
 Subscription count: 1
+
+$ ros2 interface show sensor_msgs/msg/JointState
+std_msgs/Header header
+
+string[] name
+float64[] position
+float64[] velocity
+float64[] effort
 ```
 
 sensor_msgs/msg/JointState => 이걸 받아서 odometry를 만들자.
