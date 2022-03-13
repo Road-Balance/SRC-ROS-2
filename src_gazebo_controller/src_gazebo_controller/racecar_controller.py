@@ -4,6 +4,7 @@ from rclpy.node import Node  # Enables the use of rclpy's Node class
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import (
+    Float64,
     Float64MultiArray,
 )  # Enable use of the std_msgs/Float64MultiArray message type
 from ackermann_msgs.msg import AckermannDriveStamped
@@ -60,19 +61,23 @@ class RacecarController(Node):
         self.steering_pub = self.create_publisher(
             Float64MultiArray, "/forward_position_controller/commands", 10
         )
-        # For Odometry Implementation
-        self.steering_pub_middle = self.create_publisher(
-            Float64MultiArray, "/steering_angle_middle", 10
-        )
         self.throttling_pub = self.create_publisher(
             Float64MultiArray, "/velocity_controller/commands", 10
+        )
+        # For Odometry Implementation
+        self.steering_pub_middle = self.create_publisher(
+            Float64, "/steering_angle_middle", 10
+        )
+        self.throttling_pub_middle = self.create_publisher(
+            Float64, "/throttling_vel_middle", 10
         )
 
         self.lastMsg = self.get_clock().now().to_msg()
 
         self.steering_msg = Float64MultiArray()
         self.throttling_msg = Float64MultiArray()
-        self.steering_msg_middle = Float64MultiArray()
+        self.steering_msg_middle = Float64()
+        self.throttling_msg_middle = Float64()
 
     # def _check_cmd_vel_ready(self):
     #     data = None
@@ -166,6 +171,12 @@ class RacecarController(Node):
             wheel_turnig_speed_left_rear_wheel = self.limit_wheel_speed(
                 vel_left_rear_wheel / self.wheel_radius
             )
+
+            turning_radius_com = turning_radius_base_link
+            vel_com = omega_base_link * turning_radius_com
+            wheel_turnig_speed_com = self.limit_wheel_speed(
+                vel_com / self.wheel_radius
+            )
         else:
             # Not turning , there fore they are all the same
             # Default Interior = Right WHeel
@@ -174,6 +185,10 @@ class RacecarController(Node):
             )
             # Default Interior = Left WHeel
             wheel_turnig_speed_left_rear_wheel = self.limit_wheel_speed(
+                vel_base_link / self.wheel_radius
+            )
+
+            wheel_turnig_speed_com = self.limit_wheel_speed(
                 vel_base_link / self.wheel_radius
             )
 
@@ -278,13 +293,13 @@ class RacecarController(Node):
             wheel_turnig_speed_left_front_wheel,
             wheel_turnig_speed_right_front_wheel,
         ]
-        self.steering_msg_middle.data = [
-            -1 * self.turning_sign * self.linear_sign * alfa_middle_wheel,
-        ]
+        self.steering_msg_middle.data = -1 * self.turning_sign * self.linear_sign * alfa_middle_wheel
+        self.throttling_msg_middle.data = wheel_turnig_speed_com
 
         self.steering_pub.publish(self.steering_msg)
         self.steering_pub_middle.publish(self.steering_msg_middle)
         self.throttling_pub.publish(self.throttling_msg)
+        self.throttling_pub_middle.publish(self.throttling_msg_middle)
 
 def main(args=None):
 

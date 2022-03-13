@@ -20,6 +20,8 @@ private:
     rclcpp::Time now_;
     const float pub_time_ = 5.0;
 
+    rclcpp::Time start_time = this->get_clock()->now();
+
     Twist twist_msg_;
 public:
     PubSubTest(): Node("pub_sub_test"){
@@ -50,6 +52,9 @@ public:
     void sub_joint_state(const JointState::SharedPtr msg){
         std::cout << "msg in" << std::endl;
         RCLCPP_INFO(this->get_logger(), "%s", msg->name[0].c_str());
+
+        auto cur_time = this->get_clock()->now();
+        std::cout << (cur_time - start_time).seconds() << std::endl;
     }
 
     void sub_mid_steering(const Float64MultiArray::SharedPtr msg){

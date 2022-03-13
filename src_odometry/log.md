@@ -62,6 +62,43 @@ auto interval = std::chrono::duration<double>(1.0 / frequency);
 timer_ = this->create_wall_timer(interval, std::bind(&NavSatTransform::transformCallback, this));
 ```
 
+문제
+현재 odom은 다음 두개의 값을 받음
+```
+double wheel_pos  = rear_wheel_joint_.getPosition();
+double steer_pos = front_steer_joint_.getPosition();
+```
+gazebo에서는 뒷바퀴의 양쪽 회전각이 다르다.
+/steering_angle_middle 처럼, /throttling_angle_middle을 만들어서 publish 해보자.
+
+steering_angle_middle은 되지만, throttling_angle_middle은 안된다.
+throttling_vel만 다룰 수 있음
+
+!!결론!! => 양쪽 뒷바퀴 pose를 평균내서 사용하자. (linear 관계라고 가정하면 성립함)
+
+
+주기적으로 0이 나온다.
+```
+139.732 160.031 149.881
+139.732 160.031 149.881
+139.732 160.031 149.881
+139.732 160.031 149.881
+139.732 160.031 149.881
+139.732 160.031 149.881
+0 0 0
+```
+
+createQuaternionMsgFromYaw => 직접 만들어 쓰기
+https://answers.ros.org/question/364561/tfcreatequaternionfromyaw-equivalent-in-ros2/
+
+한바퀴 아직 안돌았는데 이미 한바퀴 넘어 있음
+open loop 써도 그러네
+
+=> controller가 잘못되었나 보다 ㅅㅂ...
+
+
+
+
 # TODO
 
 * [] realtime stuffs
