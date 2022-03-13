@@ -309,7 +309,7 @@ def main(args=None):
     car_wheel_base = 0.325
 
     # Distance from left to right wheels
-    car_wheel_threat = 0.2
+    car_wheel_threat = 0.245
 
     # Calculated as the  maximum steering angle the inner wheel can do
     max_abs_steer = 0.7853

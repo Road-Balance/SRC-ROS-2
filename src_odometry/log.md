@@ -95,9 +95,51 @@ https://answers.ros.org/question/364561/tfcreatequaternionfromyaw-equivalent-in-
 open loop 써도 그러네
 
 => controller가 잘못되었나 보다 ㅅㅂ...
+수치가 잘못되었는지 살펴보자.
 
+![image](https://user-images.githubusercontent.com/12381733/158050479-0305fa59-55b7-4563-95cf-3d66a2d3a24e.png)
 
+샤시가 뒤쪽이었다.
 
+![image](https://user-images.githubusercontent.com/12381733/158050513-d010aa3f-0a4c-4267-9c5e-0d4b72774f5e.png)
+
+right_rear_wheel로는 바퀴 사이 거리 유추 불가
+
+```
+$ ros2 run tf2_ros tf2_echo chassis right_front_wheel
+[INFO] [1647158272.592267167] [tf2_echo]: Waiting for transform chassis ->  right_front_wheel: Invalid frame ID "chassis" passed to canTransform argument target_frame - frame does not exist
+At time 1647158273.536024634
+- Translation: [0.325, -0.100, 0.000]
+- Rotation: in Quaternion [-0.500, -0.500, 0.500, -0.500]
+```
+
+이건 이 둘 사이 거리니까, 실제 car_wheel_threat는 2배가 되어야지 ㅇㅇ 맞네 ㅠ
+왼쪽 오른쪽 사이 거리 확인 
+
+```xml
+<joint name="left_steering_hinge_joint" type="revolute">
+    <origin xyz="0.325 0.0 0" rpy="0 1.5708 0" />
+    <parent link="chassis" />
+```
+
+![image](https://user-images.githubusercontent.com/12381733/158051253-99f378b6-4cd9-40f1-a3b4-d773c624a084.png)
+
+완전 가운데가 아니네, 바퀴 두께가 있었음 (0.045)
+```
+<xacro:macro name="left_wheels_collision_geometry">
+    <origin xyz="0 0 -0.0225" rpy="0 0 0" />
+    <geometry>
+        <cylinder length="0.045" radius="0.05" />
+    </geometry>
+</xacro:macro>
+```
+그렇다면, 실제 오른쪽/왼쪽 바퀴 사이 거리는 (0.1 + 0.0225) * 2 = 0.245
+=> 여전히 빠르다. 
+
+컨트롤러를 바꾸자. => Bycicle Model로!
+```
+
+```
 
 # TODO
 
