@@ -77,7 +77,7 @@ throttling_vel만 다룰 수 있음
 !!결론!! => 양쪽 뒷바퀴 pose를 평균내서 사용하자. (linear 관계라고 가정하면 성립함)
 
 
-주기적으로 0이 나온다.
+주기적으로 0이 나온다. => 예외처리해줌
 ```
 139.732 160.031 149.881
 139.732 160.031 149.881
@@ -228,6 +228,128 @@ alfa_left_front_wheel = math.atan((omega_base_link * self.L ) / vel_base_link)
 => 더커진다 ㅠ
 
 ![image](https://user-images.githubusercontent.com/12381733/158106036-a71dc337-acd2-4947-92e2-7136394b6328.png)
+
+손으로 직접 써본 결과, asin이 가장 유사했음
+```
+alfa_left_front_wheel = math.asin((omega_base_link * self.L ) / vel_base_link)
+```
+
+그럼, 이제 odom으로 가자. 일단 실행 
+![image](https://user-images.githubusercontent.com/12381733/158144998-3d0ba615-eca6-4a5b-b7dd-62044b9af92e.png)
+(갈길이 멀다 ㅠㅠ)
+
+각속도 구하는 방식은 mit racecar와 동일하다.
+```c++
+    const double angular = tan(front_steer_pos) * linear / wheel_separation_h_;
+    current_angular_velocity = current_speed * tan(current_steering_angle) / wheelbase_;
+```
+
+일단 openloop부터 맞춰보자.
+
+![image](https://user-images.githubusercontent.com/12381733/158158664-ef91c528-882f-429c-a9cc-9726621a47e4.png)
+
+변위는 얼추 맞아보이는데, 타임 싱크가 다르다.
+open_loop에 기체에 대한 정보는 전혀없음
+
+왜 이런 시간 차이가 발생할까?
+
+현재의 open_loop는 이러한 구조이다.
+```
+void cmd_vel_sub(const Twist::SharedPtr msg){
+    linear_x = msg->linear.x;
+    angular_z = msg->angular.z;
+}
+
+void odom_update(const rclcpp::Time &time){
+    // COMPUTE AND PUBLISH ODOMETRY
+    // TODO : open_loop implement & comparison
+    if (open_loop_){
+        odometry_.updateOpenLoop(linear_x, angular_z, time);
+    }
+```
+문제될 건 없는데...
+
+시간 문제일까? odom topic time과 odom 계산 time을 일치시켜봄
+여전히 time 싱크가 안맞네
+
+그냥 x 축만 와리가리 치면 아주 잘 감
+
+![image](https://user-images.githubusercontent.com/12381733/158161500-6161f316-e579-4398-936f-687da1d85b0b.png)
+
+원운동 살짝 해보면 바로 어긋남 => 결국 이 어긋남 때문에 주기가 밀려서 시간이 안맞게 되는 듯
+
+그럼, closed loop는?
+
+앞뒤 와리가리 후 가만히 있어본 결과
+```
+ros2 topic echo /ground_truth_x => data: 1.113367149944375
+ros2 topic echo odom / x => 1.1913710991130013
+Rear Wheel Pose : 22.266580
+```
+이렇게나 차이가 발생한다.
+22.265 * 0.05 = 1.11325 이므로, odom 단에서 문제임, 찍어보자. 
+
+```c++
+const double rear_wheel_est_vel = rear_wheel_cur_pos - rear_wheel_old_pos_;
+
+std::cout << "rear_wheel_pos : " << rear_wheel_pos << " / " << 
+    "front_steer_pos" << front_steer_pos << " / " << 
+    "rear_wheel_est_vel : " << rear_wheel_est_vel << std::endl;
+
+### 결과
+rear_wheel_pos : 75.1827 / front_steer_pos-0 / rear_wheel_est_vel : 0.00599996
+rear_wheel_pos : 75.3027 / front_steer_pos-0 / rear_wheel_est_vel : 0.00599997
+rear_wheel_pos : 75.3627 / front_steer_pos-0 / rear_wheel_est_vel : 0.00299999
+rear_wheel_pos : 75.4827 / front_steer_pos-0 / rear_wheel_est_vel : 0.00599998
+rear_wheel_pos : 75.6027 / front_steer_pos-0 / rear_wheel_est_vel : 0.00599998
+rear_wheel_pos : 75.7227 / front_steer_pos-0 / rear_wheel_est_vel : 0.00599999
+rear_wheel_pos : 75.7827 / front_steer_pos-0 / rear_wheel_est_vel : 0.003
+rear_wheel_pos : 75.9027 / front_steer_pos-0 / rear_wheel_est_vel : 0.006
+rear_wheel_pos : 76.0227 / front_steer_pos-0 / rear_wheel_est_vel : 0.00600001
+rear_wheel_pos : 76.1427 / front_steer_pos-0 / rear_wheel_est_vel : 0.00600002
+rear_wheel_pos : 76.2627 / front_steer_pos-0 / rear_wheel_est_vel : 0.00600003
+rear_wheel_pos : 76.3227 / front_steer_pos-0 / rear_wheel_est_vel : 0.00300002
+rear_wheel_pos : 76.4427 / front_steer_pos-0 / rear_wheel_est_vel : 0.00600005
+rear_wheel_pos : 76.5627 / front_steer_pos-0 / rear_wheel_est_vel : 0.00600007
+rear_wheel_pos : 76.6227 / front_steer_pos-0 / rear_wheel_est_vel : 0.00300003
+
+0.1로 고정한 결과 
+rear_wheel_pos : 29.9224 / front_steer_pos-0 / rear_wheel_est_vel : 0.00300062
+rear_wheel_pos : 29.9624 / front_steer_pos-0 / rear_wheel_est_vel : 0.00199964
+rear_wheel_pos : 29.9824 / front_steer_pos-0 / rear_wheel_est_vel : 0.000999845
+rear_wheel_pos : 30.0424 / front_steer_pos-0 / rear_wheel_est_vel : 0.00299956
+rear_wheel_pos : 30.0624 / front_steer_pos-0 / rear_wheel_est_vel : 0.000999869
+rear_wheel_pos : 30.1024 / front_steer_pos-0 / rear_wheel_est_vel : 0.00199977
+```
+=> 이렇게 뒤죽박죽인 걸 그냥 썼다고?
+
+dt로 나누어준 결과..
+```
+rear_wheel_pos : 3.9426 / front_steer_pos-0 / rear_wheel_est_vel : 0.100047
+rear_wheel_pos : 4.0026 / front_steer_pos-0 / rear_wheel_est_vel : 0.130424
+rear_wheel_pos : 4.0426 / front_steer_pos-0 / rear_wheel_est_vel : 0.117895
+rear_wheel_pos : 4.0626 / front_steer_pos-0 / rear_wheel_est_vel : 0.0483452
+rear_wheel_pos : 4.1026 / front_steer_pos-0 / rear_wheel_est_vel : 0.103535
+rear_wheel_pos : 4.1226 / front_steer_pos-0 / rear_wheel_est_vel : 0.0466102
+rear_wheel_pos : 4.18261 / front_steer_pos-0 / rear_wheel_est_vel : 0.161761
+rear_wheel_pos : 4.20261 / front_steer_pos-0 / rear_wheel_est_vel : 0.0497566
+rear_wheel_pos : 4.26261 / front_steer_pos-0 / rear_wheel_est_vel : 0.150726
+rear_wheel_pos : 4.30261 / front_steer_pos-0 / rear_wheel_est_vel : 0.100022
+rear_wheel_pos : 4.32261 / front_steer_pos-0 / rear_wheel_est_vel : 0.0498503
+rear_wheel_pos : 4.38262 / front_steer_pos-0 / rear_wheel_est_vel : 0.150567
+rear_wheel_pos : 4.40262 / front_steer_pos-0 / rear_wheel_est_vel : 0.0497586
+rear_wheel_pos : 4.44262 / front_steer_pos-0 / rear_wheel_est_vel : 0.100079
+rear_wheel_pos : 4.48262 / front_steer_pos-0 / rear_wheel_est_vel : 0.0998396
+```
+plot 결과도 갑자기 널뛰기 한다.
+
+참고로 wheel_separation_h_는 앞뒤 바퀴 사이 거리이다.
+
+자유롭게 돌아다녀본 결과 (제자리 돌아오기)
+
+<img width="1438" alt="image" src="https://user-images.githubusercontent.com/12381733/158166262-6f531e4f-a56b-499c-94dd-0f2cccf6f260.png">
+
+y 쪽이 좀 이상한데? => 이거 좀 확인해보자.
 
 # TODO
 
