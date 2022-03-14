@@ -236,9 +236,11 @@ public:
 
         // Populate odom message and publish
         auto odom = std::make_unique<nav_msgs::msg::Odometry>();
+        auto now = get_clock()->now();
+
         odom->header.frame_id = odom_frame_id_;
         odom->child_frame_id = base_frame_id_;
-        odom->header.stamp = last_state_publish_time_;
+        odom->header.stamp = now;
         odom->pose.pose.position.x = odometry_.getX();  
         odom->pose.pose.position.y = odometry_.getY(); 
         odom->pose.pose.orientation.x = q.x();
@@ -266,7 +268,7 @@ public:
         if(enable_odom_tf_){
             // publish TF
             geometry_msgs::msg::TransformStamped odom_tf;
-            odom_tf.header.stamp = last_state_publish_time_; 
+            odom_tf.header.stamp = now; 
             odom_tf.header.frame_id = odom_frame_id_;
             odom_tf.child_frame_id = base_frame_id_;
             odom_tf.transform.translation.x = odometry_.getX();

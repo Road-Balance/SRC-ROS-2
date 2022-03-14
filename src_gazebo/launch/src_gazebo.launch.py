@@ -17,10 +17,19 @@ def generate_launch_description():
 
     # gazebo
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')   
-    gazebo = IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(
-                    pkg_gazebo_ros, 'launch', 'gazebo.launch.py'))
-            )
+    pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
+    world_path = os.path.join(pkg_path, 'worlds', 'empty_world.world')
+
+    # Start Gazebo server
+    start_gazebo_server_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')),
+        launch_arguments={'world': world_path}.items()
+    )
+
+    # Start Gazebo client    
+    start_gazebo_client_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py'))
+    )
 
     # Robot State Publisher
     pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
@@ -75,7 +84,8 @@ def generate_launch_description():
     # Racecar controller launch
     racecar_control = Node(
         package='src_gazebo_controller',
-        executable='racecar_controller',
+        # executable='racecar_controller',
+        executable='racecar_controller_v2',
         output='screen',
         parameters=[
             {
@@ -117,7 +127,8 @@ def generate_launch_description():
                 on_exit=[racecar_control],
             )
         ),
-        gazebo,
+        start_gazebo_server_cmd,
+        start_gazebo_client_cmd,
         robot_state_publisher,
         joint_state_publisher,
         spawn_entity,

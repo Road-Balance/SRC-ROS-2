@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'racecar_controller = src_gazebo_controller.racecar_controller:main',
+            'racecar_controller_v2 = src_gazebo_controller.racecar_controller_v2:main',
             'odom_utility_tools = src_gazebo_controller.odom_utility_tools:main',
             'odom_test = src_gazebo_controller.odom_test:main',
         ],
