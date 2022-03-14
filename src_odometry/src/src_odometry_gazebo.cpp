@@ -116,10 +116,11 @@ public:
         auto interval = std::chrono::duration<double>(1.0 / publish_rate);
         pub_timer_ = this->create_wall_timer(interval, std::bind(&AckermannOdometry::timer_cb, this));
 
-        this->declare_parameter("open_loop", true);
+        this->declare_parameter("open_loop", false);
         open_loop_ = this->get_parameter("open_loop").as_bool();
 
-        this->declare_parameter("wheel_separation_h_", 0.2);
+        // this->declare_parameter("wheel_separation_h_", 0.245);
+        this->declare_parameter("wheel_separation_h_", 0.325);
         wheel_separation_h_ = this->get_parameter("wheel_separation_h_").as_double();
 
         this->declare_parameter("wheel_separation_h_multiplier", 1.0);
@@ -226,7 +227,7 @@ public:
         }
     }
 
-    void publish_odom_topic(){
+    void publish_odom_topic(const rclcpp::Time &time){
         // Publish odometry message
         // Compute and store orientation info
         tf2::Quaternion q;
@@ -236,11 +237,12 @@ public:
 
         // Populate odom message and publish
         auto odom = std::make_unique<nav_msgs::msg::Odometry>();
-        auto now = get_clock()->now();
+        // auto now = get_clock()->now();
 
         odom->header.frame_id = odom_frame_id_;
         odom->child_frame_id = base_frame_id_;
-        odom->header.stamp = now;
+        // odom->header.stamp = now;
+        odom->header.stamp = time;
         odom->pose.pose.position.x = odometry_.getX();  
         odom->pose.pose.position.y = odometry_.getY(); 
         odom->pose.pose.orientation.x = q.x();
@@ -268,7 +270,8 @@ public:
         if(enable_odom_tf_){
             // publish TF
             geometry_msgs::msg::TransformStamped odom_tf;
-            odom_tf.header.stamp = now; 
+            // odom_tf.header.stamp = now; 
+            odom_tf.header.stamp = time;
             odom_tf.header.frame_id = odom_frame_id_;
             odom_tf.child_frame_id = base_frame_id_;
             odom_tf.transform.translation.x = odometry_.getX();
@@ -289,7 +292,7 @@ public:
         rclcpp::Time cur_time = this->get_clock()->now();
 
         odom_update(cur_time);
-        publish_odom_topic();
+        publish_odom_topic(cur_time);
     }
 };
 
