@@ -195,7 +195,7 @@ class RacecarController(Node):
         #### END REAR WHeel Calculations
 
         # Step 2: Calculate the Wheel Turning Speed for the Front wheels and the STeering angle
-        if self.steering_radius >= 0:
+        if self.steering_radius >= 0 and vel_base_link != 0:
             turning_radius_middle = turning_radius_base_link
             distance_to_turning_point_middle_wheel = math.sqrt(
                 pow(self.L, 2) + pow(turning_radius_middle, 2)
