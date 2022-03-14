@@ -222,7 +222,8 @@ class RacecarController(Node):
             )
             # alfa_right_front_wheel = math.atan(self.L / turning_radius_right_front_wheel)
             # alfa_right_front_wheel = math.atan( self.L / turning_radius_middle )
-            alfa_right_front_wheel = math.atan((omega_base_link * self.L ) / vel_base_link)
+            # alfa_right_front_wheel = math.atan((omega_base_link * self.L ) / vel_base_link)
+            alfa_right_front_wheel = math.asin((omega_base_link * self.L ) / vel_base_link)
 
             turning_radius_left_front_wheel = turning_radius_left_rear_wheel
             distance_to_turning_point_left_front_wheel = math.sqrt(
@@ -236,7 +237,8 @@ class RacecarController(Node):
             )
             # alfa_left_front_wheel = math.atan(self.L / turning_radius_left_front_wheel)
             # alfa_left_front_wheel = math.atan( self.L / turning_radius_middle )
-            alfa_left_front_wheel = math.atan((omega_base_link * self.L ) / vel_base_link)
+            # alfa_left_front_wheel = math.atan((omega_base_link * self.L ) / vel_base_link)
+            alfa_left_front_wheel = math.asin((omega_base_link * self.L ) / vel_base_link)
         else:
             wheel_turnig_speed_middle_wheel = self.limit_wheel_speed(
                 vel_base_link / self.wheel_radius
@@ -294,13 +296,16 @@ class RacecarController(Node):
             raw_wheel_speed,
             raw_wheel_speed,
         ]
-        self.steering_msg_middle.data = -1 * self.turning_sign * self.linear_sign * alfa_middle_wheel
+        self.steering_msg_middle.data = -1 * self.turning_sign * self.linear_sign * alfa_right_front_wheel
         self.throttling_msg_middle.data = wheel_turnig_speed_com
 
+        self.get_logger().info(f"{raw_wheel_speed}, {alfa_left_front_wheel}, {alfa_right_front_wheel}")
+        
         self.steering_pub.publish(self.steering_msg)
         self.steering_pub_middle.publish(self.steering_msg_middle)
         self.throttling_pub.publish(self.throttling_msg)
         self.throttling_pub_middle.publish(self.throttling_msg_middle)
+
 
 def main(args=None):
 
