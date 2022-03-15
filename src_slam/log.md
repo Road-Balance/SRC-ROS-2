@@ -16,3 +16,27 @@ odom.header.stamp = this->get_clock()->now();
 odom.header.frame_id = odom_frame_id;
 ```
 
+
+
+```bash
+ros2 run tf2_tools view_frames.py
+```
+
+Error, cannot vizualize laserScan data when fixed frame was odom, 
+
+```
+Message Filter dropping message: frame 'laser' at time 1647319692.498 for reason 'Unknown'
+```
+
+Edit timestamp in rf2o
+```c++
+  if (publish_tf)
+  {
+    RCLCPP_DEBUG(get_logger(), "[rf2o] Publishing TF: [base_link] to [odom]");
+    geometry_msgs::msg::TransformStamped odom_trans;
+    // odom_trans.header.stamp = rf2o_ref.last_odom_time;
+    odom_trans.header.stamp = this->get_clock()->now();
+    odom_trans.header.frame_id = odom_frame_id;
+    odom_trans.child_frame_id = base_frame_id;
+```
+

@@ -8,7 +8,7 @@ from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    slam_toolbox_pkg_path = os.path.join(get_package_share_directory("sw_slam_toolbox"))
+    pkg_path = os.path.join(get_package_share_directory("src_slam"))
 
     use_sim_time = LaunchConfiguration('use_sim_time')
     slam_params_file = LaunchConfiguration('slam_params_file')
@@ -22,7 +22,7 @@ def generate_launch_description():
     declare_slam_params_file_cmd = DeclareLaunchArgument(
         'slam_params_file',
         default_value=os.path.join(
-            slam_toolbox_pkg_path, 'config', 'mapper_params_online_async.yaml'
+            pkg_path, 'config', 'mapper_params_online_async.yaml'
         ),
         description='Full path to the ROS2 parameters file to use for the slam_toolbox node'
     )
@@ -38,7 +38,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    rviz_config_file = os.path.join(slam_toolbox_pkg_path, 'rviz', 'slam_toolbox_default.rviz')
+    rviz_config_file = os.path.join(pkg_path, 'rviz', 'slam_toolbox_default.rviz')
 
     # Launch RViz
     rviz = Node(
