@@ -51,5 +51,7 @@ ros2 launch src_demo joystick_control_foxy.launch.py
 ros2 launch src_slam src_slam.launch.py
 
 # Remote view
-
+ros2 launch src_slam only_rviz.launch.py
+ros2 run nav2_map_server map_saver -f <map_dir>/<map_name>
 ```
+
