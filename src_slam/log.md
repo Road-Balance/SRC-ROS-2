@@ -40,3 +40,16 @@ Edit timestamp in rf2o
     odom_trans.child_frame_id = base_frame_id;
 ```
 
+Real Robot Slam
+```
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
+
+ros2 launch src_demo joystick_control_foxy.launch.py
+# Accle => 10.0
+# Max vel => 0.375
+ros2 launch src_slam src_slam.launch.py
+
+# Remote view
+
+```
