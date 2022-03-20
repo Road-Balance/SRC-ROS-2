@@ -285,18 +285,28 @@ class RacecarController(Node):
             print("####### END #########")
 
         # Step 3 Publish all the data in the corresponding topics
+        right_steering = -1 * self.turning_sign * self.linear_sign * alfa_right_front_wheel
+        left_steering = -1 * self.turning_sign * self.linear_sign * alfa_left_front_wheel
         self.steering_msg.data = [
-            -1 * self.turning_sign * self.linear_sign * alfa_right_front_wheel,
-            -1 * self.turning_sign * self.linear_sign * alfa_left_front_wheel,
+            right_steering,
+            left_steering,
         ]
         raw_wheel_speed = vel_base_link / self.wheel_radius
+        # self.throttling_msg.data = [
+        #     raw_wheel_speed,
+        #     raw_wheel_speed,
+        #     raw_wheel_speed,
+        #     raw_wheel_speed,
+        # ]
+
         self.throttling_msg.data = [
-            raw_wheel_speed,
-            raw_wheel_speed,
-            raw_wheel_speed,
-            raw_wheel_speed,
+            wheel_turnig_speed_left_rear_wheel,
+            wheel_turnig_speed_right_rear_wheel,
+            wheel_turnig_speed_left_front_wheel,
+            wheel_turnig_speed_right_front_wheel,
         ]
-        self.steering_msg_middle.data = -1 * self.turning_sign * self.linear_sign * alfa_right_front_wheel
+
+        self.steering_msg_middle.data = (round(right_steering, 5) + round(left_steering, 5)) / 2
         self.throttling_msg_middle.data = wheel_turnig_speed_com
 
         self.get_logger().info(f"{raw_wheel_speed}, {alfa_left_front_wheel}, {alfa_right_front_wheel}")

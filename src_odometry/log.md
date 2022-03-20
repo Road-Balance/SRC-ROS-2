@@ -322,6 +322,7 @@ rear_wheel_pos : 30.0624 / front_steer_pos-0 / rear_wheel_est_vel : 0.000999869
 rear_wheel_pos : 30.1024 / front_steer_pos-0 / rear_wheel_est_vel : 0.00199977
 ```
 => 이렇게 뒤죽박죽인 걸 그냥 썼다고?
+=> rear_wheel_pos가 일정하게 증가하지 않는다.
 
 dt로 나누어준 결과..
 ```
@@ -342,6 +343,7 @@ rear_wheel_pos : 4.44262 / front_steer_pos-0 / rear_wheel_est_vel : 0.100079
 rear_wheel_pos : 4.48262 / front_steer_pos-0 / rear_wheel_est_vel : 0.0998396
 ```
 plot 결과도 갑자기 널뛰기 한다.
+
 
 참고로 wheel_separation_h_는 앞뒤 바퀴 사이 거리이다.
 
@@ -366,6 +368,48 @@ rqt
 angle 관련해서 뭔가 잘못된 듯 - 가되어야 하는데 + 가 됨
 ![image](https://user-images.githubusercontent.com/12381733/158322854-bf35303e-5434-49fd-974d-5b3a6208385e.png)
 
+엄밀히 말해서, linear와 angular는 속도가 아니다.
+각도 차이, 위치 차이이다.
+
+```c++
+/// Compute linear and angular diff:
+const double linear  = rear_wheel_est_vel;//(right_wheel_est_vel + left_wheel_est_vel) * 0.5;
+//const double angular = (right_wheel_est_vel - left_wheel_est_vel) / wheel_separation_w_;
+const double angular = tan(front_steer_pos) * linear / wheel_separation_h_;\
+```
+
+다시 시작해보자.
+https://medium.com/@waleedmansoor/how-i-built-ros-odometry-for-differential-drive-vehicle-without-encoder-c9f73fe63d87
+
+ㄱ 자 주행 중 angle이 틀어지는 것 잡아야 한다.
+아마 오차가 누적되어서 그런 것이 아닐까...
+
+차이는 보통 이정도 난다.
+
+```
+header:
+  stamp:
+    sec: 1647782566
+    nanosec: 719725250
+  frame_id: ''
+name:
+- left_front_wheel_joint
+- left_rear_wheel_joint
+- right_front_wheel_joint
+- right_rear_wheel_joint
+- left_steering_hinge_joint
+- right_steering_hinge_joint
+position:
+- 56.95777640412754
+- 55.261805380446454
+- 65.56167399551187
+- 63.936011147333474
+- 0.262864251819253
+- 0.26294262204133556
+```
+
+소수점 아래 6자리에서 반올림한 수로 해보자
+ 
 
 # TODO
 

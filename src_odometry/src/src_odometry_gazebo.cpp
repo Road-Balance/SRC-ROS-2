@@ -202,6 +202,8 @@ public:
 
         front_hinge_pos = msg->data;
 
+        std::cout << "front_hinge_pos : " << front_hinge_pos << std::endl;
+
         if (verbose_)
             RCLCPP_INFO(this->get_logger(), "Front Hinge Pose : %f", front_hinge_pos);
     }
