@@ -12,7 +12,8 @@
 </xacro:macro>
 
 <xacro:macro name="left_wheels_inertial_params">
-  <origin xyz="0 0 -0.0225" rpy="0 0 0" />
+  <!-- <origin xyz="0 0 -0.0225" rpy="0 0 0" /> -->
+  <origin xyz="0 0 -0.0" rpy="0 0 0" />
   <mass value="0.34055" />
   <inertia ixx="0.00026046" ixy="0"          ixz="0"
                             iyy="0.00026046" iyz="0"
@@ -20,7 +21,8 @@
 </xacro:macro>
 
 <xacro:macro name="right_wheels_inertial_params">
-  <origin xyz="0 0 0.0225" rpy="0 0 0" />
+  <!-- <origin xyz="0 0 0.0225" rpy="0 0 0" /> -->
+  <origin xyz="0 0 0.0" rpy="0 0 0" />
   <mass value="0.34055" />
   <inertia ixx="0.00026046" ixy="0"          ixz="0"
                             iyy="0.00026046" iyz="0"
@@ -67,14 +69,16 @@
 </xacro:macro>
 
 <xacro:macro name="left_front_wheel_geometry">
-  <origin xyz="0 0 0" rpy="0 0 0" />
+  <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+  <origin xyz="0 0 0.0225" rpy="0 0 0" />
   <geometry>
     <mesh filename="package://src_description/meshes/left_front_wheel.STL" />
   </geometry>
 </xacro:macro>
 
 <xacro:macro name="right_front_wheel_geometry">
-  <origin xyz="0 0 0" rpy="0 0 0" />
+  <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+  <origin xyz="0 0 -0.0225" rpy="0 0 0" />
   <geometry>
     <mesh filename="package://src_description/meshes/right_front_wheel.STL" />
   </geometry>
