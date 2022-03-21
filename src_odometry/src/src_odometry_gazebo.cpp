@@ -123,7 +123,7 @@ public:
         this->declare_parameter("wheel_separation_h_", 0.325);
         wheel_separation_h_ = this->get_parameter("wheel_separation_h_").as_double();
 
-        this->declare_parameter("wheel_separation_h_multiplier", 1.0);
+        this->declare_parameter("wheel_separation_h_multiplier", 1.1);
         wheel_separation_h_multiplier_ = this->get_parameter("wheel_separation_h_multiplier").as_double();
 
         this->declare_parameter("wheel_radius_", 0.05);

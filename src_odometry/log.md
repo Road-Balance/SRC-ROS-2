@@ -411,6 +411,25 @@ position:
 소수점 아래 6자리에서 반올림한 수로 해보자
  
 
+앞뒤 테스트는 완료, 잘 된다.
+
+angle test를 경험적으로 해보자.
+
+racecar는 이렇게 조향된다. 사실 ackermann이 아닌 것이지
+
+![image](https://user-images.githubusercontent.com/12381733/159205806-4422c7ac-6961-4533-b1f3-3fbe85131b76.png)
+
+회전 중심을 바퀴 중심으로 바꾸고 joint 위치를 수정하였다.
+
+![image](https://user-images.githubusercontent.com/12381733/159218684-56776ddb-1514-46a1-ab0f-180407fafd5a.png)
+
+R_real과 R_odom 비교 결과 1.1 정도의 차이가 있었다.
+wheel_separation_h_multiplier_를 1.1로 변경하자.
+=> 오키! 이정도면 합격!!
+
+gazebo odom은 이제 그만~
+
+
 # TODO
 
 * [] realtime stuffs
