@@ -236,7 +236,9 @@ class RacecarController(Node):
             wheel_turnig_speed_left_front_wheel = self.limit_wheel_speed(
                 vel_left_front_wheel / self.wheel_radius
             )
-            alfa_left_front_wheel = math.atan(self.L / turning_radius_left_front_wheel)
+            alfa_left_front_wheel = math.atan(
+                self.L / turning_radius_left_front_wheel
+            )
         else:
             wheel_turnig_speed_middle_wheel = self.limit_wheel_speed(
                 vel_base_link / self.wheel_radius
