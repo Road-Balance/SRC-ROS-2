@@ -353,18 +353,6 @@ plot 결과도 갑자기 널뛰기 한다.
 
 y 쪽이 좀 이상한데? => 이거 좀 확인해보자.
 
-```
-ros2 launch src_gazebo src_gazebo.launch.py
-
-ros2 run src_gazebo_controller odom_utility_tools
-
-ros2 run src_odometry src_odometry_gazebo
-# or / 대신 launch 하면 std::cout가 안나옴
-ros2 launch src_odometry src_odometry.launch.py
-
-rqt
-```
-
 angle 관련해서 뭔가 잘못된 듯 - 가되어야 하는데 + 가 됨
 ![image](https://user-images.githubusercontent.com/12381733/158322854-bf35303e-5434-49fd-974d-5b3a6208385e.png)
 
@@ -435,3 +423,15 @@ gazebo odom은 이제 그만~
 * [] realtime stuffs
     - https://docs.ros.org/en/foxy/Tutorials/Real-Time-Programming.html#id4
     - http://control.ros.org/
+
+```
+ros2 launch src_gazebo src_gazebo.launch.py
+
+ros2 run src_gazebo_controller odom_utility_tools
+
+ros2 run src_odometry src_odometry_gazebo
+# or / 대신 launch 하면 std::cout가 안나옴
+ros2 launch src_odometry src_odometry.launch.py
+
+rqt
+```
