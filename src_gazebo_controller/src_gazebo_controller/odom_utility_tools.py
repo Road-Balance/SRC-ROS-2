@@ -84,6 +84,8 @@ class OdomUtilNode(Node):
         self.gt_x = Float64()
         self.gt_y = Float64()
 
+        self.gt_list = [1.0]
+
         self._timer = self.create_timer(0.1, self.timer_callback)
 
     def timer_callback(self):
@@ -110,6 +112,17 @@ class OdomUtilNode(Node):
 
         self.gt_x.data = ground_truth_x
         self.gt_y.data = ground_truth_y
+        
+        max_gt = max(self.gt_list)
+        min_gt = min(self.gt_list)
+
+        if (self.gt_x.data < min_gt) | (self.gt_x.data > max_gt):
+            self.gt_list.append(self.gt_x.data)
+
+        max_gt = max(self.gt_list)
+        min_gt = min(self.gt_list)
+
+        print(max_gt, min_gt, max_gt - min_gt)
 
         self._ground_truth_publisher_x.publish(self.gt_x)
         self._ground_truth_publisher_y.publish(self.gt_y)

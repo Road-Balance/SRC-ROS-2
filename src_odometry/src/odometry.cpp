@@ -96,6 +96,9 @@ namespace ackermann_steering_controller
     //const double angular = (right_wheel_est_vel - left_wheel_est_vel) / wheel_separation_w_;
     const double angular = tan(front_steer_pos) * linear / wheel_separation_h_;
 
+    std::cout << "angular : " << angular << std::endl;
+    std::cout << "simple angular : " << wheel_separation_h_ / tan(front_steer_pos) << std::endl;
+
     /// Integrate odometry:
     integrate_fun_(linear, angular);
 
@@ -165,6 +168,7 @@ namespace ackermann_steering_controller
       /// Exact integration (should solve problems when angular is zero):
       const double heading_old = heading_;
       const double r = linear/angular;
+      std::cout << "r : " << r << std::endl;
       heading_ += angular;
       x_       +=  r * (sin(heading_) - sin(heading_old));
       y_       += -r * (cos(heading_) - cos(heading_old));
