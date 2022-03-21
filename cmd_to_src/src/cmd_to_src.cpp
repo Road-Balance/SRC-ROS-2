@@ -26,6 +26,10 @@ private:
   SRCMsg src_msg;
   uint steering_offset = 20;
 
+  float accel;
+  float deaccel;
+  unsigned int scale;
+
 public:
   CmdToSRC() : Node("cmd_vel_to_src_msg") {
     RCLCPP_INFO(get_logger(), "Cmd_Vel to SRC_Msg Node Created");
@@ -46,14 +50,24 @@ public:
       50ms, std::bind(&CmdToSRC::timer_callback, this)
     );
 
+    // paramter
+    this->declare_parameter("accel_scale", 5.0);
+    accel = this->get_parameter("accel_scale").as_double();
+
+    this->declare_parameter("deaccel_scale", 5.0);
+    deaccel = this->get_parameter("deaccel_scale").as_double();
+
+    this->declare_parameter("scale", 80);
+    scale = this->get_parameter("scale").as_int();
+
     src_msg.speed = 0.0;
     src_msg.steering = 0;
     src_msg.light = false;
     src_msg.direction = true;
     src_msg.lcd_msg = "";
-    src_msg.accel = 0.75;
-    src_msg.deaccel = 0.75;
-    src_msg.scale = 80;
+    src_msg.accel = accel;
+    src_msg.deaccel = deaccel;
+    src_msg.scale = scale;
   }
 
   void cmd_vel_cb(const Twist::SharedPtr msg) {

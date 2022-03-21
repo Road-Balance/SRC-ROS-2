@@ -57,7 +57,7 @@ private:
   XMode joy_keys;
 
 
-  float linear_speed_gain = 1.0;
+  float linear_speed_gain = 0.5;
   const float angular_pose_gain = 2.0;
 
 public:
@@ -76,7 +76,7 @@ public:
     twist.linear.x = 0.0;
     twist.angular.z = 0.0;
 
-    accel.data = 0.75f;
+    accel.data = 5.0f;
 
     src_mode.data = 1;
   }
