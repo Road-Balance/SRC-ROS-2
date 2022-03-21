@@ -9,13 +9,15 @@
   </xacro:macro>
 
   <xacro:macro name="left_wheels_inertial_params">
-    <origin xyz="0 0 -0.0225" rpy="0 0 0" />
+    <!-- <origin xyz="0 0 -0.0225" rpy="0 0 0" /> -->
+    <origin xyz="0 0 -0.0" rpy="0 0 0" />
     <mass value="0.34055" />
     <inertia ixx="0.00026046" ixy="0" ixz="0" iyy="0.00026046" iyz="0" izz="0.00041226" />
   </xacro:macro>
 
   <xacro:macro name="right_wheels_inertial_params">
-    <origin xyz="0 0 0.0225" rpy="0 0 0" />
+    <!-- <origin xyz="0 0 0.0225" rpy="0 0 0" /> -->
+    <origin xyz="0 0 0.0" rpy="0 0 0" />
     <mass value="0.34055" />
     <inertia ixx="0.00026046" ixy="0" ixz="0" iyy="0.00026046" iyz="0" izz="0.00041226" />
   </xacro:macro>
@@ -38,49 +40,51 @@
   <xacro:macro name="chassis_geometry">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <mesh filename="$(find sw_ros2_control_gazebo)/meshes/chassis.STL" />
+      <mesh filename="$(find src_gazebo)/meshes/chassis.STL" />
     </geometry>
   </xacro:macro>
 
   <xacro:macro name="left_rear_wheel_geometry">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <mesh filename="$(find sw_ros2_control_gazebo)/meshes/left_rear_wheel.STL" />
+      <mesh filename="$(find src_gazebo)/meshes/left_rear_wheel.STL" />
     </geometry>
   </xacro:macro>
 
   <xacro:macro name="right_rear_wheel_geometry">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <mesh filename="$(find sw_ros2_control_gazebo)/meshes/right_rear_wheel.STL" />
+      <mesh filename="$(find src_gazebo)/meshes/right_rear_wheel.STL" />
     </geometry>
   </xacro:macro>
 
   <xacro:macro name="left_front_wheel_geometry">
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+    <origin xyz="0 0 0.0225" rpy="0 0 0" />
     <geometry>
-      <mesh filename="$(find sw_ros2_control_gazebo)/meshes/left_front_wheel.STL" />
+      <mesh filename="$(find src_gazebo)/meshes/left_front_wheel.STL" />
     </geometry>
   </xacro:macro>
 
   <xacro:macro name="right_front_wheel_geometry">
-    <origin xyz="0 0 0" rpy="0 0 0" />
+    <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+    <origin xyz="0 0 -0.0225" rpy="0 0 0" />
     <geometry>
-      <mesh filename="$(find sw_ros2_control_gazebo)/meshes/right_front_wheel.STL" />
+      <mesh filename="$(find src_gazebo)/meshes/right_front_wheel.STL" />
     </geometry>
   </xacro:macro>
 
   <xacro:macro name="left_steering_hinge_geometry">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <mesh filename="$(find sw_ros2_control_gazebo)/meshes/left_steering_hinge.STL" />
+      <mesh filename="$(find src_gazebo)/meshes/left_steering_hinge.STL" />
     </geometry>
   </xacro:macro>
 
   <xacro:macro name="right_steering_hinge_geometry">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <mesh filename="$(find sw_ros2_control_gazebo)/meshes/right_steering_hinge.STL" />
+      <mesh filename="$(find src_gazebo)/meshes/right_steering_hinge.STL" />
     </geometry>
   </xacro:macro>
 

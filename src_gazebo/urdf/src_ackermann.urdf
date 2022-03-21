@@ -303,7 +303,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/kimsooyoung/ros2_ws/install/sw_ros2_control_gazebo/share/sw_ros2_control_gazebo/meshes/chassis.STL"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/src_gazebo/share/src_gazebo/meshes/chassis.STL"/>
       </geometry>
       <material name="blue"/>
     </visual>
@@ -328,14 +328,15 @@
   <!-- Add the left rear wheel with its joints and tranmissions -->
   <link name="left_rear_wheel">
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 -0.0225"/>
+      <!-- <origin xyz="0 0 -0.0225" rpy="0 0 0" /> -->
+      <origin rpy="0 0 0" xyz="0 0 -0.0"/>
       <mass value="0.34055"/>
       <inertia ixx="0.00026046" ixy="0" ixz="0" iyy="0.00026046" iyz="0" izz="0.00041226"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/kimsooyoung/ros2_ws/install/sw_ros2_control_gazebo/share/sw_ros2_control_gazebo/meshes/left_rear_wheel.STL"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/src_gazebo/share/src_gazebo/meshes/left_rear_wheel.STL"/>
       </geometry>
       <material name="black"/>
     </visual>
@@ -355,14 +356,15 @@
   </joint>
   <link name="right_rear_wheel">
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0.0225"/>
+      <!-- <origin xyz="0 0 0.0225" rpy="0 0 0" /> -->
+      <origin rpy="0 0 0" xyz="0 0 0.0"/>
       <mass value="0.34055"/>
       <inertia ixx="0.00026046" ixy="0" ixz="0" iyy="0.00026046" iyz="0" izz="0.00041226"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/kimsooyoung/ros2_ws/install/sw_ros2_control_gazebo/share/sw_ros2_control_gazebo/meshes/right_rear_wheel.STL"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/src_gazebo/share/src_gazebo/meshes/right_rear_wheel.STL"/>
       </geometry>
       <material name="black"/>
     </visual>
@@ -389,13 +391,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/kimsooyoung/ros2_ws/install/sw_ros2_control_gazebo/share/sw_ros2_control_gazebo/meshes/left_steering_hinge.STL"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/src_gazebo/share/src_gazebo/meshes/left_steering_hinge.STL"/>
       </geometry>
       <material name="grey"/>
     </visual>
   </link>
   <joint name="left_steering_hinge_joint" type="revolute">
-    <origin rpy="0 1.5708 0" xyz="0.325 0.1 0"/>
+    <!-- <origin xyz="0.325 0.1 0" rpy="0 1.5708 0" /> -->
+    <origin rpy="0 1.5708 0" xyz="0.325 0.1225 0"/>
     <parent link="chassis"/>
     <child link="left_steering_hinge"/>
     <axis xyz="-1 0 0"/>
@@ -410,13 +413,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/kimsooyoung/ros2_ws/install/sw_ros2_control_gazebo/share/sw_ros2_control_gazebo/meshes/right_steering_hinge.STL"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/src_gazebo/share/src_gazebo/meshes/right_steering_hinge.STL"/>
       </geometry>
       <material name="grey"/>
     </visual>
   </link>
   <joint name="right_steering_hinge_joint" type="continuous">
-    <origin rpy="0 1.5708 0" xyz="0.325 -0.1 0"/>
+    <!-- <origin xyz="0.325 -0.100 0" rpy="0 1.5708 0" /> -->
+    <origin rpy="0 1.5708 0" xyz="0.325 -0.1225 0"/>
     <parent link="chassis"/>
     <child link="right_steering_hinge"/>
     <axis xyz="-1 0 0"/>
@@ -424,14 +428,16 @@
   </joint>
   <link name="left_front_wheel">
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 -0.0225"/>
+      <!-- <origin xyz="0 0 -0.0225" rpy="0 0 0" /> -->
+      <origin rpy="0 0 0" xyz="0 0 -0.0"/>
       <mass value="0.34055"/>
       <inertia ixx="0.00026046" ixy="0" ixz="0" iyy="0.00026046" iyz="0" izz="0.00041226"/>
     </inertial>
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+      <origin rpy="0 0 0" xyz="0 0 0.0225"/>
       <geometry>
-        <mesh filename="/home/kimsooyoung/ros2_ws/install/sw_ros2_control_gazebo/share/sw_ros2_control_gazebo/meshes/left_front_wheel.STL"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/src_gazebo/share/src_gazebo/meshes/left_front_wheel.STL"/>
       </geometry>
       <material name="black"/>
     </visual>
@@ -451,14 +457,16 @@
   </joint>
   <link name="right_front_wheel">
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0.0225"/>
+      <!-- <origin xyz="0 0 0.0225" rpy="0 0 0" /> -->
+      <origin rpy="0 0 0" xyz="0 0 0.0"/>
       <mass value="0.34055"/>
       <inertia ixx="0.00026046" ixy="0" ixz="0" iyy="0.00026046" iyz="0" izz="0.00041226"/>
     </inertial>
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+      <origin rpy="0 0 0" xyz="0 0 -0.0225"/>
       <geometry>
-        <mesh filename="/home/kimsooyoung/ros2_ws/install/sw_ros2_control_gazebo/share/sw_ros2_control_gazebo/meshes/right_front_wheel.STL"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/src_gazebo/share/src_gazebo/meshes/right_front_wheel.STL"/>
       </geometry>
       <material name="black"/>
     </visual>
