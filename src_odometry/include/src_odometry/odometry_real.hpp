@@ -43,14 +43,14 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/rolling_mean.hpp>
-#include <boost/function.hpp>
+// #include <boost/accumulators/accumulators.hpp>
+// #include <boost/accumulators/statistics/stats.hpp>
+// #include <boost/accumulators/statistics/rolling_mean.hpp>
+// #include <boost/function.hpp>
 
 namespace ackermann_steering_controller
 {
-  namespace bacc = boost::accumulators;
+  // namespace bacc = boost::accumulators;
 
   /**
    * \brief The Odometry class handles odometry readings
@@ -148,8 +148,8 @@ namespace ackermann_steering_controller
   private:
 
     /// Rolling mean accumulator and window:
-    typedef bacc::accumulator_set<double, bacc::stats<bacc::tag::rolling_mean> > RollingMeanAcc;
-    typedef bacc::tag::rolling_window RollingWindow;
+    // typedef bacc::accumulator_set<double, bacc::stats<bacc::tag::rolling_mean> > RollingMeanAcc;
+    // typedef bacc::tag::rolling_window RollingWindow;
 
     /**
      * \brief Integrates the velocities (linear and angular) using 2nd order Runge-Kutta
