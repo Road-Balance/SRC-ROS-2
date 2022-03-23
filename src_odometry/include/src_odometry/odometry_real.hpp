@@ -43,10 +43,6 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-// #include <boost/accumulators/accumulators.hpp>
-// #include <boost/accumulators/statistics/stats.hpp>
-// #include <boost/accumulators/statistics/rolling_mean.hpp>
-// #include <boost/function.hpp>
 
 namespace ackermann_steering_controller
 {
@@ -59,9 +55,6 @@ namespace ackermann_steering_controller
   class Odometry
   {
   public:
-
-    // typedef boost::function<void(double, double)> IntegrationFunction;
-
     /**
      * \brief Constructor
      * Timestamp will get the current time value
@@ -147,10 +140,6 @@ namespace ackermann_steering_controller
 
   private:
 
-    /// Rolling mean accumulator and window:
-    // typedef bacc::accumulator_set<double, bacc::stats<bacc::tag::rolling_mean> > RollingMeanAcc;
-    // typedef bacc::tag::rolling_window RollingWindow;
-
     /**
      * \brief Integrates the velocities (linear and angular) using 2nd order Runge-Kutta
      * \param linear  Linear  velocity   [m] (linear  displacement, i.e. m/s * dt) computed by encoders
@@ -164,10 +153,6 @@ namespace ackermann_steering_controller
      * \param angular Angular velocity [rad] (angular displacement, i.e. m/s * dt) computed by encoders
      */
     void integrateExact(double linear, double angular);
-
-    /**
-     *  \brief Reset linear and angular accumulators
-     */
 
     /// Current timestamp:
     rclcpp::Time timestamp_;
@@ -190,9 +175,5 @@ namespace ackermann_steering_controller
 
     /// Rolling mean accumulators for the linar and angular velocities:
     size_t velocity_rolling_window_size_;
-    // RollingMeanAcc linear_acc_;
-    // RollingMeanAcc angular_acc_;
-
-    // IntegrationFunction integrate_fun_;
   };
 }

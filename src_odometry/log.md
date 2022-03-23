@@ -434,4 +434,7 @@ ros2 run src_odometry src_odometry_gazebo
 ros2 launch src_odometry src_odometry.launch.py
 
 rqt
+
+ros2 run src_odometry src_odometry_real
+
 ```

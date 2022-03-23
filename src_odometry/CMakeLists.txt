@@ -60,6 +60,9 @@ ament_target_dependencies(pub_sub_exercise ${dependencies})
 add_executable(src_odometry_gazebo src/src_odometry_gazebo.cpp src/odometry.cpp)
 ament_target_dependencies(src_odometry_gazebo ${dependencies})
 
+add_executable(src_odometry_real src/src_odometry_real.cpp src/odometry_real.cpp)
+ament_target_dependencies(src_odometry_real ${dependencies})
+
 add_executable(odom_test src/test.cpp src/odometry.cpp)
 ament_target_dependencies(odom_test rclcpp geometry_msgs sensor_msgs std_msgs)
 
@@ -68,7 +71,8 @@ install(
     odom_test
     pub_sub_exercise
     src_odometry_gazebo
-  DESTINATION 
+    src_odometry_real
+  DESTINATION
     lib/${PROJECT_NAME}
 )
 

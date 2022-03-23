@@ -56,8 +56,6 @@ namespace ackermann_steering_controller
   , wheel_radius_(0.0)
   , rear_wheel_old_pos_(0.0)
   , velocity_rolling_window_size_(velocity_rolling_window_size)
-  // , linear_acc_(RollingWindow::window_size = velocity_rolling_window_size)
-  // , angular_acc_(RollingWindow::window_size = velocity_rolling_window_size)
   {
   }
 
