@@ -1,19 +1,16 @@
 #include "mw_ahrsv1_ros2/Serial.h"
-#include <iostream>
-// #include <ros/ros.h>
-// #include <sensor_msgs/Imu.h>
-// #include <tf/transform_broadcaster.h>
-// #include <tf/transform_datatypes.h>
 
+#include <string>
 #include <memory>
+#include <unistd.h>
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>
 #include <std_msgs/msg/float64.hpp>
-#include <string>
+
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
-#include <unistd.h>
 
 typedef struct {
   // ang
@@ -32,6 +29,20 @@ typedef struct {
   float angular_vel_z;
 
 } IMUMsg;
+
+tf2::Quaternion Euler2Quaternion(float roll, float pitch, float yaw) {
+  float qx = (sin(roll / 2) * cos(pitch / 2) * cos(yaw / 2)) -
+              (cos(roll / 2) * sin(pitch / 2) * sin(yaw / 2));
+  float qy = (cos(roll / 2) * sin(pitch / 2) * cos(yaw / 2)) +
+              (sin(roll / 2) * cos(pitch / 2) * sin(yaw / 2));
+  float qz = (cos(roll / 2) * cos(pitch / 2) * sin(yaw / 2)) -
+              (sin(roll / 2) * sin(pitch / 2) * cos(yaw / 2));
+  float qw = (cos(roll / 2) * cos(pitch / 2) * cos(yaw / 2)) +
+              (sin(roll / 2) * sin(pitch / 2) * sin(yaw / 2));
+
+  tf2::Quaternion q(qx, qy, qz, qw);
+  return q;
+}
 
 class MW_AHRS : public rclcpp::Node {
 
@@ -75,54 +86,65 @@ private:
   double convertor_c = 1.0;        // for temperature (celsius)
 
   // ROS Parts
-
-  // whether pub tf or not
-  bool publish_tf = true;
-
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_data_raw_pub_,
       imu_data_pub_;
 
   // hold raw data
   IMUMsg imu_raw_data;
+  std::string device_id_;
+  bool verbose_;
+  int pub_rate;
+  bool pub_tf;
 
   std::unique_ptr<tf2_ros::TransformBroadcaster> broadcaster_;
 
 public:
   MW_AHRS() : Node("mv_ahrsv1_node") {
-    for (int i = 0; i < sizeof(buffer); i++)
+
+    this->declare_parameter("deviceID", "/dev/MWAHRs");
+    this->declare_parameter("publish_tf", true);
+    this->declare_parameter("verbose", true);
+    this->declare_parameter("publish_rate", 50);
+
+    rclcpp::Parameter deviceID = this->get_parameter("deviceID");
+    rclcpp::Parameter publish_tf = this->get_parameter("publish_tf");
+    rclcpp::Parameter verbose = this->get_parameter("verbose");
+    rclcpp::Parameter publish_rate = this->get_parameter("publish_rate");
+    
+    device_id_ = deviceID.as_string();
+    pub_tf = publish_tf.as_bool();
+    verbose_ = verbose.as_bool();
+    pub_rate = publish_rate.as_int();
+    
+    RCLCPP_INFO(this->get_logger(), "deviceID: %s, publish_tf: %s, verbose: %s, publish_rate: %s",
+      deviceID.value_to_string().c_str(),
+      publish_tf.value_to_string().c_str(),
+      verbose.value_to_string().c_str(),
+      publish_rate.value_to_string().c_str()
+    );
+
+    for (auto i = 0; i < sizeof(buffer); i++)
       buffer[i] = 0;
 
     // int open_serial(char *dev_name, int baud, int vtime, int vmin);
-    dev = open_serial((char *)"/dev/ttyUSB0", 115200, 0, 0);
+    dev = open_serial(const_cast<char*>(device_id_.c_str()), 115200, 0, 0);
 
     imu_data_pub_ = this->create_publisher<sensor_msgs::msg::Imu>(
-        "imu/data", rclcpp::QoS(1));
+      "imu/data", rclcpp::QoS(1)
+    );
 
     timer_ = this->create_wall_timer(std::chrono::milliseconds(100),
-                                     std::bind(&MW_AHRS::test, this));
+                                     std::bind(&MW_AHRS::timer_cb, this));
 
     broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+    
     RCLCPP_INFO(get_logger(), "Constructor...");
   }
 
   ~MW_AHRS() {
     RCLCPP_INFO(get_logger(), "Destructor...");
     close_serial(dev);
-  }
-
-  tf2::Quaternion Euler2Quaternion(float roll, float pitch, float yaw) {
-    float qx = (sin(roll / 2) * cos(pitch / 2) * cos(yaw / 2)) -
-               (cos(roll / 2) * sin(pitch / 2) * sin(yaw / 2));
-    float qy = (cos(roll / 2) * sin(pitch / 2) * cos(yaw / 2)) +
-               (sin(roll / 2) * cos(pitch / 2) * sin(yaw / 2));
-    float qz = (cos(roll / 2) * cos(pitch / 2) * sin(yaw / 2)) -
-               (sin(roll / 2) * sin(pitch / 2) * cos(yaw / 2));
-    float qw = (cos(roll / 2) * cos(pitch / 2) * cos(yaw / 2)) +
-               (sin(roll / 2) * sin(pitch / 2) * sin(yaw / 2));
-
-    tf2::Quaternion q(qx, qy, qz, qw);
-    return q;
   }
 
   void reset_imu() {
@@ -142,6 +164,7 @@ public:
 
     buffer[sizeof(buffer)] = '\0';
 
+    // Ex) sp=100 데이터 전송 주기를 100ms로 설정
     if (buffer[0] == 's' && buffer[1] == 'p' && buffer[2] == '=' &&
         buffer[3] == '1' && buffer[4] == '0') {
       printf("Serial Speed Reset\n");
@@ -184,7 +207,6 @@ public:
     read(dev, &buffer, sizeof(buffer));
 
     if (int(buffer[0]) < 97) {
-      // std::cout << buffer << std::endl;
       char *rest;
       char *token;
       char *ptr = buffer;
@@ -218,13 +240,14 @@ public:
     }
   }
 
-  void test() {
+  void timer_cb() {
     auto imu_data_msg = sensor_msgs::msg::Imu();
 
     parse_ss_data(imu_raw_data);
 
     tf2::Quaternion orientation = Euler2Quaternion(
-        imu_raw_data.roll, imu_raw_data.pitch, imu_raw_data.yaw);
+      imu_raw_data.roll, imu_raw_data.pitch, imu_raw_data.yaw
+    );
 
     tf2::Quaternion yaw_rotate;
     yaw_rotate.setRPY(0, 0, 90 * convertor_d2r);
@@ -236,10 +259,11 @@ public:
     tf2::Quaternion new_orientation = q * orientation * yaw_rotate;
 
     // Debugging Console
-    std::cout << new_orientation[0] << std::endl;
-    std::cout << new_orientation[1] << std::endl;
-    std::cout << new_orientation[2] << std::endl;
-    std::cout << "or" << std::endl;
+    if(verbose_){
+      std::cout << new_orientation[0] << std::endl;
+      std::cout << new_orientation[1] << std::endl;
+      std::cout << new_orientation[2] << std::endl;
+    }
 
     rclcpp::Time now = this->now();
 
@@ -280,9 +304,7 @@ public:
         imu_data_msg.orientation_covariance[4] =
             imu_data_msg.orientation_covariance[8] = 0;
 
-    if (publish_tf) {
-      std::cout << "Flag" << std::endl;
-
+    if (pub_tf) {
       geometry_msgs::msg::TransformStamped transform;
 
       transform.header.stamp = now;
@@ -299,140 +321,9 @@ public:
 
     imu_data_pub_->publish(imu_data_msg);
   }
-
-  void pub_msg() {
-
-    auto imu_data_msg = sensor_msgs::msg::Imu();
-
-    parse_ss_data(imu_raw_data);
-
-    // tf::Quaternion orientation = tf::createQuaternionFromRPY(
-    //     imu_raw_data.roll, imu_raw_data.pitch, imu_raw_data.yaw);
-
-    // tf::Quaternion yaw_rotate;
-    // yaw_rotate.setRPY(0, 0, 90 * convertor_d2r);
-
-    // tf::Quaternion q;
-    // q.setRPY(0, 0, -90 * convertor_d2r);
-
-    tf2::Quaternion orientation = Euler2Quaternion(
-        imu_raw_data.roll, imu_raw_data.pitch, imu_raw_data.yaw);
-
-    tf2::Quaternion yaw_rotate;
-    yaw_rotate.setRPY(0, 0, 90 * convertor_d2r);
-
-    tf2::Quaternion q;
-    q.setRPY(0, 0, -90 * convertor_d2r);
-
-    // tf::Quaternion new_orientation = orientation;
-    // tf::Quaternion new_orientation = q * orientation;
-
-    tf2::Quaternion new_orientation = q * orientation * yaw_rotate;
-
-    // tf::Quaternion new_orientation = orientation;
-
-    // tf::Quaternion yaw_rotate(0, 0, -0.7071068, 0.7071068);
-    // tf::Quaternion yaw_rotate(0, 0, -1, 0);
-
-    rclcpp::Time now = this->now();
-
-    imu_data_msg.header.stamp = now;
-    imu_data_msg.header.frame_id = "imu_link";
-
-    // orientation
-    imu_data_msg.orientation.x = new_orientation[0];
-    imu_data_msg.orientation.y = new_orientation[1];
-    imu_data_msg.orientation.z = new_orientation[2];
-    imu_data_msg.orientation.w = new_orientation[3];
-
-    // original data used the g unit, convert to m/s^2
-    imu_data_msg.linear_acceleration.x =
-        -imu_raw_data.linear_acc_y * convertor_g2a;
-    imu_data_msg.linear_acceleration.y =
-        imu_raw_data.linear_acc_x * convertor_g2a;
-    imu_data_msg.linear_acceleration.z =
-        imu_raw_data.linear_acc_z * convertor_g2a;
-
-    // original data used the degree/s unit, convert to radian/s
-    imu_data_msg.angular_velocity.x =
-        imu_raw_data.angular_vel_x * convertor_d2r;
-    imu_data_msg.angular_velocity.y =
-        imu_raw_data.angular_vel_y * convertor_d2r;
-    imu_data_msg.angular_velocity.z =
-        imu_raw_data.angular_vel_z * convertor_d2r;
-
-    // imu_data_msg.linear_acceleration_covariance[0] =
-    //     imu_data_msg.linear_acceleration_covariance[4] =
-    //         imu_data_msg.linear_acceleration_covariance[8] = 1000;
-
-    // imu_data_msg.angular_velocity_covariance[0] =
-    //     imu_data_msg.angular_velocity_covariance[4] =
-    //         imu_data_msg.angular_velocity_covariance[8] = 1;
-
-    // imu_data_msg.orientation_covariance[0] =
-    // imu_data_msg.orientation_covariance[4]
-    // =
-    //     imu_data_msg.orientation_covariance[8] = 0;
-
-    imu_data_pub_->publish(imu_data_msg);
-
-    if (publish_tf) {
-
-      std::cout << "Flag" << std::endl;
-
-      // tf::Transform transform;
-
-      // transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
-      // transform.setRotation(new_orientation);
-      // broadcaster_.sendTransform(tf::StampedTransform(
-      //     transform, ros::Time::now(), "imu_link", "base_link"));
-
-      // broadcaster_.sendTransform(tf::StampedTransform(
-      //     tf::Transform(orientation, tf::Vector3(0.0, 0.0, 0.0)),
-      //     ros::Time::now(), "imu_link", "base_link"));
-
-      geometry_msgs::msg::TransformStamped tf;
-
-      tf.header.stamp = now;
-      tf.header.frame_id = "imu_link";
-      tf.child_frame_id = "base_link";
-
-      tf.transform.translation.x = 0.0f;
-      tf.transform.translation.y = 0.0f;
-      tf.transform.translation.z = 0.0f;
-
-      // tf.transform.rotation = imu_data_msg.orientation;
-
-      tf.transform.rotation.x = new_orientation[0];
-      tf.transform.rotation.y = new_orientation[1];
-      tf.transform.rotation.z = new_orientation[2];
-      tf.transform.rotation.w = 0; //-new_orientation[3];
-
-      broadcaster_->sendTransform(tf);
-    }
-  }
 };
 
 int main(int argc, char **argv) {
-  // ros::init(argc, argv, "mw_ahrsv1");
-
-  // MW_AHRS ahrs_obj;
-  // ros::Rate rate(10);
-
-  // ahrs_obj.reset_imu();
-  // ahrs_obj.speed_setup();
-  // ahrs_obj.start_data_stream();
-
-  // // ros::Duration(1.5).sleep();
-  // IMUMsg test_imu_raw_data;
-
-  // while (ros::ok()) {
-
-  //   // ahrs_obj.parse_ss_data(test_imu_raw_data);
-  //   ahrs_obj.pub_msg();
-
-  //   rate.sleep();
-  // }
 
   rclcpp::init(argc, argv);
 
@@ -443,14 +334,6 @@ int main(int argc, char **argv) {
   imu_node->start_data_stream();
 
   rclcpp::spin(imu_node);
-
-  // rclcpp::WallRate r(1);
-
-  // while (rclcpp::ok()) {
-  //   imu_node->pub_msg();
-  //   rclcpp::spin_some(imu_node);
-  //   r.sleep();
-  // }
 
   rclcpp::shutdown();
 
