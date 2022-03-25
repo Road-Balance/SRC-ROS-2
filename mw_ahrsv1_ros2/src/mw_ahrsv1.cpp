@@ -1,5 +1,3 @@
-#include "mw_ahrsv1_ros2/Serial.h"
-
 #include <string>
 #include <memory>
 #include <unistd.h>
@@ -11,6 +9,8 @@
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
+
+#include "mw_ahrsv1_ros2/Serial.h"
 
 typedef struct {
   // ang
@@ -48,7 +48,7 @@ class MW_AHRS : public rclcpp::Node {
 
 private:
   // Device Name
-  int dev = 0;
+  int serial_id = 0;
 
   // Data buffer
   char buffer[120];
@@ -128,13 +128,13 @@ public:
       buffer[i] = 0;
 
     // int open_serial(char *dev_name, int baud, int vtime, int vmin);
-    dev = open_serial(const_cast<char*>(device_id_.c_str()), 115200, 0, 0);
+    serial_id = open_serial(const_cast<char*>(device_id_.c_str()), 115200, 0, 0);
 
     imu_data_pub_ = this->create_publisher<sensor_msgs::msg::Imu>(
       "imu/data", rclcpp::QoS(1)
     );
 
-    timer_ = this->create_wall_timer(std::chrono::milliseconds(100),
+    timer_ = this->create_wall_timer(std::chrono::milliseconds(20),
                                      std::bind(&MW_AHRS::timer_cb, this));
 
     broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -144,12 +144,12 @@ public:
 
   ~MW_AHRS() {
     RCLCPP_INFO(get_logger(), "Destructor...");
-    close_serial(dev);
+    close_serial(serial_id);
   }
 
   void reset_imu() {
-    write(dev, reset_cmd, 5);
-    read(dev, &buffer, sizeof(buffer));
+    write(serial_id, reset_cmd, 5);
+    read(serial_id, &buffer, sizeof(buffer));
 
     buffer[sizeof(buffer)] = '\0';
 
@@ -159,8 +159,8 @@ public:
   }
 
   void speed_setup() {
-    write(dev, speed_cmd, 8);
-    read(dev, &buffer, sizeof(buffer));
+    write(serial_id, speed_cmd, 8);
+    read(serial_id, &buffer, sizeof(buffer));
 
     buffer[sizeof(buffer)] = '\0';
 
@@ -172,15 +172,15 @@ public:
   }
 
   void start_data_stream() {
-    write(dev, ros_data_cmd, 6);
-    read(dev, &buffer, sizeof(buffer));
+    write(serial_id, ros_data_cmd, 6);
+    read(serial_id, &buffer, sizeof(buffer));
 
     buffer[sizeof(buffer)] = '\0';
   }
 
   void get_angle_data(IMUMsg &msg_in) {
-    write(dev, angle_cmd, 5);
-    read(dev, &buffer, sizeof(buffer));
+    write(serial_id, angle_cmd, 5);
+    read(serial_id, &buffer, sizeof(buffer));
 
     if (buffer[0] == 'a' && buffer[1] == 'n' && buffer[2] == 'g') {
       char *ptr = strtok(buffer, " ");
@@ -204,7 +204,7 @@ public:
   }
 
   void parse_ss_data(IMUMsg &msg_in) {
-    read(dev, &buffer, sizeof(buffer));
+    read(serial_id, &buffer, sizeof(buffer));
 
     if (int(buffer[0]) < 97) {
       char *rest;

@@ -48,11 +48,6 @@ set(dependencies
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 ament_target_dependencies(${EXECUTABLE_NAME} ${dependencies})
 
-install(TARGETS ${EXECUTABLE_NAME}
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -63,5 +58,19 @@ if(BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+install(TARGETS 
+    ${EXECUTABLE_NAME}
+  DESTINATION 
+    lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY
+    launch
+    rviz
+  DESTINATION
+    share/${PROJECT_NAME}/
+)
 
 ament_package()
