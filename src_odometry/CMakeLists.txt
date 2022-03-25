@@ -66,12 +66,19 @@ ament_target_dependencies(src_odometry_real ${dependencies})
 add_executable(odom_test src/test.cpp src/odometry.cpp)
 ament_target_dependencies(odom_test rclcpp geometry_msgs sensor_msgs std_msgs)
 
+add_executable(src_odom src/src_odom.cpp)
+ament_target_dependencies(src_odom rclcpp geometry_msgs sensor_msgs std_msgs tf2 tf2_ros tf2_msgs nav_msgs)
+
 install(
   TARGETS
     odom_test
     pub_sub_exercise
+    # gazebo odom
     src_odometry_gazebo
+    # gazebo odom without boost
     src_odometry_real
+    # real odom
+    src_odom
   DESTINATION
     lib/${PROJECT_NAME}
 )

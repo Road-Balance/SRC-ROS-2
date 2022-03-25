@@ -93,6 +93,8 @@ private:
   // hold raw data
   IMUMsg imu_raw_data;
   std::string device_id_;
+  std::string frame_id_;
+  std::string child_frame_id_;
   bool verbose_;
   int pub_rate;
   bool pub_tf;
@@ -103,25 +105,33 @@ public:
   MW_AHRS() : Node("mv_ahrsv1_node") {
 
     this->declare_parameter("deviceID", "/dev/MWAHRs");
+    this->declare_parameter("frame_id", "imu_link");
+    this->declare_parameter("child_frame_id", "base_link");
     this->declare_parameter("publish_tf", true);
     this->declare_parameter("verbose", true);
     this->declare_parameter("publish_rate", 50);
 
     rclcpp::Parameter deviceID = this->get_parameter("deviceID");
+    rclcpp::Parameter frame_id = this->get_parameter("frame_id");
+    rclcpp::Parameter child_frame_id = this->get_parameter("child_frame_id");
     rclcpp::Parameter publish_tf = this->get_parameter("publish_tf");
     rclcpp::Parameter verbose = this->get_parameter("verbose");
     rclcpp::Parameter publish_rate = this->get_parameter("publish_rate");
     
     device_id_ = deviceID.as_string();
+    frame_id_ = frame_id.as_string();
+    child_frame_id_ = child_frame_id.as_string();
     pub_tf = publish_tf.as_bool();
     verbose_ = verbose.as_bool();
     pub_rate = publish_rate.as_int();
     
-    RCLCPP_INFO(this->get_logger(), "deviceID: %s, publish_tf: %s, verbose: %s, publish_rate: %s",
+    RCLCPP_INFO(this->get_logger(), "deviceID: %s, publish_tf: %s, verbose: %s, publish_rate: %s, frame_id: %s, child_frame_id: %s",
       deviceID.value_to_string().c_str(),
       publish_tf.value_to_string().c_str(),
       verbose.value_to_string().c_str(),
-      publish_rate.value_to_string().c_str()
+      publish_rate.value_to_string().c_str(),
+      frame_id.value_to_string().c_str(),
+      child_frame_id.value_to_string().c_str()
     );
 
     for (auto i = 0; i < sizeof(buffer); i++)
@@ -268,7 +278,7 @@ public:
     rclcpp::Time now = this->now();
 
     imu_data_msg.header.stamp = now;
-    imu_data_msg.header.frame_id = "imu_link";
+    imu_data_msg.header.frame_id = frame_id_;
 
     // orientation
     imu_data_msg.orientation.x = new_orientation[0];
@@ -308,8 +318,8 @@ public:
       geometry_msgs::msg::TransformStamped transform;
 
       transform.header.stamp = now;
-      transform.header.frame_id = "base_link";
-      transform.child_frame_id = "imu_link";
+      transform.header.frame_id = frame_id_;
+      transform.child_frame_id = child_frame_id_;
 
       transform.transform.rotation.x = new_orientation[0];
       transform.transform.rotation.y = new_orientation[1];
