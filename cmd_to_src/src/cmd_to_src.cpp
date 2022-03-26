@@ -72,11 +72,12 @@ public:
 
   void cmd_vel_cb(const Twist::SharedPtr msg) {
     src_msg.speed = msg->linear.x;
-    
+
     // TODO: Find Zero point
     src_msg.steering = -((msg->angular.z)/2 * steering_offset) + steering_offset;
-    // TODO: Check direction
     // TODO: Light On Off mode
+    
+    src_msg.direction = src_msg.speed >= 0 ? 1:0;
   }
 
   void accel_vel_cb(const Float32::SharedPtr msg){
