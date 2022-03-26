@@ -438,3 +438,19 @@ rqt
 ros2 run src_odometry src_odometry_real
 
 ```
+
+Odom blinking => Invalid tf tree 
+
+```
+ros2 run tf2_tools view_frames.py
+```
+
+```
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
+
+ros2 launch src_demo joystick_control_foxy.launch.py
+
+ros2 run mw_ahrsv1_ros2 mw_ahrsv1_ros2 
+ros2 run src_odometry src_odom
+```

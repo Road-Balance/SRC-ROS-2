@@ -29,11 +29,13 @@ private:
 
   /// Previous wheel position/state [rad]:
   double rear_wheel_old_pos_;
-  double front_hinge_pos;
 
   int64_t encoder_pos;
+  int64_t prev_encoder_pos;
 
-  rclcpp::Time timestamp_;
+  rclcpp::Time prev_time;
+
+  tf2::Quaternion q_;
 
   Imu imu_msg_;
   Int64 encoder_msg_;
@@ -47,14 +49,61 @@ private:
   rclcpp::Subscription<Imu>::SharedPtr imu_sub_;
   rclcpp::Subscription<Int64>::SharedPtr encoder_sub_;
 
+  /// Parameters 
+  
+  // Subscribe topic names 
+  std::string imu_topic_name_;
+  std::string encoder_topic_name_;
+  
+  // TF parameters
+  bool publish_tf_;
+  bool verbose_;
+  int update_rate_;
+  std::string base_frame_id_;
+  std::string odom_frame_id_;
+
+  // Dynamics Parameters
+  double wheel_radius_;
+  uint encoder_resolution_;
+
 public:
   SRCOdom(): Node("ackermann_odometry") {
-    // imu topic name
-    // odom topic name
-    // publish_tf
-    // base_frame_id
-    // odom_frame_id
-    // update_rate
+
+    this->declare_parameter("imu_topic_name", "imu/data");
+    rclcpp::Parameter imu_topic_name = this->get_parameter("imu_topic_name");
+    imu_topic_name_ = imu_topic_name.as_string();
+
+    this->declare_parameter("encoder_topic_name", "/encoder_value");
+    rclcpp::Parameter encoder_topic_name = this->get_parameter("encoder_topic_name");
+    encoder_topic_name_ = encoder_topic_name.as_string();
+
+    this->declare_parameter("publish_tf", true);
+    rclcpp::Parameter publish_tf = this->get_parameter("publish_tf");
+    publish_tf_ = publish_tf.as_bool();
+
+    this->declare_parameter("update_rate", 50);
+    rclcpp::Parameter update_rate = this->get_parameter("update_rate");
+    update_rate_ = update_rate.as_int();
+
+    this->declare_parameter("base_frame_id", "base_link");
+    rclcpp::Parameter base_frame_id = this->get_parameter("base_frame_id");
+    base_frame_id_ = base_frame_id.as_string();
+
+    this->declare_parameter("odom_frame_id", "odom");
+    rclcpp::Parameter odom_frame_id = this->get_parameter("odom_frame_id");
+    odom_frame_id_ = odom_frame_id.as_string();
+
+    this->declare_parameter("wheel_radius", 0.0508);
+    rclcpp::Parameter wheel_radius = this->get_parameter("wheel_radius");
+    wheel_radius_ = wheel_radius.as_double();
+
+    this->declare_parameter("encoder_resolution", 150);
+    rclcpp::Parameter encoder_resolution = this->get_parameter("encoder_resolution");
+    encoder_resolution_ = encoder_resolution.as_int();
+
+    this->declare_parameter("verbose", false);
+    rclcpp::Parameter verbose = this->get_parameter("verbose");
+    verbose_ = verbose.as_bool();
 
     odom_pub_ = this->create_publisher<Odometry>("odom", rclcpp::QoS(1));
     
@@ -64,51 +113,119 @@ public:
     encoder_sub_ = this->create_subscription<Int64>("encoder_value", rclcpp::SensorDataQoS(),
         std::bind(&SRCOdom::encoder_value_cb, this, std::placeholders::_1));
 
-    // auto interval = std::chrono::duration<double>(1.0 / publish_rate);
-    timer_ = this->create_wall_timer(std::chrono::milliseconds(20), std::bind(&SRCOdom::timer_cb, this));
-    timestamp_ = this->get_clock()->now();
+    auto interval = (1000 / update_rate_);
+    timer_ = this->create_wall_timer(std::chrono::milliseconds(interval), std::bind(&SRCOdom::timer_cb, this));
+    
+    broadcaster_ = std::make_unique<TransformBroadcaster>(this);
+    prev_time = this->get_clock()->now();
+
+    q_[0] = 0.0;
+    q_[1] = 0.0;
+    q_[2] = 0.0;
+    q_[3] = 1.0;
   }
 
   void imu_sub_cb(const Imu::SharedPtr msg){
-    std::cout << "imu_sub_cb" << std::endl;
 
-    tf2::Quaternion q(
-      msg->orientation.x,
-      msg->orientation.y,
-      msg->orientation.z,
-      msg->orientation.w
-    );
+    q_[0] = msg->orientation.x;
+    q_[1] = msg->orientation.y;
+    q_[2] = msg->orientation.z;
+    q_[3] = msg->orientation.w;
 
-    tf2::Matrix3x3 m(q);
+    tf2::Matrix3x3 m(q_);
     
     double roll, pitch;
-    m.getRPY(roll, pitch, front_hinge_pos);
+    m.getRPY(roll, pitch, heading_);
 
-    std::cout << "yaw : " << front_hinge_pos << std::endl;
+    if (verbose_)
+      RCLCPP_INFO(get_logger(), "yaw : %f", heading_);
   }
 
-  void encoder_value_cb(const Int64::SharedPtr msg){
-    std::cout << "encoder_value_cb" << std::endl;
-    encoder_pos = msg->data;
-  }
+  bool update_odom(int64_t encoder_pos, double heading, const rclcpp::Time &cur_time){
 
-  void timer_cb(){
+    auto rear_encoder_diff = (encoder_pos - prev_encoder_pos);
+    auto rear_wheel_diff = rear_encoder_diff * (2 * M_PI * wheel_radius_ / encoder_resolution_);
 
-    rclcpp::Time cur_time = this->get_clock()->now();
+    if(verbose_)
+      RCLCPP_INFO(get_logger(), "rear_encoder_diff : %f / rear_wheel_diff : %f", 
+        rear_encoder_diff, rear_wheel_diff);
 
     /// We cannot estimate the speed with very small time intervals:
-    const double dt = (cur_time - timestamp_).seconds();
+    const double dt = (cur_time - prev_time).seconds();
     if (dt < 0.0001)
       return false; // Interval too small to integrate with
 
     // wheel_difference = cur_pose - prev_pose
-    auto v = wheel_difference / dt;
+    auto linear_vel_ = rear_wheel_diff / dt;
 
-    x_       += v * cos(encoder_pos);
-    y_       += v * sin(encoder_pos);
-    heading_ += angular;
+    if(verbose_)
+      RCLCPP_INFO(get_logger(), "dt : %f / linear_vel_ : %f", 
+        dt, linear_vel_);
 
-    timestamp_ = cur_time;
+    x_       += rear_wheel_diff * cos(heading);
+    y_       += rear_wheel_diff * sin(heading);
+    heading_  = heading;
+
+    prev_encoder_pos = encoder_pos;
+    prev_time = cur_time;
+
+    return true;
+  }
+
+  void encoder_value_cb(const Int64::SharedPtr msg){
+    encoder_pos = msg->data;
+  }
+
+  void timer_cb(){
+    auto time = this->get_clock()->now();
+    update_odom(encoder_pos, this->heading_, time);
+
+    odom_msg_.header.stamp = time;
+    odom_msg_.header.frame_id = odom_frame_id_;
+    odom_msg_.child_frame_id = base_frame_id_;
+    
+    odom_msg_.pose.pose.position.x = x_;  
+    odom_msg_.pose.pose.position.y = y_;
+    // odom_msg_.pose.pose.orientation = q_;
+    odom_msg_.pose.pose.orientation.x = q_[0];
+    odom_msg_.pose.pose.orientation.y = q_[1];
+    odom_msg_.pose.pose.orientation.z = q_[2];
+    odom_msg_.pose.pose.orientation.w = q_[3];
+    odom_msg_.pose.covariance.fill(0.0);
+    odom_msg_.pose.covariance[0] = 1e-3;
+    odom_msg_.pose.covariance[7] = 1e-3;
+    odom_msg_.pose.covariance[14] = 1e6;
+    odom_msg_.pose.covariance[21] = 1e6; 
+    odom_msg_.pose.covariance[28] = 1e6;
+    odom_msg_.pose.covariance[35] = 1e-3;
+
+    // odom_msg_.twist.twist.linear.x = odometry_.getLinear();  
+    // odom_msg_.twist.twist.angular.z = odometry_.getAngular();      
+    odom_msg_.twist.covariance.fill(0.0);
+    odom_msg_.twist.covariance[0] = 1e-3;
+    odom_msg_.twist.covariance[7] = 1e-3;
+    odom_msg_.twist.covariance[14] = 1e6;
+    odom_msg_.twist.covariance[21] = 1e6;
+    odom_msg_.twist.covariance[28] = 1e6;
+    odom_msg_.twist.covariance[35] = 1e3;
+    
+    if(publish_tf_){
+      // publish TF
+      geometry_msgs::msg::TransformStamped odom_tf;
+
+      odom_tf.header.stamp = time;
+      odom_tf.header.frame_id = odom_frame_id_;
+      odom_tf.child_frame_id = base_frame_id_;
+
+      odom_tf.transform.translation.x = odom_msg_.pose.pose.position.x;
+      odom_tf.transform.translation.y = odom_msg_.pose.pose.position.y;
+      odom_tf.transform.translation.z = 0;
+      odom_tf.transform.rotation = odom_msg_.pose.pose.orientation;
+
+      broadcaster_->sendTransform(odom_tf);
+    }
+
+    odom_pub_->publish(odom_msg_);
   }
 
   ~SRCOdom(){
