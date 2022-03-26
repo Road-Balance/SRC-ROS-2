@@ -48,6 +48,11 @@ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
 ros2 launch src_demo joystick_control_foxy.launch.py
 # Accle => 10.0
 # Max vel => 0.375
+
+# lidar only slam
+ros2 launch src_slam src_slam_lidar_odom.launch.py
+
+# wheel odometry slam
 ros2 launch src_slam src_slam.launch.py
 
 # Remote view

@@ -12,6 +12,7 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time')
     slam_params_file = LaunchConfiguration('slam_params_file')
+    rviz_config_file = LaunchConfiguration('rviz_config_file')
 
     declare_use_sim_time_argument = DeclareLaunchArgument(
         'use_sim_time',
@@ -27,6 +28,15 @@ def generate_launch_description():
         description='Full path to the ROS2 parameters file to use for the slam_toolbox node'
     )
 
+
+    declare_rviz_config_file = DeclareLaunchArgument(
+        'rviz_config_file',
+        default_value=os.path.join(
+            pkg_path, 'rviz', 'slam_toolbox_default.rviz'
+        ),
+        description='Full path to the ROS2 parameters file to use for the slam_toolbox node'
+    )
+
     start_async_slam_toolbox_node = Node(
         parameters=[
           slam_params_file,
@@ -37,8 +47,6 @@ def generate_launch_description():
         name='slam_toolbox',
         output='screen'
     )
-
-    rviz_config_file = os.path.join(pkg_path, 'rviz', 'slam_toolbox_default.rviz')
 
     # Launch RViz
     rviz = Node(
@@ -51,6 +59,7 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
+    ld.add_action(declare_rviz_config_file)
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_slam_params_file_cmd)
     ld.add_action(start_async_slam_toolbox_node)
