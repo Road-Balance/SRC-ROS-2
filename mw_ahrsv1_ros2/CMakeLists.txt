@@ -45,8 +45,11 @@ set(dependencies
   "tf2_msgs"
 )
 
-add_executable(${EXECUTABLE_NAME} ${SOURCES})
-ament_target_dependencies(${EXECUTABLE_NAME} ${dependencies})
+add_executable(mw_ahrsv1_ros2 src/Serial.cpp src/mw_ahrsv1.cpp)
+ament_target_dependencies(mw_ahrsv1_ros2 ${dependencies})
+
+add_executable(mw_ahrsv1_only_angle src/Serial.cpp src/mw_ahrsv1_only_ang.cpp)
+ament_target_dependencies(mw_ahrsv1_only_angle ${dependencies})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -60,7 +63,8 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS 
-    ${EXECUTABLE_NAME}
+    mw_ahrsv1_ros2
+    mw_ahrsv1_only_angle
   DESTINATION 
     lib/${PROJECT_NAME}
 )

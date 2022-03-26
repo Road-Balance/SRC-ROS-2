@@ -21,7 +21,7 @@ def generate_launch_description():
 
     mw_ahrs_node = Node(
         package='mw_ahrsv1_ros2',
-        executable='mw_ahrsv1_ros2',
+        executable='mw_ahrsv1_only_angle',
         name='mw_ahrsv1_ros2',
         output='log',
         parameters=[{
