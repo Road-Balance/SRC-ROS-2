@@ -144,7 +144,8 @@ public:
       "imu/data", rclcpp::QoS(1)
     );
 
-    timer_ = this->create_wall_timer(std::chrono::milliseconds(20),
+    auto interval = (1000 / pub_rate);
+    timer_ = this->create_wall_timer(std::chrono::milliseconds(interval),
                                      std::bind(&MW_AHRS::timer_cb, this));
 
     broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -270,9 +271,10 @@ public:
 
     // Debugging Console
     if(verbose_){
-      std::cout << new_orientation[0] << std::endl;
-      std::cout << new_orientation[1] << std::endl;
-      std::cout << new_orientation[2] << std::endl;
+      std::cout << "imu_raw_data.yaw : " << imu_raw_data.yaw << std::endl;
+      // std::cout << new_orientation[0] << std::endl;
+      // std::cout << new_orientation[1] << std::endl;
+      // std::cout << new_orientation[2] << std::endl;
     }
 
     rclcpp::Time now = this->now();
@@ -339,9 +341,21 @@ int main(int argc, char **argv) {
 
   auto imu_node = std::make_shared<MW_AHRS>();
 
+  auto t_start = imu_node->now();
+  auto t_now = imu_node->now();
+  auto stop_time = 0.3;
+
   imu_node->reset_imu();
+  while ((t_now - t_start).seconds() < stop_time)
+    t_now = imu_node->now();
+
   imu_node->speed_setup();
+  while ((t_now - t_start).seconds() < stop_time)
+    t_now = imu_node->now();
+
   imu_node->start_data_stream();
+  while ((t_now - t_start).seconds() < stop_time)
+    t_now = imu_node->now();
 
   rclcpp::spin(imu_node);
 
