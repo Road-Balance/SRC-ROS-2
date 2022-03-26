@@ -12,6 +12,7 @@
 
 #include "mw_ahrsv1_ros2/Serial.h"
 
+using namespace std::chrono_literals;
 typedef struct {
   // ang
   float roll;
@@ -58,13 +59,16 @@ private:
   unsigned char angle_cmd[5] = {0x61, 0x6E, 0x67, 0x0D, 0x0A}; // ang Enter
   unsigned char gyr_cmd[5] = {0x67, 0x79, 0x72, 0x0D, 0x0A};   // ang Enter
   unsigned char acc_cmd[5] = {0x61, 0x63, 0x63, 0x0D, 0x0A};   // ang Enter
-  unsigned char reset_cmd[5] = {0x7A, 0x72, 0x6F, 0x0D, 0x0A}; // zro Enter
+  unsigned char reset_angle_cmd[5] = {0x7A, 0x72, 0x6F, 0x0D, 0x0A}; // zro Enter
+  unsigned char reset_cmd[5] = {0x72, 0x73, 0x74, 0x0D, 0x0A}; // zro Enter
   unsigned char av_cmd[7] = {0x61, 0x76, 0x3D, 0x31,
                              0x30, 0x0D, 0x0A}; // av = 10
-  unsigned char speed_cmd[8] = {0x73, 0x70, 0x3D, 0x31,
+  unsigned char speed_cmd_slow[8] = {0x73, 0x70, 0x3D, 0x31,
                                 0x30, 0x30, 0x0D, 0x0A}; // sp=100 Enter
+  unsigned char speed_cmd[7] = {0x73, 0x70, 0x3D, 0x32,
+                                0x30, 0x0D, 0x0A}; // sp=20 Enter
   unsigned char ros_data_cmd[6] = {0x73, 0x73, 0x3D,
-                                   0x37, 0x0D, 0x0A}; // ss=7 Enter
+                                   0x37, 0x0D, 0x0A}; // ss=7 Enter 가속도, 각속도, 각도 데이터
 
   // Serperate Euler Angle Variable
   int ang_count = 0;
@@ -98,6 +102,7 @@ private:
   bool verbose_;
   int pub_rate;
   bool pub_tf;
+  bool view_imu_;
 
   std::unique_ptr<tf2_ros::TransformBroadcaster> broadcaster_;
 
@@ -105,9 +110,10 @@ public:
   MW_AHRS() : Node("mv_ahrsv1_node") {
 
     this->declare_parameter("deviceID", "/dev/MWAHRs");
-    this->declare_parameter("frame_id", "imu_link");
-    this->declare_parameter("child_frame_id", "base_link");
+    this->declare_parameter("frame_id", "base_link");
+    this->declare_parameter("child_frame_id", "imu_link");
     this->declare_parameter("publish_tf", true);
+    this->declare_parameter("view_imu", false);
     this->declare_parameter("verbose", true);
     this->declare_parameter("publish_rate", 50);
 
@@ -116,6 +122,7 @@ public:
     rclcpp::Parameter child_frame_id = this->get_parameter("child_frame_id");
     rclcpp::Parameter publish_tf = this->get_parameter("publish_tf");
     rclcpp::Parameter verbose = this->get_parameter("verbose");
+    rclcpp::Parameter view_imu = this->get_parameter("view_imu");
     rclcpp::Parameter publish_rate = this->get_parameter("publish_rate");
     
     device_id_ = deviceID.as_string();
@@ -123,6 +130,7 @@ public:
     child_frame_id_ = child_frame_id.as_string();
     pub_tf = publish_tf.as_bool();
     verbose_ = verbose.as_bool();
+    view_imu_ = view_imu.as_bool();
     pub_rate = publish_rate.as_int();
     
     RCLCPP_INFO(this->get_logger(), "deviceID: %s, publish_tf: %s, verbose: %s, publish_rate: %s, frame_id: %s, child_frame_id: %s",
@@ -150,12 +158,38 @@ public:
 
     broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
     
-    RCLCPP_INFO(get_logger(), "Constructor...");
+    this->reset_angle();
+    this->speed_setup();
+    this->start_data_stream();
+    rclcpp::sleep_for(1s);
+
+    RCLCPP_WARN(get_logger(), "Ready to Parse MwAHRs...");
   }
 
   ~MW_AHRS() {
     RCLCPP_INFO(get_logger(), "Destructor...");
+    
+    this->reset_imu();
     close_serial(serial_id);
+    
+    rclcpp::sleep_for(1s);
+  }
+
+  void reset_angle() {
+    write(serial_id, reset_angle_cmd, 5);
+    read(serial_id, &buffer, sizeof(buffer));
+
+    buffer[sizeof(buffer)] = '\0';
+
+    for(auto i=0 ; i < sizeof(buffer) ; i++)
+      std::cout << (int)buffer[i] << " ";
+    std::cout << std::endl;
+    if( (int)buffer[0] != 0 )
+      RCLCPP_INFO(get_logger(), "IMU Angle Reset Done...");
+
+    // TODO: Initialization Test
+    // if (buffer[0] != 'z' && buffer[1] == 'r' && buffer[2] == 'o')
+    //   RCLCPP_INFO(get_logger(), "IMU Reset...");
   }
 
   void reset_imu() {
@@ -164,22 +198,34 @@ public:
 
     buffer[sizeof(buffer)] = '\0';
 
-    if (buffer[0] == 'z' && buffer[1] == 'r' && buffer[2] == 'o') {
-      printf("IMU Reset\n");
-    }
+    for(auto i=0 ; i < sizeof(buffer) ; i++)
+      std::cout << (int)buffer[i] << " ";
+    std::cout << std::endl;
+    if( (int)buffer[0] != 0 )
+      RCLCPP_INFO(get_logger(), "IMU Reset Done...");
+
+    // TODO: Initialization Test
+    // if (buffer[0] != 'z' && buffer[1] == 'r' && buffer[2] == 'o')
+    //   RCLCPP_INFO(get_logger(), "IMU Reset...");
   }
 
   void speed_setup() {
-    write(serial_id, speed_cmd, 8);
+    write(serial_id, speed_cmd, 7);
     read(serial_id, &buffer, sizeof(buffer));
 
     buffer[sizeof(buffer)] = '\0';
 
+    for(auto i=0 ; i < sizeof(buffer) ; i++)
+      std::cout << (int)buffer[i] << " ";
+    std::cout << std::endl;
+    if( (int)buffer[0] != 0 )
+      RCLCPP_INFO(get_logger(), "Speed Setup Done...");
+
+    // TODO: Initialization Test
     // Ex) sp=100 데이터 전송 주기를 100ms로 설정
-    if (buffer[0] == 's' && buffer[1] == 'p' && buffer[2] == '=' &&
-        buffer[3] == '1' && buffer[4] == '0') {
-      printf("Serial Speed Reset\n");
-    }
+    // if (buffer[0] == 's' && buffer[1] == 'p' && buffer[2] == '=' &&
+    //     buffer[3] == '1' && buffer[4] == '0')
+    //   RCLCPP_INFO(get_logger(), "Speed Setup Done...");
   }
 
   void start_data_stream() {
@@ -271,7 +317,8 @@ public:
 
     // Debugging Console
     if(verbose_){
-      std::cout << "imu_raw_data.yaw : " << imu_raw_data.yaw << std::endl;
+      RCLCPP_INFO(get_logger(), "imu_raw_data.yaw : %f", imu_raw_data.yaw);
+      // std::cout << "imu_raw_data.yaw : " << imu_raw_data.yaw << std::endl;
       // std::cout << new_orientation[0] << std::endl;
       // std::cout << new_orientation[1] << std::endl;
       // std::cout << new_orientation[2] << std::endl;
@@ -286,8 +333,9 @@ public:
     imu_data_msg.orientation.x = new_orientation[0];
     imu_data_msg.orientation.y = new_orientation[1];
     imu_data_msg.orientation.z = new_orientation[2];
-    imu_data_msg.orientation.w = new_orientation[3];
-
+    imu_data_msg.orientation.w = -new_orientation[3];
+    // imu_data_msg.orientation_covariance[0] = -1; // we don't have estimation for orientation
+    
     // original data used the g unit, convert to m/s^2
     imu_data_msg.linear_acceleration.x =
         -imu_raw_data.linear_acc_y * convertor_g2a;
@@ -323,10 +371,21 @@ public:
       transform.header.frame_id = frame_id_;
       transform.child_frame_id = child_frame_id_;
 
-      transform.transform.rotation.x = new_orientation[0];
-      transform.transform.rotation.y = new_orientation[1];
-      transform.transform.rotation.z = new_orientation[2];
-      transform.transform.rotation.w = -new_orientation[3];
+      transform.transform.translation.x = 0.0;
+      transform.transform.translation.y = 0.0;
+
+      if(view_imu_){
+        transform.transform.rotation.x = new_orientation[0];
+        transform.transform.rotation.y = new_orientation[1];
+        transform.transform.rotation.z = new_orientation[2];
+        transform.transform.rotation.w = -new_orientation[3];
+      }
+      else {
+        transform.transform.rotation.x = 0.0;
+        transform.transform.rotation.y = 0.0;
+        transform.transform.rotation.z = 0.0;
+        transform.transform.rotation.w = 1.0;
+      }
 
       broadcaster_->sendTransform(transform);
     }
@@ -340,22 +399,6 @@ int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
 
   auto imu_node = std::make_shared<MW_AHRS>();
-
-  auto t_start = imu_node->now();
-  auto t_now = imu_node->now();
-  auto stop_time = 0.3;
-
-  imu_node->reset_imu();
-  while ((t_now - t_start).seconds() < stop_time)
-    t_now = imu_node->now();
-
-  imu_node->speed_setup();
-  while ((t_now - t_start).seconds() < stop_time)
-    t_now = imu_node->now();
-
-  imu_node->start_data_stream();
-  while ((t_now - t_start).seconds() < stop_time)
-    t_now = imu_node->now();
 
   rclcpp::spin(imu_node);
 
