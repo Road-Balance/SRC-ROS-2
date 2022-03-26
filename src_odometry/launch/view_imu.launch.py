@@ -55,9 +55,10 @@ def generate_launch_description():
 
     return LaunchDescription([
         mw_ahrs_node,
-        rviz2,
+        src_odom,
+        
         TimerAction(    
             period=2.0,
-            actions=[src_odom]
+            actions=[rviz2]
         ),
     ])
