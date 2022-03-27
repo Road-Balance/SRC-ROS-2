@@ -17,7 +17,7 @@ def generate_launch_description():
 
     # Rviz
     src_slam_pkg = os.path.join(get_package_share_directory('src_slam'))
-    rviz_config_file = os.path.join(src_slam_pkg, 'rviz', 'slam_toolbox_view.rviz')
+    rviz_config_file = os.path.join(src_slam_pkg, 'rviz', 'slam_toolbox_real.rviz')
 
     rviz2 = Node(
             package='rviz2',
