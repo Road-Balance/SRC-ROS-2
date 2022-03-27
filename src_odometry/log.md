@@ -451,7 +451,7 @@ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
 
 ros2 launch src_demo joystick_control_foxy.launch.py
 
-ros2 run mw_ahrsv1_ros2 mw_ahrsv1_ros2 
+ros2 run mw_ahrsv1_ros2 mw_ahrsv1_ros2
 ros2 run src_odometry src_odom
 
 ros2 launch src_odometry view_imu.launch.py 

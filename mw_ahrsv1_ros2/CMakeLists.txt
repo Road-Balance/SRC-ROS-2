@@ -48,7 +48,7 @@ set(dependencies
 add_executable(mw_ahrsv1_ros2 src/Serial.cpp src/mw_ahrsv1.cpp)
 ament_target_dependencies(mw_ahrsv1_ros2 ${dependencies})
 
-add_executable(mw_ahrsv1_only_angle src/Serial.cpp src/mw_ahrsv1_only_ang.cpp)
+add_executable(mw_ahrsv1_only_angle src/Serial.cpp src/MW_AHRSv1.cpp src/mw_ahrsv1_only_angle.cpp)
 ament_target_dependencies(mw_ahrsv1_only_angle ${dependencies})
 
 if(BUILD_TESTING)
