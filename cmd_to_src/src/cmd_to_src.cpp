@@ -47,7 +47,7 @@ public:
     );
 
     pub_timer = this->create_wall_timer(
-      50ms, std::bind(&CmdToSRC::timer_callback, this)
+      20ms, std::bind(&CmdToSRC::timer_callback, this)
     );
 
     // paramter
@@ -57,7 +57,7 @@ public:
     this->declare_parameter("deaccel_scale", 5.0);
     deaccel = this->get_parameter("deaccel_scale").as_double();
 
-    this->declare_parameter("scale", 80);
+    this->declare_parameter("scale", 9);
     scale = this->get_parameter("scale").as_int();
 
     src_msg.speed = 0.0;
