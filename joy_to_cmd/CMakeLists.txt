@@ -18,6 +18,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -39,8 +40,12 @@ endif()
 add_executable(joy_to_cmd_vel src/joy_to_cmd_vel.cpp)
 ament_target_dependencies(joy_to_cmd_vel rclcpp std_msgs sensor_msgs geometry_msgs)
 
+add_executable(vel_util src/vel_util.cpp)
+ament_target_dependencies(vel_util rclcpp nav_msgs)
+
 install(TARGETS
   joy_to_cmd_vel
+  vel_util
   DESTINATION lib/${PROJECT_NAME}
 )
 
