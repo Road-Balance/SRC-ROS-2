@@ -18,6 +18,9 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(src_control_message REQUIRED)
 # uncomment the following section in order to fill in
@@ -37,7 +40,10 @@ endif()
 
 add_executable(cmd_to_src src/cmd_to_src.cpp)
 ament_target_dependencies(cmd_to_src 
-  rclcpp 
+  tf2
+  tf2_ros
+  rclcpp
+  sensor_msgs
   geometry_msgs
   src_control_message
 )
