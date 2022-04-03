@@ -22,6 +22,7 @@ private:
   double x_;        //   [m]
   double y_;        //   [m]
   double heading_;  // [rad]
+  double prev_heading_;
 
   /// Current velocity:
   double linear_;  //   [m/s]
@@ -32,6 +33,7 @@ private:
 
   int64_t encoder_pos;
   int64_t prev_encoder_pos;
+
 
   rclcpp::Time prev_time;
 
@@ -146,6 +148,14 @@ public:
     auto rear_encoder_diff = (encoder_pos - prev_encoder_pos);
     auto rear_wheel_diff = rear_encoder_diff * (2 * M_PI * wheel_radius_ / encoder_resolution_);
 
+    auto angular_diff = heading_ - prev_heading_;
+    if (fabs(angular_diff) > 3.0){
+      if(angular_diff < 0.0)
+        angular_diff = -1 * (angular_diff + 6.2831);
+      else
+        angular_diff = -1 * (angular_diff - 6.2831);
+    }
+
     if(verbose_)
       RCLCPP_INFO(get_logger(), "rear_encoder_diff : %f / rear_wheel_diff : %f", 
         rear_encoder_diff, rear_wheel_diff);
@@ -155,12 +165,13 @@ public:
     if (dt < 0.0001)
       return false; // Interval too small to integrate with
 
-    // wheel_difference = cur_pose - prev_pose
-    auto linear_vel_ = rear_wheel_diff / dt;
+    linear_ = rear_wheel_diff / dt;
+    angular_ = angular_diff / dt;
+
 
     if(verbose_)
-      RCLCPP_INFO(get_logger(), "dt : %f / linear_vel_ : %f", 
-        dt, linear_vel_);
+      RCLCPP_INFO(get_logger(), "dt : %f / linear_ : %f / angular_ : %f" , 
+        dt, linear_, angular_);
 
     x_       += rear_wheel_diff * cos(heading);
     y_       += rear_wheel_diff * sin(heading);
@@ -168,6 +179,7 @@ public:
 
     prev_encoder_pos = encoder_pos;
     prev_time = cur_time;
+    prev_heading_ = heading_;
 
     return true;
   }
@@ -199,8 +211,8 @@ public:
     odom_msg_.pose.covariance[28] = 1e6;
     odom_msg_.pose.covariance[35] = 1e-3;
 
-    // odom_msg_.twist.twist.linear.x = odometry_.getLinear();  
-    // odom_msg_.twist.twist.angular.z = odometry_.getAngular();      
+    odom_msg_.twist.twist.linear.x = linear_;  
+    odom_msg_.twist.twist.angular.z = angular_;      
     odom_msg_.twist.covariance.fill(0.0);
     odom_msg_.twist.covariance[0] = 1e-3;
     odom_msg_.twist.covariance[7] = 1e-3;
