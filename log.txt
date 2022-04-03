@@ -1,3 +1,17 @@
 ros2 pkg create --build-type ament_cmake mw_ahrsv1_ros2 --dependencies rclcpp std_msgs sensor_msgs tf geometry_msgs tf2 tf2_ros tf2_msgs
 
 
+```
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
+
+ros2 launch src_demo joystick_control_foxy.launch.py
+ros2 launch src_odometry src_bringup.launch.py
+```
+
+```
+ros2 run joy_to_cmd joy_to_cmd_vel
+
+ros2 launch src_odometry src_bringup.launch.py
+ros2 run joy joy_node
+```
