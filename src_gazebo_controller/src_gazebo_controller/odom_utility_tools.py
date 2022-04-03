@@ -61,7 +61,7 @@ class OdomUtilNode(Node):
 
         self.declare_parameter('model_name', 'racecar')
         self.declare_parameter('alpha', 0.4)
-        self.declare_parameter('verbose', True)
+        self.declare_parameter('verbose', False)
 
         self._model_name = self.get_parameter('model_name').value
         self._alpha = self.get_parameter('alpha').value
@@ -122,7 +122,8 @@ class OdomUtilNode(Node):
         max_gt = max(self.gt_list)
         min_gt = min(self.gt_list)
 
-        print(max_gt, min_gt, max_gt - min_gt)
+        if(self._verbose): 
+            self.get_logger().info(f"max_gt : {max_gt}, min_gt : {min_gt}, max_gt - min_gt : {max_gt - min_gt}")
 
         self._ground_truth_publisher_x.publish(self.gt_x)
         self._ground_truth_publisher_y.publish(self.gt_y)
