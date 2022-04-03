@@ -6,45 +6,45 @@
 
 SRCOdometry::SRCOdometry(): Node("ackermann_odometry"){
     // Setup Parameters
-    this->declare_parameter("verbose", false);
-    verbose_ = this->get_parameter("verbose").as_bool();
+    verbose_ = declare_parameter("verbose", false);
+    RCLCPP_INFO(get_logger(), "verbose : %s", verbose_ == true ? "true":"false");
 
-    this->declare_parameter("publish_rate", 50);
-    auto publish_rate = this->get_parameter("publish_rate").as_int();
+    auto publish_rate = declare_parameter("publish_rate", 50);
     auto interval = std::chrono::duration<double>(1.0 / publish_rate);
     pub_timer_ = this->create_wall_timer(interval, std::bind(&SRCOdometry::timer_cb, this));
 
-    this->declare_parameter("open_loop", false);
-    open_loop_ = this->get_parameter("open_loop").as_bool();
+    open_loop_ = declare_parameter("open_loop", false);
+    RCLCPP_INFO(get_logger(), "open_loop_ : %s", open_loop_ == true ? "true":"false");
 
-    this->declare_parameter("wheel_separation_h_", 0.325);
-    wheel_separation_h_ = this->get_parameter("wheel_separation_h_").as_double();
+    wheel_separation_h_ = declare_parameter("wheel_separation_h_", 0.325);
+    RCLCPP_INFO(get_logger(), "wheel_separation_h_ : %f", wheel_separation_h_);
 
-    this->declare_parameter("wheel_separation_h_multiplier", 1.1);
-    wheel_separation_h_multiplier_ = this->get_parameter("wheel_separation_h_multiplier").as_double();
+    wheel_separation_h_multiplier_ = declare_parameter("wheel_separation_h_multiplier", 1.1);
+    RCLCPP_INFO(get_logger(), "wheel_separation_h_multiplier : %f", wheel_separation_h_multiplier_);
 
-    this->declare_parameter("wheel_radius_", 0.05);
-    wheel_radius_ = this->get_parameter("wheel_radius_").as_double();
+    wheel_radius_ = declare_parameter("wheel_radius", 0.05);
+    RCLCPP_INFO(get_logger(), "wheel_radius : %f", wheel_radius_);
     
-    this->declare_parameter("wheel_radius_multiplier", 1.0);
-    wheel_radius_multiplier_ = this->get_parameter("wheel_radius_multiplier").as_double();
+    wheel_radius_multiplier_ = declare_parameter("wheel_radius_multiplier", 1.0);
+    RCLCPP_INFO(get_logger(), "wheel_radius_multiplier : %f", wheel_radius_multiplier_);
     
-    this->declare_parameter("steer_pos_multiplier", 1.0);
-    steer_pos_multiplier_ = this->get_parameter("steer_pos_multiplier").as_double();
+    steer_pos_multiplier_ = declare_parameter("steer_pos_multiplier", 1.0);
+    RCLCPP_INFO(get_logger(), "steer_pos_multiplier : %f", steer_pos_multiplier_);
 
-    this->declare_parameter("velocity_rolling_window_size", 10);
-    velocity_rolling_window_size_ = this->get_parameter("velocity_rolling_window_size").as_int();
+    velocity_rolling_window_size_ = declare_parameter("velocity_rolling_window_size", 10);
+    RCLCPP_INFO(get_logger(), "velocity_rolling_window_size : %f", velocity_rolling_window_size_);
 
     odometry_.setVelocityRollingWindowSize(velocity_rolling_window_size_);
 
-    this->declare_parameter("base_frame_id", "base_link");
-    base_frame_id_ = this->get_parameter("base_frame_id").as_string();
+    base_frame_id_ = declare_parameter("base_frame_id", "base_link");
+    RCLCPP_INFO(get_logger(), "base_frame_id : %s", base_frame_id_.c_str());
 
-    this->declare_parameter("odom_frame_id", "odom");
-    odom_frame_id_ = this->get_parameter("odom_frame_id").as_string();
+    odom_frame_id_ = declare_parameter("odom_frame_id", "odom");
+    RCLCPP_INFO(get_logger(), "odom_frame_id : %s", odom_frame_id_.c_str());
 
     this->declare_parameter("enable_odom_tf", true);
     enable_odom_tf_ = this->get_parameter("enable_odom_tf").as_bool();
+    RCLCPP_INFO(get_logger(), "enable_odom_tf : %s", enable_odom_tf_ == true ? "true":"false");
 
     const double ws_h = wheel_separation_h_multiplier_ * wheel_separation_h_;
     const double wr = wheel_radius_multiplier_ * wheel_radius_;
@@ -98,8 +98,6 @@ void SRCOdometry::joint_state_cb(const JointState::SharedPtr msg){
 void SRCOdometry::steering_angle_sub(const Float64::SharedPtr msg){
 
     front_hinge_pos = msg->data;
-
-    std::cout << "front_hinge_pos : " << front_hinge_pos << std::endl;
 
     if (verbose_)
         RCLCPP_INFO(this->get_logger(), "Front Hinge Pose : %f", front_hinge_pos);
