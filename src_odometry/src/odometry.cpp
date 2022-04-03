@@ -80,9 +80,9 @@ namespace ackermann_steering_controller
     /// Estimate velocity of wheels using old and current position:
     const double rear_wheel_est_vel = rear_wheel_cur_pos - rear_wheel_old_pos_;
 
-    std::cout << "rear_wheel_pos : " << rear_wheel_pos << " / " << 
-      "front_steer_pos" << front_steer_pos << " / " << 
-      "rear_wheel_est_vel : " << rear_wheel_est_vel << std::endl;
+    // std::cout << "rear_wheel_pos : " << rear_wheel_pos << " / " << 
+    //   "front_steer_pos" << front_steer_pos << " / " << 
+    //   "rear_wheel_est_vel : " << rear_wheel_est_vel << std::endl;
 
     /// Update old position with current:
     rear_wheel_old_pos_ = rear_wheel_cur_pos;
@@ -91,8 +91,8 @@ namespace ackermann_steering_controller
     const double linear  = rear_wheel_est_vel;
     const double angular = tan(front_steer_pos) * linear / wheel_separation_h_;
 
-    std::cout << "angular : " << angular << std::endl;
-    std::cout << "simple angular : " << wheel_separation_h_ / tan(front_steer_pos) << std::endl;
+    // std::cout << "angular : " << angular << std::endl;
+    // std::cout << "simple angular : " << wheel_separation_h_ / tan(front_steer_pos) << std::endl;
 
     /// Integrate odometry:
     integrate_fun_(linear, angular);
