@@ -7,10 +7,12 @@ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
 
 ros2 launch src_demo joystick_control_foxy.launch.py
 ros2 launch src_odometry src_bringup.launch.py
+ros2 launch src_odometry src_bringup_new.launch.py
 ```
 
 ```
 ros2 run joy_to_cmd joy_to_cmd_vel
+ros2 run cmd_to_src cmd_to_src
 
 ros2 launch src_odometry src_bringup.launch.py
 ros2 run joy joy_node

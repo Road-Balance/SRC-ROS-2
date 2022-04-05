@@ -7,21 +7,21 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    # mw_ahrs_node = Node(
-    #     package='mw_ahrsv1_ros2',
-    #     executable='mw_ahrsv1_only_angle',
-    #     name='mw_ahrsv1_ros2',
-    #     output='log',
-    #     parameters=[{
-    #         'deviceID' : '/dev/MWAHRs',
-    #         'frame_id' : 'base_link',
-    #         'child_frame_id' : 'imu_link',
-    #         'publish_tf' : True,
-    #         'view_imu' : False,
-    #         'verbose' : False,
-    #         'publish_rate' : 50,
-    #     }],
-    # )
+    mw_ahrs_node = Node(
+        package='mw_ahrsv1_ros2',
+        executable='mw_ahrsv1_only_angle',
+        name='mw_ahrsv1_ros2',
+        output='log',
+        parameters=[{
+            'deviceID' : '/dev/MWAHRs',
+            'frame_id' : 'base_link',
+            'child_frame_id' : 'imu_link',
+            'publish_tf' : True,
+            'view_imu' : False,
+            'verbose' : False,
+            'publish_rate' : 50,
+        }],
+    )
 
     # src_odom = Node(
     #     package='src_odometry',
@@ -51,7 +51,7 @@ def generate_launch_description():
             'publish_rate' : 50,
             'open_loop' : False,
             'has_imu_heading' : True,
-            'is_gazebo' : True,
+            'is_gazebo' : False,
             'wheel_radius' : 0.0508,
             'base_frame_id' : "base_link",
             'odom_frame_id' : "odom",
@@ -60,6 +60,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        # mw_ahrs_node,
+        mw_ahrs_node,
         src_odom,
     ])

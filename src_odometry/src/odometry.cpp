@@ -69,6 +69,8 @@ namespace ackermann_steering_controller
 
     double heading_diff = heading_angle - heading_angle_old_;
 
+    std::cout << "rear_wheel_diff : " << rear_wheel_diff << std::endl;
+
     integrateExactwithHeading(rear_wheel_diff, heading_angle, heading_diff, time);
 
     /// Update old values
@@ -81,11 +83,14 @@ namespace ackermann_steering_controller
 
   bool Odometry::updateWithHeading(int64_t& encoder_pos, const double& heading_angle, const rclcpp::Time &time)
   {
-    auto rear_encoder_diff = (encoder_pos - encoder_old_pos_);
-    const double rear_wheel_diff = rear_encoder_diff * (2 * M_PI * wheel_radius_ / encoder_resolution_);
+    auto rear_encoder_diff = int(encoder_pos - encoder_old_pos_);
+    auto rear_wheel_diff = rear_encoder_diff * (2 * M_PI * wheel_radius_ / encoder_resolution_);
 
     double heading_diff = heading_angle - heading_angle_old_;
     integrateExactwithHeading(rear_wheel_diff, heading_angle, heading_diff, time);
+
+    std::cout << "rear_encoder_diff : " << rear_encoder_diff << std::endl;
+    std::cout << "[Encoder] ear_wheel_diff : " << rear_wheel_diff << std::endl;
 
     /// Update old values
     encoder_old_pos_ = encoder_pos;

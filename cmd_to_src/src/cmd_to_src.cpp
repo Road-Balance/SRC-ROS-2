@@ -19,7 +19,7 @@ using SRCMsg = src_control_message::msg::SRCMsg;
 using Float32 = std_msgs::msg::Float32;
 using Imu = sensor_msgs::msg::Imu;
 
-class YawRatePID {
+class YawRatePID : public rclcpp::Node {
 public:
   enum TwiddleCase {
     CASE_P_1 = 0,
@@ -41,9 +41,9 @@ private:
   TwiddleCase twiddle_case_ = CASE_P_1;
 
 public:
-  YawRatePID(const float &k_p = 0.0, const float &k_i = 0.0,
-             const float &k_d = 0.0)
-      : k_p(k_p), k_i(k_i), k_d(k_d) {
+  YawRatePID (const float &k_p = 18.0, const float &k_i = -10.0,
+             const float &k_d = -9.0)
+      : Node("yaw_ctl_pid"), k_p(k_p), k_i(k_i), k_d(k_d) {
     d_p = 1.0;
     d_i = 1.0;
     d_d = 1.0;
@@ -131,10 +131,10 @@ public:
     auto diff_err = cur_err - prev_err;
     integrate_err += cur_err;
 
-    twiddle(cur_err);
+    // twiddle(cur_err);
 
     prev_err = cur_err;
-    std::cout << "cur_err : " << cur_err << std::endl;
+    RCLCPP_INFO(get_logger(), "cur_err : %f", cur_err);
 
     uint8_t output = -k_p * cur_err - k_i * integrate_err - k_d * diff_err;
 
@@ -171,11 +171,13 @@ private:
   float deaccel;
   unsigned int scale;
 
-  YawRatePID pid_controller_;
+  std::shared_ptr<YawRatePID> pid_controller_;
 
 public:
   CmdToSRC() : Node("cmd_vel_to_src_msg") {
     RCLCPP_INFO(get_logger(), "Cmd_Vel to SRC_Msg Node Created");
+
+    pid_controller_ = std::make_shared<YawRatePID>();
 
     src_msg_pub_ = create_publisher<SRCMsg>("src_control", 10);
 
@@ -216,9 +218,10 @@ public:
     prev_time = this->get_clock()->now();
     prev_heading_ = 0.0;
 
-    pid_controller_.setGain(30.0, 0.0, 0.0);
+    pid_controller_->setGain(18.0, -10.0, -9.0);
   }
 
+  // change to odom callback
   void imu_cb(const Imu::SharedPtr msg) {
 
     auto current_time = this->get_clock()->now();
@@ -241,7 +244,7 @@ public:
     yaw_speed_ = (heading - prev_heading_) / dt;
     prev_heading_ = heading;
 
-    RCLCPP_INFO(get_logger(), "yaw : %f", heading);
+    // RCLCPP_INFO(get_logger(), "yaw : %f", heading);
     RCLCPP_INFO(get_logger(), "angular_z : %f", yaw_speed_);
   }
 
@@ -250,12 +253,13 @@ public:
 
     // TODO : move controller into timer cb
 
-    if (fabs(src_msg_.speed) >= 0.1)
+    if (fabs(msg->linear.x) >= 0.1)
+      // src_msg_.steering = steering_offset_;
       src_msg_.steering =
-          steering_offset_ + pid_controller_.update(msg->angular.z, yaw_speed_);
+          steering_offset_ + pid_controller_->update(msg->angular.z, yaw_speed_);
     else
       src_msg_.steering = steering_offset_;
-    RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02 ok
+    // RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02 ok
 
     // src_msg_.steering =
     //     -((msg->angular.z) / 2 * steering_offset_) + steering_offset_;

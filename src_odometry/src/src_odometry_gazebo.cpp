@@ -20,7 +20,7 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
   has_imu_heading_ = declare_parameter("has_imu_heading", true);
   RCLCPP_INFO(get_logger(), "has_imu_heading_ : %s", has_imu_heading_ == true ? "true" : "false");
 
-  is_gazebo_ = declare_parameter("is_gazebo", true);
+  is_gazebo_ = declare_parameter("is_gazebo", false);
   RCLCPP_INFO(get_logger(), "is_gazebo_ : %s", is_gazebo_ == true ? "true" : "false");
 
   wheel_separation_h_ = declare_parameter("wheel_separation_h_", 0.325);
@@ -29,7 +29,7 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
   wheel_separation_h_multiplier_ = declare_parameter("wheel_separation_h_multiplier", 1.1);
   RCLCPP_INFO(get_logger(), "wheel_separation_h_multiplier : %f", wheel_separation_h_multiplier_);
 
-  wheel_radius_ = declare_parameter("wheel_radius", 0.05);
+  wheel_radius_ = declare_parameter("wheel_radius", 0.0508);
   RCLCPP_INFO(get_logger(), "wheel_radius : %f", wheel_radius_);
 
   wheel_radius_multiplier_ = declare_parameter("wheel_radius_multiplier", 1.0);
@@ -74,7 +74,8 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
     imu_sub_ = this->create_subscription<Imu>("imu/data", 10,
                                               std::bind(&SRCOdometry::imuSubCallback, this, std::placeholders::_1));
 
-    encoder_sub_ = this->create_subscription<Int64>("encoder_value", rclcpp::SensorDataQoS(),
+    if ( is_gazebo_ == false)
+      encoder_sub_ = this->create_subscription<Int64>("encoder_value", rclcpp::SensorDataQoS(),
                                                     std::bind(&SRCOdometry::encoderCallback, this, std::placeholders::_1));
   }
   else
