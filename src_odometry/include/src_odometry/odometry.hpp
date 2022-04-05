@@ -86,6 +86,8 @@ namespace ackermann_steering_controller
      */
     bool update(double rear_wheel_pos, double front_steer_pos, const rclcpp::Time &time);
 
+    bool updateWithHeading(double rear_wheel_pos, double heading_angle, const rclcpp::Time &time);
+
     /**
      * \brief Updates the odometry class with latest velocity command
      * \param linear  Linear velocity [m/s]
@@ -195,6 +197,8 @@ namespace ackermann_steering_controller
 
     /// Previous wheel position/state [rad]:
     double rear_wheel_old_pos_;
+
+    double heading_angle_old_;
 
     /// Rolling mean accumulators for the linar and angular velocities:
     size_t velocity_rolling_window_size_;
