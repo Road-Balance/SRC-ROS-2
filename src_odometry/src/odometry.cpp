@@ -49,23 +49,11 @@ namespace ackermann_steering_controller
   namespace bacc = boost::accumulators;
 
   Odometry::Odometry(size_t velocity_rolling_window_size)
-  : timestamp_(0.0)
-  , x_(0.0)
-  , y_(0.0)
-  , heading_(0.0)
-  , linear_(0.0)
-  , angular_(0.0)
-  , wheel_separation_h_(0.0)
-  , wheel_radius_(0.0)
-  , rear_wheel_old_pos_(0.0)
-  , velocity_rolling_window_size_(velocity_rolling_window_size)
-  , linear_acc_(RollingWindow::window_size = velocity_rolling_window_size)
-  , angular_acc_(RollingWindow::window_size = velocity_rolling_window_size)
-  , integrate_fun_(boost::bind(&Odometry::integrateExact, this, _1, _2))
+      : timestamp_(0.0), x_(0.0), y_(0.0), heading_(0.0), linear_(0.0), angular_(0.0), wheel_separation_h_(0.0), wheel_radius_(0.0), rear_wheel_old_pos_(0.0), velocity_rolling_window_size_(velocity_rolling_window_size), linear_acc_(RollingWindow::window_size = velocity_rolling_window_size), angular_acc_(RollingWindow::window_size = velocity_rolling_window_size), integrate_fun_(boost::bind(&Odometry::integrateExact, this, _1, _2))
   {
   }
 
-  void Odometry::init(const rclcpp::Time& time)
+  void Odometry::init(const rclcpp::Time &time)
   {
     // Reset accumulators and timestamp:
     resetAccumulators();
@@ -78,23 +66,29 @@ namespace ackermann_steering_controller
     const double rear_wheel_cur_pos = rear_wheel_pos * wheel_radius_;
     /// Estimate velocity of wheels using old and current position:
     const double rear_wheel_est_vel = rear_wheel_cur_pos - rear_wheel_old_pos_;
-    
-    const double heading_difference = heading_angle - heading_angle_old_;
-    // Exception handler required 
 
+    double heading_difference = heading_angle - heading_angle_old_;
+    // Exception handler required
+    if (fabs(heading_difference) > 3.0)
+    {
+      if (heading_difference < 0.0)
+        heading_difference = -1 * (heading_difference + 6.2831);
+      else
+        heading_difference = -1 * (heading_difference - 6.2831);
+    }
     /// Update old position with current:
     rear_wheel_old_pos_ = rear_wheel_cur_pos;
-    heading_angle_old_  = heading_angle;
+    heading_angle_old_ = heading_angle;
 
     /// Compute linear and angular diff:
-    const double linear  = rear_wheel_est_vel;
+    const double linear = rear_wheel_est_vel;
     const double angular = heading_difference;
 
-    // std::cout << "angular : " << angular << std::endl;
+    std::cout << "angular : " << angular << std::endl;
     // std::cout << "simple angular : " << wheel_separation_h_ / tan(front_steer_pos) << std::endl;
 
     /// Integrate odometry:
-    integrate_fun_(linear, angular);
+    // integrate_fun_(linear, angular);
 
     /// We cannot estimate the speed with very small time intervals:
     const double dt = (time - timestamp_).seconds();
@@ -104,11 +98,17 @@ namespace ackermann_steering_controller
     timestamp_ = time;
 
     /// Estimate speeds using a rolling mean to filter them out:
-    linear_acc_(linear/dt);
-    angular_acc_(angular/dt);
+    linear_acc_(linear / dt);
+    angular_acc_(angular / dt);
 
     linear_ = bacc::rolling_mean(linear_acc_);
     angular_ = bacc::rolling_mean(angular_acc_);
+
+    x_ += rear_wheel_est_vel * cos(heading_angle);
+    y_ += rear_wheel_est_vel * sin(heading_angle);
+
+    std::cout << "heading_angle : " << heading_angle << std::endl;
+    std::cout << "cos(heading_angle) : " << cos(heading_angle) << std::endl;
 
     return true;
   }
@@ -117,19 +117,19 @@ namespace ackermann_steering_controller
   {
     /// Get current wheel joint positions:
     const double rear_wheel_cur_pos = rear_wheel_pos * wheel_radius_;
-    
+
     /// Estimate velocity of wheels using old and current position:
     const double rear_wheel_est_vel = rear_wheel_cur_pos - rear_wheel_old_pos_;
 
-    // std::cout << "rear_wheel_pos : " << rear_wheel_pos << " / " << 
-    //   "front_steer_pos" << front_steer_pos << " / " << 
+    // std::cout << "rear_wheel_pos : " << rear_wheel_pos << " / " <<
+    //   "front_steer_pos" << front_steer_pos << " / " <<
     //   "rear_wheel_est_vel : " << rear_wheel_est_vel << std::endl;
 
     /// Update old position with current:
     rear_wheel_old_pos_ = rear_wheel_cur_pos;
 
     /// Compute linear and angular diff:
-    const double linear  = rear_wheel_est_vel;
+    const double linear = rear_wheel_est_vel;
     const double angular = tan(front_steer_pos) * linear / wheel_separation_h_;
 
     // std::cout << "angular : " << angular << std::endl;
@@ -146,56 +146,14 @@ namespace ackermann_steering_controller
     timestamp_ = time;
 
     /// Estimate speeds using a rolling mean to filter them out:
-    linear_acc_(linear/dt);
-    angular_acc_(angular/dt);
+    linear_acc_(linear / dt);
+    angular_acc_(angular / dt);
 
     linear_ = bacc::rolling_mean(linear_acc_);
     angular_ = bacc::rolling_mean(angular_acc_);
 
     return true;
   }
-
-  // bool Odometry::update(double rear_wheel_pos, double heading_difference, const rclcpp::Time &time)
-  // {
-  //   /// Get current wheel joint positions:
-  //   const double rear_wheel_cur_pos = rear_wheel_pos * wheel_radius_;
-    
-  //   /// Estimate velocity of wheels using old and current position:
-  //   const double rear_wheel_est_vel = rear_wheel_cur_pos - rear_wheel_old_pos_;
-
-  //   std::cout << "rear_wheel_pos : " << rear_wheel_pos << " / " << 
-  //     "front_steer_pos" << front_steer_pos << " / " << 
-  //     "rear_wheel_est_vel : " << rear_wheel_est_vel << std::endl;
-
-  //   /// Update old position with current:
-  //   rear_wheel_old_pos_ = rear_wheel_cur_pos;
-
-  //   /// Compute linear and angular diff:
-  //   const double linear  = rear_wheel_est_vel;
-  //   const double angular = tan(front_steer_pos) * linear / wheel_separation_h_;
-
-  //   std::cout << "angular : " << angular << std::endl;
-  //   std::cout << "simple angular : " << wheel_separation_h_ / tan(front_steer_pos) << std::endl;
-
-  //   /// Integrate odometry:
-  //   integrate_fun_(linear, angular);
-
-  //   /// We cannot estimate the speed with very small time intervals:
-  //   const double dt = (time - timestamp_).seconds();
-  //   if (dt < 0.0001)
-  //     return false; // Interval too small to integrate with
-
-  //   timestamp_ = time;
-
-  //   /// Estimate speeds using a rolling mean to filter them out:
-  //   linear_acc_(linear/dt);
-  //   angular_acc_(angular/dt);
-
-  //   linear_ = bacc::rolling_mean(linear_acc_);
-  //   angular_ = bacc::rolling_mean(angular_acc_);
-
-  //   return true;
-  // }
 
   void Odometry::updateOpenLoop(double linear, double angular, const rclcpp::Time &time)
   {
@@ -212,7 +170,7 @@ namespace ackermann_steering_controller
   void Odometry::setWheelParams(double wheel_separation_h, double wheel_radius)
   {
     wheel_separation_h_ = wheel_separation_h;
-    wheel_radius_     = wheel_radius;
+    wheel_radius_ = wheel_radius;
   }
 
   void Odometry::setVelocityRollingWindowSize(size_t velocity_rolling_window_size)
@@ -227,8 +185,8 @@ namespace ackermann_steering_controller
     const double direction = heading_ + angular * 0.5;
 
     /// Runge-Kutta 2nd order integration:
-    x_       += linear * cos(direction);
-    y_       += linear * sin(direction);
+    x_ += linear * cos(direction);
+    y_ += linear * sin(direction);
     heading_ += angular;
   }
 
@@ -245,13 +203,13 @@ namespace ackermann_steering_controller
     {
       /// Exact integration (should solve problems when angular is zero):
       const double heading_old = heading_;
-      const double r = linear/angular;
+      const double r = linear / angular;
 
       std::cout << "r : " << r << std::endl;
 
       heading_ += angular;
-      x_       +=  r * (sin(heading_) - sin(heading_old));
-      y_       += -r * (cos(heading_) - cos(heading_old));
+      x_ += r * (sin(heading_) - sin(heading_old));
+      y_ += -r * (cos(heading_) - cos(heading_old));
     }
   }
 

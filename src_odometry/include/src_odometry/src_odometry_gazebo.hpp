@@ -96,8 +96,7 @@ private:
     double left_rear_wheel_joint, right_rear_wheel_joint;
 
     // 
-    double cur_heading_;
-    double prev_heading_;
+    double heading_angle;
 
     // Front wheel steering pose (radian)
     float front_hinge_pos;

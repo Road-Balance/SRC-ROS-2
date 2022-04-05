@@ -4,55 +4,54 @@
 #include "src_odometry/src_odometry_gazebo.hpp"
 #include "src_odometry/odometry.hpp"
 
-SRCOdometry::SRCOdometry(): Node("ackermann_odometry"){
-    // Setup Parameters
-    verbose_ = declare_parameter("verbose", false);
-    RCLCPP_INFO(get_logger(), "verbose : %s", verbose_ == true ? "true":"false");
+SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
+{
+  // Setup Parameters
+  verbose_ = declare_parameter("verbose", false);
+  RCLCPP_INFO(get_logger(), "verbose : %s", verbose_ == true ? "true" : "false");
 
-    auto publish_rate = declare_parameter("publish_rate", 50);
-    auto interval = std::chrono::duration<double>(1.0 / publish_rate);
-    pub_timer_ = this->create_wall_timer(interval, std::bind(&SRCOdometry::timer_cb, this));
+  auto publish_rate = declare_parameter("publish_rate", 50);
+  auto interval = std::chrono::duration<double>(1.0 / publish_rate);
+  pub_timer_ = this->create_wall_timer(interval, std::bind(&SRCOdometry::timer_cb, this));
 
-    open_loop_ = declare_parameter("open_loop", false);
-    RCLCPP_INFO(get_logger(), "open_loop_ : %s", open_loop_ == true ? "true":"false");
+  open_loop_ = declare_parameter("open_loop", false);
+  RCLCPP_INFO(get_logger(), "open_loop_ : %s", open_loop_ == true ? "true" : "false");
 
-    wheel_separation_h_ = declare_parameter("wheel_separation_h_", 0.325);
-    RCLCPP_INFO(get_logger(), "wheel_separation_h_ : %f", wheel_separation_h_);
+  has_imu_heading_ = declare_parameter("has_imu_heading", true);
+  RCLCPP_INFO(get_logger(), "has_imu_heading_ : %s", has_imu_heading_ == true ? "true" : "false");
 
-    wheel_separation_h_multiplier_ = declare_parameter("wheel_separation_h_multiplier", 1.1);
-    RCLCPP_INFO(get_logger(), "wheel_separation_h_multiplier : %f", wheel_separation_h_multiplier_);
+  wheel_separation_h_ = declare_parameter("wheel_separation_h_", 0.325);
+  RCLCPP_INFO(get_logger(), "wheel_separation_h_ : %f", wheel_separation_h_);
 
-    wheel_radius_ = declare_parameter("wheel_radius", 0.05);
-    RCLCPP_INFO(get_logger(), "wheel_radius : %f", wheel_radius_);
-    
-    wheel_radius_multiplier_ = declare_parameter("wheel_radius_multiplier", 1.0);
-    RCLCPP_INFO(get_logger(), "wheel_radius_multiplier : %f", wheel_radius_multiplier_);
-    
-    steer_pos_multiplier_ = declare_parameter("steer_pos_multiplier", 1.0);
-    RCLCPP_INFO(get_logger(), "steer_pos_multiplier : %f", steer_pos_multiplier_);
+  wheel_separation_h_multiplier_ = declare_parameter("wheel_separation_h_multiplier", 1.1);
+  RCLCPP_INFO(get_logger(), "wheel_separation_h_multiplier : %f", wheel_separation_h_multiplier_);
 
-    velocity_rolling_window_size_ = declare_parameter("velocity_rolling_window_size", 10);
-    RCLCPP_INFO(get_logger(), "velocity_rolling_window_size : %f", velocity_rolling_window_size_);
+  wheel_radius_ = declare_parameter("wheel_radius", 0.05);
+  RCLCPP_INFO(get_logger(), "wheel_radius : %f", wheel_radius_);
 
-  this->declare_parameter("steer_pos_multiplier", 1.0);
-  steer_pos_multiplier_ = this->get_parameter("steer_pos_multiplier").as_double();
+  wheel_radius_multiplier_ = declare_parameter("wheel_radius_multiplier", 1.0);
+  RCLCPP_INFO(get_logger(), "wheel_radius_multiplier : %f", wheel_radius_multiplier_);
 
-  this->declare_parameter("velocity_rolling_window_size", 10);
-  velocity_rolling_window_size_ = this->get_parameter("velocity_rolling_window_size").as_int();
+  steer_pos_multiplier_ = declare_parameter("steer_pos_multiplier", 1.0);
+  RCLCPP_INFO(get_logger(), "steer_pos_multiplier : %f", steer_pos_multiplier_);
+
+  velocity_rolling_window_size_ = declare_parameter("velocity_rolling_window_size", 10);
+  RCLCPP_INFO(get_logger(), "velocity_rolling_window_size : %f", velocity_rolling_window_size_);
 
   odometry_.setVelocityRollingWindowSize(velocity_rolling_window_size_);
 
-  this->declare_parameter("base_frame_id", "base_link");
-  base_frame_id_ = this->get_parameter("base_frame_id").as_string();
+  base_frame_id_ = declare_parameter("base_frame_id", "base_link");
+  RCLCPP_INFO(get_logger(), "base_frame_id_ : %s", base_frame_id_.c_str());
 
-  this->declare_parameter("odom_frame_id", "odom");
-  odom_frame_id_ = this->get_parameter("odom_frame_id").as_string();
+  odom_frame_id_ = declare_parameter("odom_frame_id", "odom");
+  RCLCPP_INFO(get_logger(), "odom_frame_id_ : %s", odom_frame_id_.c_str());
 
-  this->declare_parameter("enable_odom_tf", true);
-  enable_odom_tf_ = this->get_parameter("enable_odom_tf").as_bool();
+  enable_odom_tf_ = declare_parameter("enable_odom_tf", true);
+  RCLCPP_INFO(get_logger(), "enable_odom_tf_ : %s", enable_odom_tf_ == true ? "true" : "false");
 
   const double ws_h = wheel_separation_h_multiplier_ * wheel_separation_h_;
   const double wr = wheel_radius_multiplier_ * wheel_radius_;
+
   odometry_.setWheelParams(ws_h, wr);
 
   RCLCPP_INFO(this->get_logger(), "Ackermann Odometry Node created");
@@ -113,7 +112,7 @@ void SRCOdometry::steeringAngleSubCallback(const Float64::SharedPtr msg)
   front_hinge_pos = msg->data;
 
   if (verbose_)
-      RCLCPP_INFO(this->get_logger(), "Front Hinge Pose : %f", front_hinge_pos);
+    RCLCPP_INFO(this->get_logger(), "Front Hinge Pose : %f", front_hinge_pos);
 }
 
 void SRCOdometry::cmdvelSubCallback(const Twist::SharedPtr msg)
@@ -133,16 +132,16 @@ void SRCOdometry::imuSubCallback(const Imu::SharedPtr msg)
 
   tf2::Matrix3x3 m(q_);
 
-  double roll, pitch, cur_heading_;
-  m.getRPY(roll, pitch, cur_heading_);
+  double roll, pitch;
+  m.getRPY(roll, pitch, heading_angle);
 
   Float64 heading_msg;
-  heading_msg.data = cur_heading_;
+  heading_msg.data = heading_angle;
 
   imu_heading_pub_->publish(heading_msg);
 
   if (verbose_)
-    RCLCPP_INFO(this->get_logger(), "yaw : %f", cur_heading_);
+    RCLCPP_INFO(this->get_logger(), "yaw : %f", heading_angle);
 }
 
 void SRCOdometry::odom_update(const rclcpp::Time &time)
@@ -158,9 +157,9 @@ void SRCOdometry::odom_update(const rclcpp::Time &time)
 
     // Estimate linear and angular velocity using joint information
     front_hinge_pos *= steer_pos_multiplier_;
-    
+
     if (has_imu_heading_)
-      odometry_.updateWithHeading(rear_wheel_pos, cur_heading_, time);
+      odometry_.updateWithHeading(rear_wheel_pos, heading_angle, time);
     else
       odometry_.update(rear_wheel_pos, front_hinge_pos, time);
   }

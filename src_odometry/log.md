@@ -459,3 +459,8 @@ ros2 launch src_odometry src_bringup.launch.py
 
 ros2 launch src_odometry view_imu.launch.py 
 ```
+
+기존 tan 방식 버리고 imu heading을 사용하는 odom을 만들었음
+이게 제일 잘된다!
+
+![image](https://user-images.githubusercontent.com/92073907/161692652-83be20f4-f5a6-409b-96ee-aa5034950f2a.png)
