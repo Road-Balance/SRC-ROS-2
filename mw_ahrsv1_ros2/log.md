@@ -21,5 +21,3 @@ ros2 launch mw_ahrsv1_ros2 view_imu.launch.py
 rviz를 통해 imu tf frame의 변화를 확인할 수 있다.
 현재 angle 값만 갖고 있기 때문에 imu 데이터 자체 시각화는 안되고 tf 시각화만 지원
 
-<<video>>
-

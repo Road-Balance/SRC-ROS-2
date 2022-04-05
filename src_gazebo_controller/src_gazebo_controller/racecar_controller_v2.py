@@ -7,7 +7,6 @@ from std_msgs.msg import (
     Float64,
     Float64MultiArray,
 )  # Enable use of the std_msgs/Float64MultiArray message type
-from ackermann_msgs.msg import AckermannDriveStamped
 
 # Twist Sub => Float64MultiArray Pub
 class RacecarController(Node):
@@ -309,7 +308,12 @@ class RacecarController(Node):
         self.steering_msg_middle.data = (round(right_steering, 5) + round(left_steering, 5)) / 2
         self.throttling_msg_middle.data = wheel_turnig_speed_com
 
-        self.get_logger().info(f"{raw_wheel_speed}, {alfa_left_front_wheel}, {alfa_right_front_wheel}")
+        if self._verbose:
+            self.get_logger().info(f"""
+                raw_wheel_speed : {raw_wheel_speed:.2}
+                alfa_left_front_wheel : {alfa_left_front_wheel:.6}
+                alfa_right_front_wheel : {alfa_right_front_wheel:.6}
+            """)
         
         self.steering_pub.publish(self.steering_msg)
         self.steering_pub_middle.publish(self.steering_msg_middle)

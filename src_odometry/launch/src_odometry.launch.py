@@ -22,8 +22,8 @@ def generate_launch_description():
         output='screen',
         parameters=[
             {
-                "verbose": True,
-                "open_loop": True,
+                "verbose": False,
+                "open_loop": False,
             }
         ],
     )

@@ -93,7 +93,7 @@
       <always_on>true</always_on>
       <update_rate>100</update_rate>
       <visualize>true</visualize>
-      <imu>
+      <!-- <imu>
         <orientation>
           <x>
             <noise type="gaussian">
@@ -154,7 +154,7 @@
             </noise>
           </z>
         </linear_acceleration>
-      </imu>
+      </imu> -->
       <topic>imu</topic>
       <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
         <topicName>imu</topicName>

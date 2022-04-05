@@ -69,6 +69,10 @@ ament_target_dependencies(odom_test rclcpp geometry_msgs sensor_msgs std_msgs)
 add_executable(src_odom src/src_odom.cpp)
 ament_target_dependencies(src_odom rclcpp geometry_msgs sensor_msgs std_msgs tf2 tf2_ros tf2_msgs nav_msgs)
 
+add_executable(src_odom_compatible src/src_odom_compatible.cpp)
+ament_target_dependencies(src_odom_compatible rclcpp geometry_msgs sensor_msgs std_msgs tf2 tf2_ros tf2_msgs nav_msgs)
+
+
 install(
   TARGETS
     odom_test
@@ -79,6 +83,8 @@ install(
     src_odometry_real
     # real odom
     src_odom
+    # gazebo + real intergrated odom
+    src_odom_compatible
   DESTINATION
     lib/${PROJECT_NAME}
 )
