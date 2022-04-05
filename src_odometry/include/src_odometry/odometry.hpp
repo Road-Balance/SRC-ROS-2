@@ -42,6 +42,7 @@
 
 #pragma once
 
+#include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
@@ -86,7 +87,10 @@ namespace ackermann_steering_controller
      */
     bool update(double rear_wheel_pos, double front_steer_pos, const rclcpp::Time &time);
 
-    bool updateWithHeading(double rear_wheel_pos, double heading_angle, const rclcpp::Time &time);
+    // TODO
+    bool updateWithHeading(const double& rear_wheel_pos, const double& heading_angle, const rclcpp::Time &time);
+    
+    bool updateWithHeading(int64_t& encoder_pos, const double& heading_angle, const rclcpp::Time &time);
 
     /**
      * \brief Updates the odometry class with latest velocity command
@@ -148,6 +152,8 @@ namespace ackermann_steering_controller
      */
     void setWheelParams(double wheel_reparation_h, double wheel_radius);
 
+    void setEncoderResolution(uint encoder_resolution);
+
     /**
      * \brief Velocity rolling window size setter
      * \param velocity_rolling_window_size Velocity rolling window size
@@ -174,6 +180,8 @@ namespace ackermann_steering_controller
      */
     void integrateExact(double linear, double angular);
 
+    bool integrateExactwithHeading(const double& linear, const double& heading_angle, double& angular, const rclcpp::Time &time);
+
     /**
      *  \brief Reset linear and angular accumulators
      */
@@ -195,8 +203,12 @@ namespace ackermann_steering_controller
     double wheel_separation_h_;
     double wheel_radius_;
 
+    /// how many encoders for 1 circle
+    uint encoder_resolution_;
+
     /// Previous wheel position/state [rad]:
     double rear_wheel_old_pos_;
+    uint64_t encoder_old_pos_;
 
     double heading_angle_old_;
 

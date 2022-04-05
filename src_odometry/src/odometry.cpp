@@ -49,7 +49,7 @@ namespace ackermann_steering_controller
   namespace bacc = boost::accumulators;
 
   Odometry::Odometry(size_t velocity_rolling_window_size)
-      : timestamp_(0.0), x_(0.0), y_(0.0), heading_(0.0), linear_(0.0), angular_(0.0), wheel_separation_h_(0.0), wheel_radius_(0.0), rear_wheel_old_pos_(0.0), velocity_rolling_window_size_(velocity_rolling_window_size), linear_acc_(RollingWindow::window_size = velocity_rolling_window_size), angular_acc_(RollingWindow::window_size = velocity_rolling_window_size), integrate_fun_(boost::bind(&Odometry::integrateExact, this, _1, _2))
+      : timestamp_(0.0), x_(0.0), y_(0.0), heading_(0.0), linear_(0.0), angular_(0.0), wheel_separation_h_(0.0), wheel_radius_(0.0), encoder_resolution_(150), rear_wheel_old_pos_(0.0), velocity_rolling_window_size_(velocity_rolling_window_size), linear_acc_(RollingWindow::window_size = velocity_rolling_window_size), angular_acc_(RollingWindow::window_size = velocity_rolling_window_size), integrate_fun_(boost::bind(&Odometry::integrateExact, this, _1, _2))
   {
   }
 
@@ -60,55 +60,37 @@ namespace ackermann_steering_controller
     timestamp_ = time;
   }
 
-  bool Odometry::updateWithHeading(double rear_wheel_pos, double heading_angle, const rclcpp::Time &time)
+  bool Odometry::updateWithHeading(const double& rear_wheel_pos, const double& heading_angle, const rclcpp::Time &time)
   {
     /// Get current wheel joint positions:
     const double rear_wheel_cur_pos = rear_wheel_pos * wheel_radius_;
     /// Estimate velocity of wheels using old and current position:
-    const double rear_wheel_est_vel = rear_wheel_cur_pos - rear_wheel_old_pos_;
+    const double rear_wheel_diff = rear_wheel_cur_pos - rear_wheel_old_pos_;
 
-    double heading_difference = heading_angle - heading_angle_old_;
-    // Exception handler required
-    if (fabs(heading_difference) > 3.0)
-    {
-      if (heading_difference < 0.0)
-        heading_difference = -1 * (heading_difference + 6.2831);
-      else
-        heading_difference = -1 * (heading_difference - 6.2831);
-    }
-    /// Update old position with current:
+    double heading_diff = heading_angle - heading_angle_old_;
+
+    integrateExactwithHeading(rear_wheel_diff, heading_angle, heading_diff, time);
+
+    /// Update old values
     rear_wheel_old_pos_ = rear_wheel_cur_pos;
     heading_angle_old_ = heading_angle;
-
-    /// Compute linear and angular diff:
-    const double linear = rear_wheel_est_vel;
-    const double angular = heading_difference;
-
-    std::cout << "angular : " << angular << std::endl;
-    // std::cout << "simple angular : " << wheel_separation_h_ / tan(front_steer_pos) << std::endl;
-
-    /// Integrate odometry:
-    // integrate_fun_(linear, angular);
-
-    /// We cannot estimate the speed with very small time intervals:
-    const double dt = (time - timestamp_).seconds();
-    if (dt < 0.0001)
-      return false; // Interval too small to integrate with
-
     timestamp_ = time;
 
-    /// Estimate speeds using a rolling mean to filter them out:
-    linear_acc_(linear / dt);
-    angular_acc_(angular / dt);
+    return true;
+  }
 
-    linear_ = bacc::rolling_mean(linear_acc_);
-    angular_ = bacc::rolling_mean(angular_acc_);
+  bool Odometry::updateWithHeading(int64_t& encoder_pos, const double& heading_angle, const rclcpp::Time &time)
+  {
+    auto rear_encoder_diff = (encoder_pos - encoder_old_pos_);
+    const double rear_wheel_diff = rear_encoder_diff * (2 * M_PI * wheel_radius_ / encoder_resolution_);
 
-    x_ += rear_wheel_est_vel * cos(heading_angle);
-    y_ += rear_wheel_est_vel * sin(heading_angle);
+    double heading_diff = heading_angle - heading_angle_old_;
+    integrateExactwithHeading(rear_wheel_diff, heading_angle, heading_diff, time);
 
-    std::cout << "heading_angle : " << heading_angle << std::endl;
-    std::cout << "cos(heading_angle) : " << cos(heading_angle) << std::endl;
+    /// Update old values
+    encoder_old_pos_ = encoder_pos;
+    heading_angle_old_ = heading_angle;
+    timestamp_ = time;
 
     return true;
   }
@@ -173,6 +155,11 @@ namespace ackermann_steering_controller
     wheel_radius_ = wheel_radius;
   }
 
+  void Odometry::setEncoderResolution(uint encoder_resolution)
+  {
+    encoder_resolution_ = encoder_resolution;
+  }
+
   void Odometry::setVelocityRollingWindowSize(size_t velocity_rolling_window_size)
   {
     velocity_rolling_window_size_ = velocity_rolling_window_size;
@@ -211,6 +198,38 @@ namespace ackermann_steering_controller
       x_ += r * (sin(heading_) - sin(heading_old));
       y_ += -r * (cos(heading_) - cos(heading_old));
     }
+  }
+
+  bool Odometry::integrateExactwithHeading(const double& linear, const double& heading_angle, double& angular, const rclcpp::Time &time){
+    /// handle exceptions for huge heading angle change
+    /// ex) 3.14 to -3.14
+    /// TODO : debvide by function
+    if (fabs(angular) > 3.0)
+    {
+      if (angular < 0.0)
+        angular = -1 * (angular + 6.2831);
+      else
+        angular = -1 * (angular - 6.2831);
+    }
+
+    /// We cannot estimate the speed with very small time intervals:
+    const double dt = (time - timestamp_).seconds();
+    if (dt < 0.0001)
+      return false; // Interval too small to integrate with
+
+    /// Estimate speeds using a rolling mean to filter them out:
+    linear_acc_(linear / dt);
+    angular_acc_(angular / dt);
+
+    /// velocity with rolling window mean
+    linear_ = bacc::rolling_mean(linear_acc_);
+    angular_ = bacc::rolling_mean(angular_acc_);
+
+    /// calculate odom
+    x_ += linear * cos(heading_angle);
+    y_ += linear * sin(heading_angle);
+
+    return true;
   }
 
   void Odometry::resetAccumulators()

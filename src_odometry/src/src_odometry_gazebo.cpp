@@ -12,13 +12,16 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
 
   auto publish_rate = declare_parameter("publish_rate", 50);
   auto interval = std::chrono::duration<double>(1.0 / publish_rate);
-  pub_timer_ = this->create_wall_timer(interval, std::bind(&SRCOdometry::timer_cb, this));
+  pub_timer_ = this->create_wall_timer(interval, std::bind(&SRCOdometry::timerCallback, this));
 
   open_loop_ = declare_parameter("open_loop", false);
   RCLCPP_INFO(get_logger(), "open_loop_ : %s", open_loop_ == true ? "true" : "false");
 
   has_imu_heading_ = declare_parameter("has_imu_heading", true);
   RCLCPP_INFO(get_logger(), "has_imu_heading_ : %s", has_imu_heading_ == true ? "true" : "false");
+
+  is_gazebo_ = declare_parameter("is_gazebo", true);
+  RCLCPP_INFO(get_logger(), "is_gazebo_ : %s", is_gazebo_ == true ? "true" : "false");
 
   wheel_separation_h_ = declare_parameter("wheel_separation_h_", 0.325);
   RCLCPP_INFO(get_logger(), "wheel_separation_h_ : %f", wheel_separation_h_);
@@ -63,14 +66,20 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
   joint_state_sub_ = this->create_subscription<JointState>("joint_states", 10,
                                                            std::bind(&SRCOdometry::jointstateCallback, this, std::placeholders::_1));
 
-  steering_angle_sub_ = this->create_subscription<Float64>("steering_angle_middle", 10,
-                                                           std::bind(&SRCOdometry::steeringAngleSubCallback, this, std::placeholders::_1));
-
   cmd_vel_sub_ = this->create_subscription<Twist>("cmd_vel", 10,
                                                   std::bind(&SRCOdometry::cmdvelSubCallback, this, std::placeholders::_1));
 
-  imu_sub_ = this->create_subscription<Imu>("imu/data", 10,
-                                            std::bind(&SRCOdometry::imuSubCallback, this, std::placeholders::_1));
+  if (has_imu_heading_)
+  {
+    imu_sub_ = this->create_subscription<Imu>("imu/data", 10,
+                                              std::bind(&SRCOdometry::imuSubCallback, this, std::placeholders::_1));
+
+    encoder_sub_ = this->create_subscription<Int64>("encoder_value", rclcpp::SensorDataQoS(),
+                                                    std::bind(&SRCOdometry::encoderCallback, this, std::placeholders::_1));
+  }
+  else
+    steering_angle_sub_ = this->create_subscription<Float64>("steering_angle_middle", 10,
+                                                             std::bind(&SRCOdometry::steeringAngleSubCallback, this, std::placeholders::_1));
 
   tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
 
@@ -89,7 +98,6 @@ void SRCOdometry::starting()
 
 void SRCOdometry::jointstateCallback(const JointState::SharedPtr msg)
 {
-
   for (auto i = 0; i < 6; i++)
   {
     if (msg->position[i] == 0)
@@ -144,7 +152,11 @@ void SRCOdometry::imuSubCallback(const Imu::SharedPtr msg)
     RCLCPP_INFO(this->get_logger(), "yaw : %f", heading_angle);
 }
 
-void SRCOdometry::odom_update(const rclcpp::Time &time)
+void SRCOdometry::encoderCallback(const Int64::SharedPtr msg){
+  encoder_pos_ = msg->data;
+}
+
+void SRCOdometry::odomUpdate(const rclcpp::Time &time)
 {
   // COMPUTE AND PUBLISH ODOMETRY
   // TODO : open_loop implement & comparison
@@ -156,16 +168,20 @@ void SRCOdometry::odom_update(const rclcpp::Time &time)
       return;
 
     // Estimate linear and angular velocity using joint information
-    front_hinge_pos *= steer_pos_multiplier_;
-
     if (has_imu_heading_)
-      odometry_.updateWithHeading(rear_wheel_pos, heading_angle, time);
+      if (is_gazebo_)
+        odometry_.updateWithHeading(rear_wheel_pos, heading_angle, time);
+      else
+        odometry_.updateWithHeading(encoder_pos_, heading_angle, time);
     else
+    {
+      front_hinge_pos *= steer_pos_multiplier_;
       odometry_.update(rear_wheel_pos, front_hinge_pos, time);
+    }
   }
 }
 
-void SRCOdometry::publish_odom_topic(const rclcpp::Time &time)
+void SRCOdometry::publishOdomTopic(const rclcpp::Time &time)
 {
   // Publish odometry message
   // Compute and store orientation info
@@ -219,12 +235,12 @@ void SRCOdometry::publish_odom_topic(const rclcpp::Time &time)
   odom_pub_->publish(std::move(odom));
 }
 
-void SRCOdometry::timer_cb()
+void SRCOdometry::timerCallback()
 {
   rclcpp::Time cur_time = this->get_clock()->now();
 
-  odom_update(cur_time);
-  publish_odom_topic(cur_time);
+  odomUpdate(cur_time);
+  publishOdomTopic(cur_time);
 }
 
 int main(int argc, char **argv)

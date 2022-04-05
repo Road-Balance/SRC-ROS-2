@@ -34,7 +34,6 @@ private:
   int64_t encoder_pos;
   int64_t prev_encoder_pos;
 
-
   rclcpp::Time prev_time;
 
   tf2::Quaternion q_;
