@@ -69,7 +69,7 @@ namespace ackermann_steering_controller
 
     double heading_diff = heading_angle - heading_angle_old_;
 
-    std::cout << "rear_wheel_diff : " << rear_wheel_diff << std::endl;
+    // std::cout << "rear_wheel_diff : " << rear_wheel_diff << std::endl;
 
     integrateExactwithHeading(rear_wheel_diff, heading_angle, heading_diff, time);
 
@@ -77,6 +77,8 @@ namespace ackermann_steering_controller
     rear_wheel_old_pos_ = rear_wheel_cur_pos;
     heading_angle_old_ = heading_angle;
     timestamp_ = time;
+
+    heading_ = heading_angle;
 
     return true;
   }
@@ -89,13 +91,15 @@ namespace ackermann_steering_controller
     double heading_diff = heading_angle - heading_angle_old_;
     integrateExactwithHeading(rear_wheel_diff, heading_angle, heading_diff, time);
 
-    std::cout << "rear_encoder_diff : " << rear_encoder_diff << std::endl;
-    std::cout << "[Encoder] ear_wheel_diff : " << rear_wheel_diff << std::endl;
+    // std::cout << "rear_encoder_diff : " << rear_encoder_diff << std::endl;
+    // std::cout << "[Encoder] ear_wheel_diff : " << rear_wheel_diff << std::endl;
 
     /// Update old values
     encoder_old_pos_ = encoder_pos;
     heading_angle_old_ = heading_angle;
     timestamp_ = time;
+
+    heading_ = heading_angle;
 
     return true;
   }
