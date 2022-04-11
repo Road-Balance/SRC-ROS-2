@@ -93,24 +93,6 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
         "steering_angle_middle", 10,
         std::bind(&SRCOdometry::steeringAngleSubCallback, this, std::placeholders::_1));
 
-  // TODO is_gazebo_ == True => /clock rosgraph_msgs/msg/Clock
-  // $ ros2 interface show rosgraph_msgs/msg/Clock
-  // # This message communicates the current time.
-  // #
-  // # For more information, see https://design.ros2.org/articles/clock_and_time.html.
-  // builtin_interfaces/Time clock
-
-  // $ ros2 interface show std_msgs/msg/Header
-  // # Standard metadata for higher-level stamped data types.
-  // # This is generally used to communicate timestamped data
-  // # in a particular coordinate frame.
-
-  // # Two-integer timestamp that is expressed as seconds and nanoseconds.
-  // builtin_interfaces/Time stamp
-
-  // # Transform frame with which this data is associated.
-  // string frame_id
-
   tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
 
   this->starting();
