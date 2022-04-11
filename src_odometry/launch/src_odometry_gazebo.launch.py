@@ -17,15 +17,20 @@ def generate_launch_description():
     # Racecar controller launch
     src_odometry_gazebo = Node(
         package='src_odometry',
-        # executable='racecar_controller',
         executable='src_odometry_gazebo',
-        output='screen',
-        parameters=[
-            {
-                "verbose": False,
-                "open_loop": False,
-            }
-        ],
+        name='src_odometry_gazebo',
+        output='log',
+        parameters=[{
+            "verbose" : False,
+            'publish_rate' : 50,
+            'open_loop' : False,
+            'has_imu_heading' : True,
+            'is_gazebo' : True,
+            'wheel_radius' : 0.0508,
+            'base_frame_id' : "base_link",
+            'odom_frame_id' : "odom",
+            'enable_odom_tf_' : True,
+        }],
     )
 
     return LaunchDescription([
