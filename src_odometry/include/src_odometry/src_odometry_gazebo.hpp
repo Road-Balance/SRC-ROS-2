@@ -14,6 +14,7 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#include <rosgraph_msgs/msg/clock.hpp>
 
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/float64.hpp>
@@ -28,6 +29,7 @@ using Odometry = nav_msgs::msg::Odometry;
 using JointState = sensor_msgs::msg::JointState;
 using Imu = sensor_msgs::msg::Imu;
 using Int64 = std_msgs::msg::Int64;
+using Clock = rosgraph_msgs::msg::Clock;
 
 class SRCOdometry: public rclcpp::Node {
 public:
@@ -41,7 +43,6 @@ public:
     void steeringAngleSubCallback(const Float64::SharedPtr msg);
     void cmdvelSubCallback(const Twist::SharedPtr msg);
     void imuSubCallback(const Imu::SharedPtr msg);
-    void encoderCallback(const Int64::SharedPtr msg);
 
     void odomUpdate(const rclcpp::Time &time);
     void publishOdomTopic(const rclcpp::Time &time);
@@ -60,6 +61,7 @@ private:
     rclcpp::Subscription<Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::Subscription<Imu>::SharedPtr imu_sub_;
     rclcpp::Subscription<Int64>::SharedPtr encoder_sub_;
+    rclcpp::Subscription<Clock>::SharedPtr clock_sub_;
 
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
@@ -67,6 +69,7 @@ private:
 
     /// Odometry related:
     rclcpp::Time last_state_publish_time_;
+    Clock gazebo_clock_;
 
     /// use open loop odom or not
     bool open_loop_;

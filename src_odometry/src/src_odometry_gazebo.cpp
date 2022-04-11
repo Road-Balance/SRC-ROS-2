@@ -69,18 +69,47 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
   cmd_vel_sub_ = this->create_subscription<Twist>("cmd_vel", 10,
                                                   std::bind(&SRCOdometry::cmdvelSubCallback, this, std::placeholders::_1));
 
-  if (has_imu_heading_)
-  {
-    imu_sub_ = this->create_subscription<Imu>("imu/data", 10,
-                                              std::bind(&SRCOdometry::imuSubCallback, this, std::placeholders::_1));
-
-    if ( is_gazebo_ == false)
-      encoder_sub_ = this->create_subscription<Int64>("encoder_value", rclcpp::SensorDataQoS(),
-                                                    std::bind(&SRCOdometry::encoderCallback, this, std::placeholders::_1));
-  }
+  if (is_gazebo_ == true)
+    clock_sub_ = this->create_subscription<Clock>(
+        "clock", 10,
+        [this](const Clock::SharedPtr msg) -> void
+        {
+          gazebo_clock_.clock = msg->clock;
+        });
   else
-    steering_angle_sub_ = this->create_subscription<Float64>("steering_angle_middle", 10,
-                                                             std::bind(&SRCOdometry::steeringAngleSubCallback, this, std::placeholders::_1));
+    encoder_sub_ = this->create_subscription<Int64>(
+        "encoder_value", rclcpp::SensorDataQoS(),
+        [this](const Int64::SharedPtr msg) -> void
+        {
+          encoder_pos_ = msg->data;
+        });
+
+  if (has_imu_heading_ == true)
+    imu_sub_ = this->create_subscription<Imu>(
+        "imu/data", 10,
+        std::bind(&SRCOdometry::imuSubCallback, this, std::placeholders::_1));
+  else
+    steering_angle_sub_ = this->create_subscription<Float64>(
+        "steering_angle_middle", 10,
+        std::bind(&SRCOdometry::steeringAngleSubCallback, this, std::placeholders::_1));
+
+  // TODO is_gazebo_ == True => /clock rosgraph_msgs/msg/Clock
+  // $ ros2 interface show rosgraph_msgs/msg/Clock
+  // # This message communicates the current time.
+  // #
+  // # For more information, see https://design.ros2.org/articles/clock_and_time.html.
+  // builtin_interfaces/Time clock
+
+  // $ ros2 interface show std_msgs/msg/Header
+  // # Standard metadata for higher-level stamped data types.
+  // # This is generally used to communicate timestamped data
+  // # in a particular coordinate frame.
+
+  // # Two-integer timestamp that is expressed as seconds and nanoseconds.
+  // builtin_interfaces/Time stamp
+
+  // # Transform frame with which this data is associated.
+  // string frame_id
 
   tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
 
@@ -153,10 +182,6 @@ void SRCOdometry::imuSubCallback(const Imu::SharedPtr msg)
     RCLCPP_INFO(this->get_logger(), "yaw : %f", heading_angle);
 }
 
-void SRCOdometry::encoderCallback(const Int64::SharedPtr msg){
-  encoder_pos_ = msg->data;
-}
-
 void SRCOdometry::odomUpdate(const rclcpp::Time &time)
 {
   // COMPUTE AND PUBLISH ODOMETRY
@@ -190,18 +215,26 @@ void SRCOdometry::publishOdomTopic(const rclcpp::Time &time)
   q.setRPY(0.0, 0.0, odometry_.getHeading());
 
   // Populate odom message and publish
-  auto odom = std::make_unique<nav_msgs::msg::Odometry>();
+  auto odom = std::make_unique<Odometry>();
+
+  if(is_gazebo_ == true)
+    odom->header.stamp = gazebo_clock_.clock;
+  else
+    odom->header.stamp = time;
 
   odom->header.frame_id = odom_frame_id_;
   odom->child_frame_id = base_frame_id_;
-  odom->header.stamp = time;
+
   odom->pose.pose.position.x = odometry_.getX();
   odom->pose.pose.position.y = odometry_.getY();
+  
   odom->pose.pose.orientation.x = q.x();
   odom->pose.pose.orientation.y = q.y();
   odom->pose.pose.orientation.z = q.z();
   odom->pose.pose.orientation.w = q.w();
+  
   odom->pose.covariance.fill(0.0);
+  // x y z roll pitch yaw
   odom->pose.covariance[0] = 1e-3;
   odom->pose.covariance[7] = 1e-3;
   odom->pose.covariance[14] = 1e6;
@@ -211,6 +244,7 @@ void SRCOdometry::publishOdomTopic(const rclcpp::Time &time)
 
   odom->twist.twist.linear.x = odometry_.getLinear();
   odom->twist.twist.angular.z = odometry_.getAngular();
+
   odom->twist.covariance.fill(0.0);
   odom->twist.covariance[0] = 1e-3;
   odom->twist.covariance[7] = 1e-3;
@@ -223,13 +257,19 @@ void SRCOdometry::publishOdomTopic(const rclcpp::Time &time)
   {
     // publish TF
     geometry_msgs::msg::TransformStamped odom_tf;
-    odom_tf.header.stamp = time;
+   
+    if(is_gazebo_ == true)
+      odom_tf.header.stamp = gazebo_clock_.clock;
+    else
+      odom_tf.header.stamp = time;
+    
     odom_tf.header.frame_id = odom_frame_id_;
     odom_tf.child_frame_id = base_frame_id_;
     odom_tf.transform.translation.x = odometry_.getX();
     odom_tf.transform.translation.y = odometry_.getY();
     odom_tf.transform.translation.z = 0;
     odom_tf.transform.rotation = odom->pose.pose.orientation;
+
     tf_broadcaster_->sendTransform(odom_tf);
   }
 
