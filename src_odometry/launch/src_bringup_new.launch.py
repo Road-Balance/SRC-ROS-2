@@ -23,24 +23,6 @@ def generate_launch_description():
         }],
     )
 
-    # src_odom = Node(
-    #     package='src_odometry',
-    #     executable='src_odom',
-    #     name='src_odom',
-    #     output='log',
-    #     parameters=[{
-    #         'imu_topic_name' : 'imu/data',
-    #         'encoder_topic_name' : '/encoder_value',
-    #         'publish_tf' : True,
-    #         'update_rate' : 50,
-    #         'base_frame_id' : "base_link",
-    #         'odom_frame_id' : "odom",
-    #         'wheel_radius' : 0.0508,
-    #         "encoder_resolution" : 150,
-    #         "verbose" : False,
-    #     }],
-    # )
-
     src_odom = Node(
         package='src_odometry',
         executable='src_odometry_gazebo',

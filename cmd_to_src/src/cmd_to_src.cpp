@@ -121,22 +121,25 @@ public:
     k_p = k_p_in;
     k_i = k_i_in;
     k_d = k_d_in;
+
+    RCLCPP_INFO(get_logger(), "kp : %f / ki : %f / kd : %f", k_p, k_i, k_d);
   }
 
   std::vector<float> getGain() { return std::vector<float>{k_p, k_i, k_d}; }
 
-  uint8_t update(float object_val, float cur_val) {
+  int update(bool use_twiddle, float object_val, float cur_val) {
 
     auto cur_err = object_val - cur_val;
     auto diff_err = cur_err - prev_err;
     integrate_err += cur_err;
 
-    // twiddle(cur_err);
+    if (use_twiddle)
+      twiddle(cur_err);
 
     prev_err = cur_err;
     RCLCPP_INFO(get_logger(), "cur_err : %f", cur_err);
 
-    uint8_t output = -k_p * cur_err - k_i * integrate_err - k_d * diff_err;
+    int output = -k_p * cur_err - k_i * integrate_err - k_d * diff_err;
 
     std::cout << "output : " << int(output) << std::endl;
 
@@ -169,6 +172,7 @@ private:
 
   float accel_;
   float deaccel;
+  bool use_twiddle_;
   unsigned int scale;
 
   std::shared_ptr<YawRatePID> pid_controller_;
@@ -206,6 +210,18 @@ public:
     this->declare_parameter("scale", 9);
     scale = this->get_parameter("scale").as_int();
 
+    this->declare_parameter("p_gain", 18.0);
+    auto p_gain_ = this->get_parameter("p_gain").as_double();
+
+    this->declare_parameter("i_gain", 0.0);
+    auto i_gain_ = this->get_parameter("i_gain").as_double();
+
+    this->declare_parameter("d_gain", 0.0);
+    auto d_gain_ = this->get_parameter("d_gain").as_double();
+
+    this->declare_parameter("use_twiddle", false);
+    use_twiddle_ = this->get_parameter("use_twiddle").as_bool();
+
     src_msg_.speed = 0.0;
     src_msg_.steering = 0;
     src_msg_.light = false;
@@ -218,7 +234,7 @@ public:
     prev_time = this->get_clock()->now();
     prev_heading_ = 0.0;
 
-    pid_controller_->setGain(18.0, -10.0, -9.0);
+    pid_controller_->setGain(p_gain_, i_gain_, d_gain_);
   }
 
   // change to odom callback
@@ -245,7 +261,7 @@ public:
     prev_heading_ = heading;
 
     // RCLCPP_INFO(get_logger(), "yaw : %f", heading);
-    RCLCPP_INFO(get_logger(), "angular_z : %f", yaw_speed_);
+    // RCLCPP_INFO(get_logger(), "angular_z : %f", yaw_speed_);
   }
 
   void cmd_vel_cb(const Twist::SharedPtr msg) {
@@ -253,12 +269,23 @@ public:
 
     // TODO : move controller into timer cb
 
-    if (fabs(msg->linear.x) >= 0.1)
+    if (fabs(msg->linear.x) >= 0.1){
+      int pid_result =
+          steering_offset_ + pid_controller_->update(use_twiddle_, msg->angular.z, yaw_speed_);
+      
+      if(pid_result < 0)
+        pid_result = 0;
+      if(pid_result > 200)
+        pid_result = 200;
+
+      src_msg_.steering = pid_result;
+    }
       // src_msg_.steering = steering_offset_;
-      src_msg_.steering =
-          steering_offset_ + pid_controller_->update(msg->angular.z, yaw_speed_);
     else
       src_msg_.steering = steering_offset_;
+    
+
+
     // RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02 ok
 
     // src_msg_.steering =

@@ -53,3 +53,10 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
+
+install(
+  DIRECTORY
+    launch
+  DESTINATION
+    share/${PROJECT_NAME}/
+)
