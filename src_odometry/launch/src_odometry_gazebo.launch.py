@@ -29,7 +29,7 @@ def generate_launch_description():
             'wheel_radius' : 0.0508,
             'base_frame_id' : "base_link",
             'odom_frame_id' : "odom",
-            'enable_odom_tf_' : True,
+            'enable_odom_tf' : True,
         }],
     )
 
