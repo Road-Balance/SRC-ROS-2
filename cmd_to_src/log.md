@@ -74,3 +74,7 @@ while sum(dp) > tol:
                 p[i] += dp[i]
                 dp[i] *= 0.9
 ```
+
+gain tuning
+
+P : 100 - 120 
