@@ -70,6 +70,7 @@ namespace ackermann_steering_controller
      * Value will be set to zero
      * \param velocity_rolling_window_size Rolling window size used to compute the velocity mean
      */
+    /// TODO : const double&
     Odometry(size_t velocity_rolling_window_size = 10);
 
     /**
@@ -85,6 +86,7 @@ namespace ackermann_steering_controller
      * \param time      Current time
      * \return true if the odometry is actually updated
      */
+    /// TODO : const double&
     bool update(double rear_wheel_pos, double front_steer_pos, const rclcpp::Time &time);
 
     // TODO
@@ -98,6 +100,7 @@ namespace ackermann_steering_controller
      * \param angular Angular velocity [rad/s]
      * \param time    Current time
      */
+    /// TODO : const double& 
     void updateOpenLoop(double linear, double angular, const rclcpp::Time &time);
 
     /**
@@ -150,14 +153,23 @@ namespace ackermann_steering_controller
      * \param wheel_separation Seperation between left and right wheels [m]
      * \param wheel_radius     Wheel radius [m]
      */
+    /// TODO : void setWheelParams(const double& wheel_reparation_h, const double& wheel_radius);
     void setWheelParams(double wheel_reparation_h, double wheel_radius);
 
+    /**
+     * @brief Set the Encoder Resolution object
+     * 
+     * @param encoder_resolution 
+     * In real robot, it has own encoder resolution, if 150 encoder for 1 cycle set it as 150
+     */
+    /// TODO: void setEncoderResolution(const uint& encoder_resolution);
     void setEncoderResolution(uint encoder_resolution);
 
     /**
      * \brief Velocity rolling window size setter
      * \param velocity_rolling_window_size Velocity rolling window size
      */
+    /// TODO: void setVelocityRollingWindowSize(const size_t& velocity_rolling_window_size);
     void setVelocityRollingWindowSize(size_t velocity_rolling_window_size);
 
   private:
@@ -171,6 +183,7 @@ namespace ackermann_steering_controller
      * \param linear  Linear  velocity   [m] (linear  displacement, i.e. m/s * dt) computed by encoders
      * \param angular Angular velocity [rad] (angular displacement, i.e. m/s * dt) computed by encoders
      */
+    /// TODO : const double& 
     void integrateRungeKutta2(double linear, double angular);
 
     /**
@@ -178,6 +191,7 @@ namespace ackermann_steering_controller
      * \param linear  Linear  velocity   [m] (linear  displacement, i.e. m/s * dt) computed by encoders
      * \param angular Angular velocity [rad] (angular displacement, i.e. m/s * dt) computed by encoders
      */
+    /// TODO : const double& 
     void integrateExact(double linear, double angular);
 
     bool integrateExactwithHeading(const double& linear, const double& heading_angle, double& angular, const rclcpp::Time &time);

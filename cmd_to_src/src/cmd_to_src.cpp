@@ -19,6 +19,7 @@ using SRCMsg = src_control_message::msg::SRCMsg;
 using Float32 = std_msgs::msg::Float32;
 using Imu = sensor_msgs::msg::Imu;
 
+/// TODO : friend class CmdToSRC;
 class YawRatePID : public rclcpp::Node {
 public:
   enum TwiddleCase {
