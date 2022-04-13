@@ -60,3 +60,9 @@ ros2 launch src_slam only_rviz.launch.py
 ros2 run nav2_map_server map_saver -f <map_dir>/<map_name>
 ```
 
+PID 
+
+```
+ros2 launch cmd_to_src cmd_to_src.launch.py
+ros2 launch src_odometry src_bringup_new.launch.py
+```
