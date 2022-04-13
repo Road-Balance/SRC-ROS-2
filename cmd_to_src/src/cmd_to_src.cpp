@@ -127,11 +127,19 @@ public:
 
   std::vector<float> getGain() { return std::vector<float>{k_p, k_i, k_d}; }
 
-  int update(bool use_twiddle, float object_val, float cur_val) {
+  int update(bool use_twiddle, bool sign_change, float object_val, float cur_val) {
 
     auto cur_err = object_val - cur_val;
     auto diff_err = cur_err - prev_err;
+
     integrate_err += cur_err;
+    if(sign_change)
+      integrate_err = 0;
+
+    if (integrate_err > 10)
+      integrate_err = 10;
+    if (integrate_err < -10)
+      integrate_err = -10;
 
     if (use_twiddle)
       twiddle(cur_err);
@@ -140,6 +148,11 @@ public:
     RCLCPP_INFO(get_logger(), "cur_err : %f", cur_err);
 
     int output = -k_p * cur_err - k_i * integrate_err - k_d * diff_err;
+
+    if (output > 30)
+      output = 30;
+    if (output < -30)
+      output = -30;
 
     std::cout << "output : " << int(output) << std::endl;
 
@@ -172,6 +185,8 @@ private:
 
   float accel_;
   float deaccel;
+  float prev_angular_vel_;
+
   bool use_twiddle_;
   unsigned int scale;
 
@@ -270,8 +285,20 @@ public:
     // TODO : move controller into timer cb
 
     if (fabs(msg->linear.x) >= 0.1){
-      int pid_result =
-          steering_offset_ + pid_controller_->update(use_twiddle_, msg->angular.z, yaw_speed_);
+      bool sign_change = false;
+      int pid_result;
+
+      auto angular_vel = msg->angular.z;
+      if( (prev_angular_vel_ > 0 && angular_vel < 0 ) || ( prev_angular_vel_ < 0 && angular_vel > 0 ) ){
+        RCLCPP_INFO(get_logger(), "sign changed");
+        sign_change = true;
+      }
+
+      if (angular_vel == 0.0)
+        pid_result = steering_offset_;
+      else
+        pid_result =
+            steering_offset_ + pid_controller_->update(use_twiddle_, sign_change, msg->angular.z, yaw_speed_);
       
       if(pid_result < 0)
         pid_result = 0;
@@ -279,12 +306,11 @@ public:
         pid_result = 200;
 
       src_msg_.steering = pid_result;
+      prev_angular_vel_ = angular_vel;
     }
       // src_msg_.steering = steering_offset_;
     else
       src_msg_.steering = steering_offset_;
-    
-
 
     // RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02 ok
 

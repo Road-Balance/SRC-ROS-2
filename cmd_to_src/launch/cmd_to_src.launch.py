@@ -11,9 +11,9 @@ def generate_launch_description():
         name='cmd_to_src',
         output='screen',
         parameters=[{
-            "p_gain" : 120.0,
-            'i_gain' : 0.0,
-            'd_gain' : 0.0,
+            "p_gain" : 122.0,
+            'i_gain' : 3.0,
+            'd_gain' : 1.0,
             'use_twiddle' : False,
         }],
     )
