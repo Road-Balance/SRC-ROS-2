@@ -6,8 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1/Status1
-        - /Odometry1
         - /Odometry1/Topic1
         - /Odometry1/Shape1
         - /Odometry1/Covariance1
@@ -120,7 +118,7 @@ Visualization Manager:
           Color: 204; 51; 204
           Scale: 1
           Value: true
-        Value: true
+        Value: false
       Enabled: true
       Keep: 100
       Name: Odometry
@@ -218,25 +216,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 100.8499755859375
+      Distance: 9.209060668945312
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 9.279090881347656
-        Y: 6.693484306335449
-        Z: 1.9824143648147583
+        X: 1.5483274459838867
+        Y: 0.3724467158317566
+        Z: 0.778517484664917
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.31039756536483765
+      Pitch: 0.8753973841667175
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.93676233291626
+      Yaw: 4.706760883331299
     Saved: ~
 Window Geometry:
   Displays:
