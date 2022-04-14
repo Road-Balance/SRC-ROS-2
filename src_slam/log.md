@@ -57,7 +57,10 @@ ros2 launch src_slam src_slam.launch.py
 
 # Remote view
 ros2 launch src_slam only_rviz.launch.py
+# eloquent
 ros2 run nav2_map_server map_saver -f <map_dir>/<map_name>
+# foxy
+ros2 run nav2_map_server map_saver_cli -f <map_dir>/<map_name>
 ```
 
 PID 
@@ -66,3 +69,17 @@ PID
 ros2 launch cmd_to_src cmd_to_src.launch.py
 ros2 launch src_odometry src_bringup_new.launch.py
 ```
+
+Gazebo SLAM
+
+```
+ros2 launch src_gazebo src_gazebo_racecourse.launch.py
+ros2 launch src_slam src_slam_gazebo.launch.py
+```
+
+# TODO
+- [] gmapping
+- [] cartographer
+- [] 3D SLAM 도 할 수 있을까??
+- [] etc...
+

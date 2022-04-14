@@ -39,6 +39,7 @@ install(
     launch
     rviz
     param
+    map
   DESTINATION
     share/${PROJECT_NAME}/
 )

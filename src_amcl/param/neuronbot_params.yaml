@@ -30,20 +30,20 @@ amcl:
     save_pose_rate: 0.5
     sigma_hit: 0.02
     tf_broadcast: true
-    transform_tolerance: 1.0
+    transform_tolerance: 0.5
     update_min_a: 0.06
     update_min_d: 0.025
     z_hit: 0.7
     z_max: 0.001
     z_rand: 0.059
     z_short: 0.24
-
+    
     # Initial Pose
-    set_initial_pose: true
-    initial_pose_x: 0.0
-    initial_pose_y: 0.0
-    initial_pose_z: 0.0
-    initial_pose_yaw: 0.0    
+    set_initial_pose: True
+    initial_pose.x: 0.0
+    initial_pose.y: 0.0
+    initial_pose.z: 0.0
+    initial_pose.yaw: 0.0        
 
 amcl_map_client:
   ros__parameters:
@@ -83,26 +83,6 @@ bt_navigator:
     - nav2_transform_available_condition_bt_node
     - nav2_time_expired_condition_bt_node
     - nav2_distance_traveled_condition_bt_node
-
-# bt_navigator:
-#   ros__parameters:
-#     use_sim_time: False
-#     bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
-#     plugin_lib_names:
-#     - nav2_compute_path_to_pose_action_bt_node
-#     - nav2_follow_path_action_bt_node
-#     - nav2_back_up_action_bt_node
-#     - nav2_spin_action_bt_node
-#     - nav2_wait_action_bt_node
-#     - nav2_clear_costmap_service_bt_node
-#     - nav2_is_stuck_condition_bt_node
-#     - nav2_goal_reached_condition_bt_node
-#     - nav2_initial_pose_received_condition_bt_node
-#     - nav2_reinitialize_global_localization_service_bt_node
-#     - nav2_rate_controller_bt_node
-#     - nav2_recovery_node_bt_node
-#     - nav2_pipeline_sequence_bt_node
-#     - nav2_round_robin_node_bt_node
 
 bt_navigator_rclcpp_node:
   ros__parameters:
@@ -183,44 +163,83 @@ local_costmap:
       update_frequency: 5.0
       publish_frequency: 2.0
       global_frame: odom
+      robot_base_frame: base_footprint
       use_sim_time: False
       rolling_window: true
       width: 3
       height: 3
       resolution: 0.05
-      plugin_names: ["obstacle_layer", "voxel_layer", "inflation_layer"]
-      plugin_types: ["nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::VoxelLayer", "nav2_costmap_2d::InflationLayer"]
       robot_radius: 0.20
+      #plugins: ["obstacle_layer", "stvl_layer", "inflation_layer"]
+      plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
       inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
       obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
         observation_sources: scan
         scan:
           topic: /scan
           max_obstacle_height: 2.0
-          obstacle_range: 5.0
-          raytrace_range: 5.0       
           clearing: True
           marking: True
           data_type: "LaserScan"
+          obstacle_range: 2.5
+          raytrace_range: 10.0
+      #stvl_layer:
+      #  plugin: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"
+      #  enabled: true
+      #  voxel_decay: 15.0                # seconds if linear, e^n if exponential
+      #  decay_model: 0                  # 0=linear, 1=exponential, -1=persistent
+      #  voxel_size: 0.05                # meters
+      #  track_unknown_space: true       # default space is known
+      #  max_obstacle_height: 0.5        # meters
+      #  unknown_threshold: 15           # voxel height
+      #  mark_threshold: 0               # voxel height
+      #  update_footprint_enabled: true
+      #  combination_method: 1           # 1=max, 0=override
+      #  obstacle_range: 3.0             # meters
+      #  origin_z: 0.0                   # meters
+      #  publish_voxel_map: true        # default off; set true to visualize in RViz but increasing system/traffic load
+      #  transform_tolerance: 0.2        # seconds
+      #  mapping_mode: false             # default off, saves map not for navigation
+      #  map_save_duration: 60.0         # default 60s, how often to autosave
+      #  observation_sources: pointcloud
+      #  pointcloud:
+      #    data_type: PointCloud2
+      #    topic: /camera/pointcloud
+      #    marking: true
+      #    clearing: true
+      #    min_obstacle_height: 0.0      # default 0, meters
+      #    max_obstacle_height: 0.5      # default 3, meters
+      #    expected_update_rate: 0.0     # default 0, if not updating at this rate at least, remove from buffer
+      #    observation_persistence: 0.0  # default 0, use all measurements taken during now-value, 0=latest
+      #    inf_is_valid: false           # default false, for laser scans
+      #    voxel_filter: true            # default off, apply voxel filter to sensor, recommend on
+      #    clear_after_reading: true     # default false, clear the buffer after the layer gets readings from it
+      #    max_z: 7.0                    # default 0, meters
+      #    min_z: 0.0                    # default 10, meters
+      #    vertical_fov_angle: 0.9948    # 57 degree to radian
+      #    horizontal_fov_angle: 1.501   # 86 degree to radian
+      #    decay_acceleration: 15.0      # default 0, 1/s^2. If laser scanner MUST be 0
+      #    model_type: 0                 # default 0, model type for frustum. 0=depth camera, 1=3d lidar like VLP16 or similar
       voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
         publish_voxel_map: True
         origin_z: 0.0
-        z_resolution: 0.2
-        z_voxels: 10
+        z_resolution: 0.05
+        z_voxels: 16
         max_obstacle_height: 2.0
         mark_threshold: 0
         observation_sources: pointcloud
         pointcloud:
-          topic: /intel_realsense_r200_depth/points
+          topic: /camera/pointcloud
           max_obstacle_height: 2.0
           clearing: True
           marking: True
           data_type: "PointCloud2"
-      static_layer:
-        map_subscribe_transient_local: True
       always_send_full_costmap: True
   local_costmap_client:
     ros__parameters:
@@ -234,39 +253,84 @@ global_costmap:
     ros__parameters:
       update_frequency: 2.0
       publish_frequency: 1.0
-      use_sim_time: False
-      plugin_names: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
-      plugin_types: ["nav2_costmap_2d::StaticLayer", "nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::VoxelLayer", "nav2_costmap_2d::InflationLayer"]
+      global_frame: map
+      robot_base_frame: base_footprint
+      use_sim_time: False      
       robot_radius: 0.20
+      #plugins: ["static_layer", "obstacle_layer", "stvl_layer", "inflation_layer"]
+      plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
       resolution: 0.05
       obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
         observation_sources: scan
         scan:
           topic: /scan
           max_obstacle_height: 2.0
-          obstacle_range: 10.0
-          raytrace_range: 10.0
           clearing: True
           marking: True
           data_type: "LaserScan"
+          obstacle_range: 2.5
+          raytrace_range: 10.0
+      #stvl_layer:
+      #  plugin: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"
+      #  enabled: true
+      #  voxel_decay: 15.0                # seconds if linear, e^n if exponential
+      #  decay_model: 0                  # 0=linear, 1=exponential, -1=persistent
+      #  voxel_size: 0.05                # meters
+      #  track_unknown_space: true       # default space is known
+      #  max_obstacle_height: 0.5        # meters
+      #  unknown_threshold: 15           # voxel height
+      #  mark_threshold: 0               # voxel height
+      #  update_footprint_enabled: true
+      #  combination_method: 1           # 1=max, 0=override
+      #  obstacle_range: 3.0             # meters
+      #  origin_z: 0.0                   # meters
+      #  publish_voxel_map: true         # default off; set true to visualize in RViz but increasing system/traffic load
+      #  transform_tolerance: 0.2        # seconds
+      #  mapping_mode: false             # default off, saves map not for navigation
+      #  map_save_duration: 60.0         # default 60s, how often to autosave
+      #  observation_sources: pointcloud
+      #  pointcloud:
+      #    data_type: PointCloud2
+      #    topic: /camera/pointcloud
+      #    marking: true
+      #    clearing: true
+      #    min_obstacle_height: 0.0      # default 0, meters
+      #    max_obstacle_height: 0.5      # default 3, meters
+      #    expected_update_rate: 0.0     # default 0, if not updating at this rate at least, remove from buffer
+      #    observation_persistence: 0.0  # default 0, use all measurements taken during now-value, 0=latest
+      #    inf_is_valid: false           # default false, for laser scans
+      #    voxel_filter: true            # default off, apply voxel filter to sensor, recommend on
+      #    clear_after_reading: true     # default false, clear the buffer after the layer gets readings from it
+      #    max_z: 7.0                    # default 0, meters
+      #    min_z: 0.0                    # default 10, meters
+      #    vertical_fov_angle: 0.9948    # 57 degree to radian
+      #    horizontal_fov_angle: 1.501   # 86 degree to radian
+      #    decay_acceleration: 15.0      # default 0, 1/s^2. If laser scanner MUST be 0
+      #    model_type: 0                 # default 0, model type for frustum. 0=depth camera, 1=3d lidar like VLP16 or similar
       voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
         publish_voxel_map: True
         origin_z: 0.0
-        z_resolution: 0.2
-        z_voxels: 10
+        z_resolution: 0.05
+        z_voxels: 16
         max_obstacle_height: 2.0
         mark_threshold: 0
         observation_sources: pointcloud
         pointcloud:
-          topic: /intel_realsense_r200_depth/points
+          topic: /camera/pointcloud
           max_obstacle_height: 2.0
           clearing: True
           marking: True
-          data_type: "PointCloud2"
+          data_type: "PointCloud2"      
       static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"        
+        cost_scaling_factor: 3.0
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
@@ -279,7 +343,7 @@ map_server:
   ros__parameters:
     use_sim_time: False
     yaml_filename: "turtlebot3_world.yaml"
-
+    
 map_saver:
   ros__parameters:
     use_sim_time: False
@@ -287,7 +351,7 @@ map_saver:
     free_thresh_default: 0.25
     occupied_thresh_default: 0.65
     map_subscribe_transient_local: True
-
+    
 planner_server:
   ros__parameters:
     expected_planner_frequency: 5.0
