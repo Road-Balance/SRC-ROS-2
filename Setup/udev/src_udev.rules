@@ -5,7 +5,9 @@
 KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="rplidar"
 
 # Teensy rules
-KERNEL=="ttyACM*", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="0483", MODE:="0777", SYMLINK+="teensy4.0"
+KERNEL=="ttyACM*", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04**", MODE:="0777", SYMLINK+="teensy4.0"
+KERNEL=="hidraw*", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04**", MODE:="0777", SYMLINK+="teensy4.0"
+
 
 # MW-AHRSv1
 KERNEL=="ttyUSB*", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", MODE:="0777", SYMLINK+="MWAHRs"
