@@ -137,7 +137,7 @@ def generate_launch_description():
             'has_imu_heading' : True,
             'is_gazebo' : True,
             'wheel_radius' : 0.0508,
-            'base_frame_id' : "base_link",
+            'base_frame_id' : "base_footprint",
             'odom_frame_id' : "odom",
             'enable_odom_tf' : True,
         }],

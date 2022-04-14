@@ -298,7 +298,13 @@
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
   <!-- Add chassis and it's inertia link -->
+  <link name="base_footprint"/>
   <link name="base_link"/>
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
   <link name="chassis">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
