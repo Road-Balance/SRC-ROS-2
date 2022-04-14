@@ -14,6 +14,7 @@ def generate_launch_description():
     pkg_path = get_package_share_directory('src_amcl')
     map_file_path = os.path.join(pkg_path, 'map', 'racecourse.yaml')
     param_file_path = os.path.join(pkg_path, 'param', 'neuronbot_params.yaml')
+    param_file_path = os.path.join(pkg_path, 'param', 'amcl.yaml')
 
     namespace = LaunchConfiguration('namespace')
     map_yaml_file = LaunchConfiguration('map')
@@ -74,7 +75,7 @@ def generate_launch_description():
         ]
     )
 
-    rviz_config_dir = os.path.join(pkg_path, 'rviz', 'nav2_default_view.rviz')
+    rviz_config_dir = os.path.join(pkg_path, 'rviz', 'nav2_localization.rviz')
 
     rviz2 = Node(
         package='rviz2',
@@ -114,5 +115,5 @@ def generate_launch_description():
         map_server,
         amcl,
         lifecycle_manager,
-        rviz2,
+        # rviz2,
     ])
