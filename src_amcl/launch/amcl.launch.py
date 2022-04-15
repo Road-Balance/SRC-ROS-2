@@ -115,5 +115,5 @@ def generate_launch_description():
         map_server,
         amcl,
         lifecycle_manager,
-        # rviz2,
+        rviz2,
     ])

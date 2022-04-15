@@ -5,7 +5,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription, ExecuteProcess, RegisterEventHandler
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, RegisterEventHandler
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import LaunchConfiguration
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -27,6 +29,14 @@ def generate_launch_description():
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')   
     pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
     world_path = os.path.join(pkg_path, 'worlds', 'racecar_course.world')
+
+    # launch configuration
+    use_rviz = LaunchConfiguration('use_rviz')
+
+    declare_use_rviz = DeclareLaunchArgument(
+        name='use_rviz',
+        default_value='True',
+        description='Whether to start RVIZ')
 
     # Start Gazebo server
     start_gazebo_server_cmd = IncludeLaunchDescription(
@@ -118,6 +128,7 @@ def generate_launch_description():
 
     # Launch RViz
     rviz = Node(
+        condition=IfCondition(use_rviz),
         package='rviz2',
         executable='rviz2',
         name='rviz2',
@@ -152,6 +163,8 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        declare_use_rviz,
+        
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=spawn_entity,
