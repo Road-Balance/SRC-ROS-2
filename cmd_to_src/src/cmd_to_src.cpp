@@ -19,6 +19,14 @@ using SRCMsg = src_control_message::msg::SRCMsg;
 using Float32 = std_msgs::msg::Float32;
 using Imu = sensor_msgs::msg::Imu;
 
+template <typename T>
+inline void in_range(T& input, const T& low_val, const T& max_val){
+  if(input < low_val) 
+    input = low_val;
+  if(input > max_val)
+    input = max_val;
+}
+
 /// TODO : friend class CmdToSRC;
 class YawRatePID : public rclcpp::Node {
 public:
@@ -122,11 +130,9 @@ public:
     k_p = k_p_in;
     k_i = k_i_in;
     k_d = k_d_in;
-
-    RCLCPP_INFO(get_logger(), "kp : %f / ki : %f / kd : %f", k_p, k_i, k_d);
   }
 
-  std::vector<float> getGain() { return std::vector<float>{k_p, k_i, k_d}; }
+  std::vector<float> getGain() const { return std::vector<float>{k_p, k_i, k_d}; }
 
   int update(bool use_twiddle, bool sign_change, float object_val, float cur_val) {
 
@@ -134,26 +140,23 @@ public:
     auto diff_err = cur_err - prev_err;
 
     integrate_err += cur_err;
-    if(sign_change)
+    if(sign_change){
       integrate_err = 0;
+      diff_err = 0;
+    }
 
-    if (integrate_err > 10)
-      integrate_err = 10;
-    if (integrate_err < -10)
-      integrate_err = -10;
+    in_range(integrate_err, -10.0f, 10.0f);
 
     if (use_twiddle)
       twiddle(cur_err);
 
     prev_err = cur_err;
+
     RCLCPP_INFO(get_logger(), "cur_err : %f", cur_err);
 
     int output = -k_p * cur_err - k_i * integrate_err - k_d * diff_err;
 
-    if (output > 30)
-      output = 30;
-    if (output < -30)
-      output = -30;
+    in_range(output, -30, 30);
 
     std::cout << "output : " << int(output) << std::endl;
 
@@ -297,19 +300,17 @@ public:
 
       if (angular_vel == 0.0)
         pid_result = steering_offset_;
-      else
+      else {
         pid_result =
             steering_offset_ + pid_controller_->update(use_twiddle_, sign_change, msg->angular.z, yaw_speed_);
-      
-      if(pid_result < 0)
-        pid_result = 0;
-      if(pid_result > 200)
-        pid_result = 200;
+      }
+
+      in_range(pid_result, 0, 200);
 
       src_msg_.steering = pid_result;
       prev_angular_vel_ = angular_vel;
     }
-      // src_msg_.steering = steering_offset_;
+    // src_msg_.steering = steering_offset_;
     else
       src_msg_.steering = steering_offset_;
 
