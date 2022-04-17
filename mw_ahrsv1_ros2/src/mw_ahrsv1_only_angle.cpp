@@ -61,6 +61,10 @@ public:
     this->declare_parameter("verbose", true);
     this->declare_parameter("publish_rate", 50);
 
+    // TODO : param 방식 바꾸기
+    // open_loop_ = declare_parameter("open_loop", false);
+    // RCLCPP_INFO(get_logger(), "open_loop_ : %s", open_loop_ == true ? "true" : "false");
+
     rclcpp::Parameter deviceID = this->get_parameter("deviceID");
     rclcpp::Parameter frame_id = this->get_parameter("frame_id");
     rclcpp::Parameter child_frame_id = this->get_parameter("child_frame_id");
@@ -87,6 +91,7 @@ public:
                 frame_id.value_to_string().c_str(),
                 child_frame_id.value_to_string().c_str());
 
+    /// TOOD : publish topic 이름 parameter로 변경
     imu_data_pub_ = this->create_publisher<sensor_msgs::msg::Imu>(
         "imu/data", rclcpp::QoS(1));
 
@@ -147,8 +152,7 @@ public:
     imu_data_msg.orientation.y = new_orientation[1];
     imu_data_msg.orientation.z = new_orientation[2];
     imu_data_msg.orientation.w = -new_orientation[3];
-    // imu_data_msg.orientation_covariance[0] = -1; // we don't have estimation
-    // for orientation
+    // imu_data_msg.orientation_covariance[0] = -1; // we don't have estimation for orientation
 
     // original data used the g unit, convert to m/s^2
     imu_data_msg.linear_acceleration.x =
