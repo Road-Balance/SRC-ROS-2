@@ -41,7 +41,7 @@ private:
   std::string frame_id_;
   std::string child_frame_id_;
   std::string pub_topic_name_; 
-  
+
   bool verbose_;
   int pub_rate_;
   bool pub_tf_;
@@ -170,8 +170,6 @@ public:
             imu_data_msg.orientation_covariance[8] = 0;
 
     if (pub_tf_) {
-      RCLCPP_INFO(get_logger(), "Publish TF");
-
       geometry_msgs::msg::TransformStamped transform;
 
       transform.header.stamp = now;
