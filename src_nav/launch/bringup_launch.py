@@ -31,8 +31,8 @@ def generate_launch_description():
     my_nav_dir = get_package_share_directory('src_nav')
     my_launch_dir = os.path.join(my_nav_dir, 'launch')
     my_param_dir = os.path.join(my_nav_dir, 'param')
-    my_param_file = 'src_dwb_params.yaml'
-    my_bt_file = 'navigate_w_replanning_time.xml'
+    my_param_file = 'src_regulated_pure_pursuit.yaml'
+    my_bt_file = 'navigate_w_replanning_and_recovery.xml'
     my_map_dir = os.path.join(my_nav_dir, 'map')
     my_map_file = 'racecourse.yaml'
 
