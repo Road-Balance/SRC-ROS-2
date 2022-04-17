@@ -10,4 +10,4 @@ KERNEL=="hidraw*", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04**", MODE:="077
 
 
 # MW-AHRSv1
-KERNEL=="ttyUSB*", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", MODE:="0777", SYMLINK+="MWAHRs"
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="23**", MODE:="0777", SYMLINK+="MWAHRs"
