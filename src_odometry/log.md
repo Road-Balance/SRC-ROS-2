@@ -498,3 +498,15 @@ Lidar와 Sensor Fusion
 ```
 
 ```
+
+# Refactoring
+
+gazebo odom 통합
+
+```
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
+
+ros2 launch src_demo joystick_control_foxy.launch.py
+ros2 launch src_odometry src_bringup.launch.py
+```
