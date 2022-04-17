@@ -25,8 +25,8 @@ def generate_launch_description():
 
     src_odom = Node(
         package='src_odometry',
-        executable='src_odometry_gazebo',
-        name='src_odometry_gazebo',
+        executable='src_odometry',
+        name='src_odometry',
         output='log',
         parameters=[{
             "verbose" : False,

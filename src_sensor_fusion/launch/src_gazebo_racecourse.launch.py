@@ -126,10 +126,10 @@ def generate_launch_description():
         arguments=['-d', rviz_config_file]
     )
 
-    src_odometry_gazebo = Node(
+    src_odometry = Node(
         package='src_odometry',
-        executable='src_odometry_gazebo',
-        name='src_odometry_gazebo',
+        executable='src_odometry',
+        name='src_odometry',
         output='log',
         parameters=[{
             "verbose" : False,
@@ -201,7 +201,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=load_velocity_controller,
-                on_exit=[src_odometry_gazebo],
+                on_exit=[src_odometry],
             )
         ),
         RegisterEventHandler(
