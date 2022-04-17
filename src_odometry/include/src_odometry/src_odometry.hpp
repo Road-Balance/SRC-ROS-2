@@ -4,13 +4,21 @@
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <sensor_msgs/msg/imu.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#include <rosgraph_msgs/msg/clock.hpp>
+
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/int64.hpp>
 
 #include "src_odometry/odometry.hpp"
 
@@ -19,6 +27,9 @@ using Float64 = std_msgs::msg::Float64;
 using Twist = geometry_msgs::msg::Twist;
 using Odometry = nav_msgs::msg::Odometry;
 using JointState = sensor_msgs::msg::JointState;
+using Imu = sensor_msgs::msg::Imu;
+using Int64 = std_msgs::msg::Int64;
+using Clock = rosgraph_msgs::msg::Clock;
 
 class SRCOdometry: public rclcpp::Node {
 public:
@@ -28,12 +39,14 @@ public:
     void starting();
     void stopping(const rclcpp::Time& /*time*/);
 
-    void joint_state_cb(const JointState::SharedPtr msg);
-    void steering_angle_sub(const Float64::SharedPtr msg);
-    void cmd_vel_sub(const Twist::SharedPtr msg);
-    void odom_update(const rclcpp::Time &time);
-    void publish_odom_topic(const rclcpp::Time &time);
-    void timer_cb();
+    void jointstateCallback(const JointState::SharedPtr msg);
+    void steeringAngleSubCallback(const Float64::SharedPtr msg);
+    void cmdvelSubCallback(const Twist::SharedPtr msg);
+    void imuSubCallback(const Imu::SharedPtr msg);
+
+    void odomUpdate(const rclcpp::Time &time);
+    void publishOdomTopic(const rclcpp::Time &time);
+    void timerCallback();
 
 private:
     ackermann_steering_controller::Odometry odometry_;
@@ -41,28 +54,34 @@ private:
     rclcpp::TimerBase::SharedPtr pub_timer_;
 
     rclcpp::Publisher<Odometry>::SharedPtr odom_pub_;
+    rclcpp::Publisher<Float64>::SharedPtr imu_heading_pub_;
+
     rclcpp::Subscription<JointState>::SharedPtr joint_state_sub_;
     rclcpp::Subscription<Float64>::SharedPtr steering_angle_sub_;
     rclcpp::Subscription<Twist>::SharedPtr cmd_vel_sub_;
+    rclcpp::Subscription<Imu>::SharedPtr imu_sub_;
+    rclcpp::Subscription<Int64>::SharedPtr encoder_sub_;
+    rclcpp::Subscription<Clock>::SharedPtr clock_sub_;
+
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
     bool verbose_;
 
     /// Odometry related:
-    // rclcpp::Duration publish_period_;
     rclcpp::Time last_state_publish_time_;
-    bool open_loop_;
-    
-    /// Velocity command related:
-    struct Commands
-    {
-      double lin;
-      double ang;
-      rclcpp::Time stamp;
+    Clock gazebo_clock_;
 
-      Commands() : lin(0.0), ang(0.0), stamp(0.0) {}
-    };
-    Commands command_struct_;
+    /// use open loop odom or not
+    bool open_loop_;
+
+    /// if imu topic exists, it'll be better to use it during odom calculation 
+    /// most ackermann robots has wheel slip
+    bool has_imu_heading_;
+
+    bool is_gazebo_;
+    
+    /// (usefull only has_imu_heading_ is activated) get raw heading angle from imu 
+    double heading_angle;
 
     /// Wheel separation, wrt the midpoint of the wheel width:
     double wheel_separation_h_;
@@ -81,6 +100,9 @@ private:
     // Mean of two rear wheel pose (radian)
     double rear_wheel_pos;
     double left_rear_wheel_joint, right_rear_wheel_joint;
+
+    // real robot only, rear wheel encoder position
+    int64_t encoder_pos_;
 
     // Front wheel steering pose (radian)
     float front_hinge_pos;
@@ -109,7 +131,6 @@ private:
     size_t steer_joints_size_;
 
     /// Speed limiters:
-    Commands last1_cmd_;
-    Commands last0_cmd_;
-    
+    // Commands last1_cmd_;
+    // Commands last0_cmd_;
 };
