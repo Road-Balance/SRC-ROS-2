@@ -67,7 +67,7 @@ PID
 
 ```
 ros2 launch cmd_to_src cmd_to_src.launch.py
-ros2 launch src_odometry src_bringup_new.launch.py
+ros2 launch src_odometry src_bringup.launch.py
 ```
 
 Gazebo SLAM
@@ -83,3 +83,12 @@ ros2 launch src_slam src_slam_gazebo.launch.py
 - [] 3D SLAM 도 할 수 있을까??
 - [] etc...
 
+SLAM
+
+```
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
+
+ros2 launch cmd_to_src cmd_to_src.launch.py
+ros2 launch src_slam src_slam.launch.py
+```
