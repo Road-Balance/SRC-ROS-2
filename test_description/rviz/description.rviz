@@ -48,33 +48,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        base_footprint:
+          Value: true
         base_link:
-          Value: true
-        camera_link:
-          Value: true
-        chassis:
-          Value: true
-        chassis_inertia:
-          Value: true
-        imu_link:
-          Value: true
-        laser:
-          Value: true
-        left_front_wheel:
-          Value: true
-        left_rear_wheel:
-          Value: true
-        left_steering_hinge:
-          Value: true
-        right_front_wheel:
-          Value: true
-        right_rear_wheel:
-          Value: true
-        right_steering_hinge:
-          Value: true
-        zed_camera_link:
-          Value: true
-        zed_camera_right_link:
           Value: true
       Marker Scale: 0.5
       Name: TF
@@ -82,29 +58,9 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        base_link:
-          chassis:
-            chassis_inertia:
-              {}
-            laser:
-              {}
-            left_rear_wheel:
-              {}
-            left_steering_hinge:
-              left_front_wheel:
-                {}
-            right_rear_wheel:
-              {}
-            right_steering_hinge:
-              right_front_wheel:
-                {}
-            zed_camera_link:
-              camera_link:
-                {}
-              imu_link:
-                {}
-              zed_camera_right_link:
-                {}
+        base_footprint:
+          base_link:
+            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -125,71 +81,15 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        chassis:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
-        chassis_inertia:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        imu_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        laser:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        left_front_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        left_rear_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        left_steering_hinge:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        right_front_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        right_rear_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        right_steering_hinge:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        zed_camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        zed_camera_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
       Name: RobotModel
       TF Prefix: ""
       Update Interval: 0
@@ -238,25 +138,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 0.4933992624282837
+      Distance: 0.7433145642280579
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.35942503809928894
-        Y: 0.12381640076637268
-        Z: 0.1462031453847885
+        X: -0.05725359171628952
+        Y: -0.11105469614267349
+        Z: 0.005578870885074139
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4753984212875366
+      Pitch: 0.29039856791496277
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.7503975033760071
+      Yaw: 0.5803986191749573
     Saved: ~
 Window Geometry:
   Displays:
