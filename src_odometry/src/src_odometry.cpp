@@ -1,7 +1,7 @@
 #include <memory>
 #include <boost/range/combine.hpp>
 
-#include "src_odometry/src_odometry_gazebo.hpp"
+#include "src_odometry/src_odometry.hpp"
 #include "src_odometry/odometry.hpp"
 
 SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
@@ -11,6 +11,8 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
   RCLCPP_INFO(get_logger(), "verbose : %s", verbose_ == true ? "true" : "false");
 
   auto publish_rate = declare_parameter("publish_rate", 50);
+  RCLCPP_INFO(get_logger(), "publish_rate : %d", publish_rate);
+
   auto interval = std::chrono::duration<double>(1.0 / publish_rate);
   pub_timer_ = this->create_wall_timer(interval, std::bind(&SRCOdometry::timerCallback, this));
 
@@ -32,9 +34,11 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
   wheel_radius_ = declare_parameter("wheel_radius", 0.0508);
   RCLCPP_INFO(get_logger(), "wheel_radius : %f", wheel_radius_);
 
+  // imu 쓴다면 사용하지는 않는 값임
   wheel_radius_multiplier_ = declare_parameter("wheel_radius_multiplier", 1.0);
   RCLCPP_INFO(get_logger(), "wheel_radius_multiplier : %f", wheel_radius_multiplier_);
 
+  // imu 쓴다면 사용하지는 않는 값임
   steer_pos_multiplier_ = declare_parameter("steer_pos_multiplier", 1.0);
   RCLCPP_INFO(get_logger(), "steer_pos_multiplier : %f", steer_pos_multiplier_);
 

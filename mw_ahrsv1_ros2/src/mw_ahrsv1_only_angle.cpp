@@ -40,10 +40,11 @@ private:
   std::string device_id_;
   std::string frame_id_;
   std::string child_frame_id_;
+  std::string pub_topic_name_; 
 
   bool verbose_;
-  int pub_rate;
-  bool pub_tf;
+  int pub_rate_;
+  bool pub_tf_;
   bool view_imu_;
 
   std::unique_ptr<tf2_ros::TransformBroadcaster> broadcaster_;
@@ -53,49 +54,35 @@ private:
 public:
   MW_AHRS() : Node("mw_ahrsv1_node") {
 
-    this->declare_parameter("deviceID", "/dev/MWAHRs");
-    this->declare_parameter("frame_id", "base_link");
-    this->declare_parameter("child_frame_id", "imu_link");
-    this->declare_parameter("publish_tf", true);
-    this->declare_parameter("view_imu", false);
-    this->declare_parameter("verbose", true);
-    this->declare_parameter("publish_rate", 50);
+    device_id_ = declare_parameter("device_id", "/dev/MWAHRs");
+    RCLCPP_INFO(get_logger(), "device_id_ : %s", device_id_.c_str());
 
-    // TODO : param 방식 바꾸기
-    // open_loop_ = declare_parameter("open_loop", false);
-    // RCLCPP_INFO(get_logger(), "open_loop_ : %s", open_loop_ == true ? "true" : "false");
+    frame_id_ = declare_parameter("frame_id", "base_link");
+    RCLCPP_INFO(get_logger(), "frame_id_ : %s", frame_id_.c_str());
 
-    rclcpp::Parameter deviceID = this->get_parameter("deviceID");
-    rclcpp::Parameter frame_id = this->get_parameter("frame_id");
-    rclcpp::Parameter child_frame_id = this->get_parameter("child_frame_id");
-    rclcpp::Parameter publish_tf = this->get_parameter("publish_tf");
-    rclcpp::Parameter verbose = this->get_parameter("verbose");
-    rclcpp::Parameter view_imu = this->get_parameter("view_imu");
-    rclcpp::Parameter publish_rate = this->get_parameter("publish_rate");
+    child_frame_id_ = declare_parameter("child_frame_id", "imu_link");
+    RCLCPP_INFO(get_logger(), "child_frame_id_ : %s", child_frame_id_.c_str());
 
-    device_id_ = deviceID.as_string();
-    frame_id_ = frame_id.as_string();
-    child_frame_id_ = child_frame_id.as_string();
-    pub_tf = publish_tf.as_bool();
-    verbose_ = verbose.as_bool();
-    view_imu_ = view_imu.as_bool();
-    pub_rate = publish_rate.as_int();
+    pub_topic_name_ = declare_parameter("pub_topic_name", "imu/data");
+    RCLCPP_INFO(get_logger(), "pub_topic_name_ : %s", pub_topic_name_.c_str());
 
-    RCLCPP_INFO(this->get_logger(),
-                "deviceID: %s, publish_tf: %s, verbose: %s, publish_rate: %s, "
-                "frame_id: %s, child_frame_id: %s",
-                deviceID.value_to_string().c_str(),
-                publish_tf.value_to_string().c_str(),
-                verbose.value_to_string().c_str(),
-                publish_rate.value_to_string().c_str(),
-                frame_id.value_to_string().c_str(),
-                child_frame_id.value_to_string().c_str());
+    pub_tf_ = declare_parameter("pub_tf", true);
+    RCLCPP_INFO(get_logger(), "pub_tf : %s", pub_tf_ == true ? "true" : "false");
+
+    verbose_ = declare_parameter("verbose", true);
+    RCLCPP_INFO(get_logger(), "verbose : %s", verbose_ == true ? "true" : "false");
+
+    view_imu_ = declare_parameter("view_imu", true);
+    RCLCPP_INFO(get_logger(), "view_imu : %s", view_imu_ == true ? "true" : "false");
+
+    pub_rate_ = declare_parameter("pub_rate", 50);
+    RCLCPP_INFO(get_logger(), "pub_rate : %d", pub_rate_);
 
     /// TOOD : publish topic 이름 parameter로 변경
     imu_data_pub_ = this->create_publisher<sensor_msgs::msg::Imu>(
-        "imu/data", rclcpp::QoS(1));
+        pub_topic_name_, rclcpp::QoS(1));
 
-    auto interval = (1000 / pub_rate);
+    auto interval = (1000 / pub_rate_);
     timer_ = this->create_wall_timer(std::chrono::milliseconds(interval),
                                      std::bind(&MW_AHRS::timer_cb, this));
 
@@ -182,7 +169,7 @@ public:
         imu_data_msg.orientation_covariance[4] =
             imu_data_msg.orientation_covariance[8] = 0;
 
-    if (pub_tf) {
+    if (pub_tf_) {
       geometry_msgs::msg::TransformStamped transform;
 
       transform.header.stamp = now;

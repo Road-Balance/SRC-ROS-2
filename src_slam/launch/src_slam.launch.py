@@ -27,7 +27,7 @@ def generate_launch_description():
     )
 
     src_bringup = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(src_odometry_pkg, 'launch', 'src_bringup.launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(src_odometry_pkg, 'launch', 'src_bringup_new.launch.py')),
     )
 
     # x y z yaw pitch roll frame_id child_frame_id period_in_ms

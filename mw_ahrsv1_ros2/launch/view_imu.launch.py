@@ -25,9 +25,10 @@ def generate_launch_description():
         name='mw_ahrsv1_ros2',
         output='log',
         parameters=[{
-            'deviceID' : '/dev/MWAHRs',
+            'device_id' : '/dev/MWAHRs',
             'frame_id' : 'base_link',
             'child_frame_id' : 'imu_link',
+            'pub_topic_name' : 'imu/data',
             'publish_tf' : True,
             'view_imu' : True,
             'verbose' : True,
