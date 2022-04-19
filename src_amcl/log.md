@@ -41,7 +41,6 @@ Waiting for the lifecycle_manager_navigation/is_active service...
 ```
 
 ```
-ros2 launch src_gazebo src_gazebo_racecourse.launch.py
 ros2 launch src_gazebo src_gazebo_racecourse.launch.py use_rviz:=false
 ros2 launch src_amcl amcl.launch.py
 => 되는데?
