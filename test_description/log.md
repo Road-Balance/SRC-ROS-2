@@ -53,3 +53,6 @@ hinge에서 나는 것 같아서 racecar보고 질량 수정함
 ![image](https://user-images.githubusercontent.com/12381733/164170370-01788062-713d-4e21-97fe-5b733a93b317.png)
 
 => 지혼자 춤을 춘다...
+
+왜 혼자 도는 것일지 생각을 해보자.
+

@@ -10,47 +10,55 @@ from std_msgs.msg import (
 
 # Twist Sub => Float64MultiArray Pub
 class RacecarController(Node):
-    def __init__(
-        self,
-        car_wheel_base,
-        car_wheel_threat,
-        max_abs_steer,
-        wheel_radius,
-        max_wheel_turn_speed,
-    ):
+    def __init__(self):
         super().__init__("racecar_controller")
 
-        self.declare_parameter('verbose', True)
+        max_wheel_turn_speed = 167
 
-        self._verbose = self.get_parameter('verbose').value
+        self.declare_parameter('verbose', True)
+        self.__verbose = self.get_parameter('verbose').value
+
+        # Distance from Front to Rear axel
+        self.declare_parameter('car_wheel_base', 0.325)
+        self.__L = self.get_parameter('car_wheel_base').value
+
+        # Distance from left to right wheels
+        self.declare_parameter('car_wheel_threat', 0.245)
+        self.__T = self.get_parameter('car_wheel_threat').value
+
+        # Calculated as the maximum steering angle the inner wheel can do
+        # we want maxsteer to be that of the "inside" tire, and since it is 0.6 in gazebo, we
+        # set our ideal steering angle max to be less than that, based on geometry
+        self.declare_parameter('max_abs_steer', 0.7853)
+        self.__maxsteer_inside = self.get_parameter('max_abs_steer').value
+
+        # Wheel Radius (from urdf)
+        self.declare_parameter('wheel_radius', 0.05)
+        self.__wheel_radius = self.get_parameter('wheel_radius').value
+
+        # Radians per second, that with the current wheel radius would make 44 Km/h max linear vel
+        # 최대속도 30km/h 기준
+        # 30 * 1000 / 3600 / 0.05 = 167
+        # 30 * 1000 / 3600 / 0.0508 = 164
+        self.declare_parameter('max_wheel_turn_speed', 167)
+        self.__max_wheel_turn_speed = self.get_parameter('max_wheel_turn_speed').value
 
         # initial velocity and tire angle are 0
         self.x = 0
         self.z = 0
 
-        self.L = car_wheel_base
-        self.T = car_wheel_threat
-        self.wheel_radius = wheel_radius
-        self._max_wheel_turn_speed = max_wheel_turn_speed
-
         # rad / sec
         self.max_steering_speed = 2.0
         self.acceptable_steer_error = 0.1
 
-        # we want maxsteer to be that of the "inside" tire, and since it is 0.6 in gazebo, we
-        # set our ideal steering angle max to be less than that, based on geometry
-        self.maxsteerInside = max_abs_steer
         # tan(maxsteerInside) = wheelbase/radius --> solve for max radius at this angle
         # radius of inside tire is rMax, so radius of the ideal middle tire (R_MIN) is rMax+treadwidth/2
-        R_Min_interior = self.L / math.tan(self.maxsteerInside)
-        self.R_Min_baselink = R_Min_interior + (self.T / 2.0)
+        R_Min_interior = self.__L / math.tan(self.__maxsteer_inside)
+        self.__R_Min_baselink = R_Min_interior + (self.__T / 2.0)
         self.get_logger().info(
             "################ MINIMUM TURNING RADIUS ACKERMAN==="
-            + str(self.R_Min_baselink)
+            + str(self.__R_Min_baselink)
         )
-
-        # TODO
-        # self._check_cmd_vel_ready()
 
         # ROS 2 Parts
         self.cmd_vel_sub = self.create_subscription(
@@ -63,6 +71,7 @@ class RacecarController(Node):
         self.throttling_pub = self.create_publisher(
             Float64MultiArray, "/velocity_controller/commands", 10
         )
+
         # For Odometry Implementation
         self.steering_pub_middle = self.create_publisher(
             Float64, "/steering_angle_middle", 10
@@ -78,16 +87,6 @@ class RacecarController(Node):
         self.steering_msg_middle = Float64()
         self.throttling_msg_middle = Float64()
 
-    # def _check_cmd_vel_ready(self):
-    #     data = None
-    #     while data is None and rclpy.ok():
-    #         try:
-    #             data = rclpy.wait_for_message('/cmd_vel', Twist, timeout=1.0)
-    #             self.process_cmd_vel_data(data)
-    #             rclpy.get_logger().info("Current cmd_vel READY=>")
-    #         except:
-    #             rclpy.get_logger().info("Current cmd_vel not ready yet, retrying...")
-
     def cmd_vel_callback(self, data):
         """
         We get the linear velocity and the desired Turning Angular velocity.
@@ -101,17 +100,17 @@ class RacecarController(Node):
         # We limit the minimum value of the Steering Radius
         # Todo Process negatives
 
-        if self._verbose:
+        if self.__verbose:
             self.get_logger().info("self.linear_velocity=" + str(self.linear_velocity))
             self.get_logger().info("data.angular.z=" + str(data.angular.z))
 
         if data.angular.z != 0.0:
             steering_radius_raw = abs(self.linear_velocity / data.angular.z)
-            if self._verbose:
+            if self.__verbose:
                 self.get_logger().info("steering_radius_raw=" + str(steering_radius_raw))
-                self.get_logger().info("R_Min_baselink=" + str(self.R_Min_baselink))
+                self.get_logger().info("R_Min_baselink=" + str(self.__R_Min_baselink))
 
-            self.steering_radius = max(abs(steering_radius_raw), self.R_Min_baselink)
+            self.steering_radius = max(abs(steering_radius_raw), self.__R_Min_baselink)
             # We consider that turning left should be positive
             self.turning_sign = -1 * math.copysign(1, data.angular.z)
             # Going Fowards is positive
@@ -127,12 +126,12 @@ class RacecarController(Node):
 
     def limit_wheel_speed(self, in_speed):
 
-        if in_speed > self._max_wheel_turn_speed:
+        if in_speed > self.__max_wheel_turn_speed:
             self.get_logger().warn("MAX Wheel Speed!")
-            in_speed = self._max_wheel_turn_speed
-        elif in_speed < -1.0 * self._max_wheel_turn_speed:
+            in_speed = self.__max_wheel_turn_speed
+        elif in_speed < -1.0 * self.__max_wheel_turn_speed:
             self.get_logger().warn("MAX Wheel Speed!")
-            in_speed = -1.0 * self._max_wheel_turn_speed
+            in_speed = -1.0 * self.__max_wheel_turn_speed
 
         return in_speed
 
@@ -155,40 +154,40 @@ class RacecarController(Node):
             # Make this sign multiplication because when going backwards angular is inverted, so it ha sto invert the sign
             turning_radius_right_rear_wheel = turning_radius_base_link + (
                 -1 * self.turning_sign * self.linear_sign
-            ) * (self.T / 2.0)
+            ) * (self.__T / 2.0)
             vel_right_rear_wheel = omega_base_link * turning_radius_right_rear_wheel
             wheel_turnig_speed_right_rear_wheel = self.limit_wheel_speed(
-                vel_right_rear_wheel / self.wheel_radius
+                vel_right_rear_wheel / self.__wheel_radius
             )
 
             # Default Interior = Left WHeel
             # Make this sign multiplication because when going backwards angular is inverted, so it ha sto invert the sign
             turning_radius_left_rear_wheel = turning_radius_base_link + (
                 1 * self.turning_sign * self.linear_sign
-            ) * (self.T / 2.0)
+            ) * (self.__T / 2.0)
             vel_left_rear_wheel = omega_base_link * turning_radius_left_rear_wheel
             wheel_turnig_speed_left_rear_wheel = self.limit_wheel_speed(
-                vel_left_rear_wheel / self.wheel_radius
+                vel_left_rear_wheel / self.__wheel_radius
             )
 
             turning_radius_com = turning_radius_base_link
             vel_com = omega_base_link * turning_radius_com
             wheel_turnig_speed_com = self.limit_wheel_speed(
-                vel_com / self.wheel_radius
+                vel_com / self.__wheel_radius
             )
         else:
             # Not turning , there fore they are all the same
             # Default Interior = Right WHeel
             wheel_turnig_speed_right_rear_wheel = self.limit_wheel_speed(
-                vel_base_link / self.wheel_radius
+                vel_base_link / self.__wheel_radius
             )
             # Default Interior = Left WHeel
             wheel_turnig_speed_left_rear_wheel = self.limit_wheel_speed(
-                vel_base_link / self.wheel_radius
+                vel_base_link / self.__wheel_radius
             )
 
             wheel_turnig_speed_com = self.limit_wheel_speed(
-                vel_base_link / self.wheel_radius
+                vel_base_link / self.__wheel_radius
             )
 
         #### END REAR WHeel Calculations
@@ -197,65 +196,65 @@ class RacecarController(Node):
         if self.steering_radius >= 0 and vel_base_link != 0:
             turning_radius_middle = turning_radius_base_link
             distance_to_turning_point_middle_wheel = math.sqrt(
-                pow(self.L, 2) + pow(turning_radius_middle, 2)
+                pow(self.__L, 2) + pow(turning_radius_middle, 2)
             )
             vel_middle_front_wheel = (
                 omega_base_link * distance_to_turning_point_middle_wheel
             )
 
             wheel_turnig_speed_middle_wheel = self.limit_wheel_speed(
-                vel_middle_front_wheel / self.wheel_radius
+                vel_middle_front_wheel / self.__wheel_radius
             )
-            alfa_middle_wheel = math.atan( self.L / turning_radius_middle )
+            alfa_middle_wheel = math.atan( self.__L / turning_radius_middle )
 
             turning_radius_right_front_wheel = turning_radius_right_rear_wheel
             distance_to_turning_point_right_front_wheel = math.sqrt(
-                pow(self.L, 2) + pow(turning_radius_right_front_wheel, 2)
+                pow(self.__L, 2) + pow(turning_radius_right_front_wheel, 2)
             )
             vel_right_front_wheel = (
                 omega_base_link * distance_to_turning_point_right_front_wheel
             )
 
             wheel_turnig_speed_right_front_wheel = self.limit_wheel_speed(
-                vel_right_front_wheel / self.wheel_radius
+                vel_right_front_wheel / self.__wheel_radius
             )
-            # alfa_right_front_wheel = math.atan(self.L / turning_radius_right_front_wheel)
-            # alfa_right_front_wheel = math.atan( self.L / turning_radius_middle )
-            # alfa_right_front_wheel = math.atan((omega_base_link * self.L ) / vel_base_link)
-            alfa_right_front_wheel = math.asin((omega_base_link * self.L ) / vel_base_link)
+            # alfa_right_front_wheel = math.atan(self.__L / turning_radius_right_front_wheel)
+            # alfa_right_front_wheel = math.atan( self.__L / turning_radius_middle )
+            # alfa_right_front_wheel = math.atan((omega_base_link * self.__L ) / vel_base_link)
+            alfa_right_front_wheel = math.asin((omega_base_link * self.__L ) / vel_base_link)
 
             turning_radius_left_front_wheel = turning_radius_left_rear_wheel
             distance_to_turning_point_left_front_wheel = math.sqrt(
-                pow(self.L, 2) + pow(turning_radius_left_front_wheel, 2)
+                pow(self.__L, 2) + pow(turning_radius_left_front_wheel, 2)
             )
             vel_left_front_wheel = (
                 omega_base_link * distance_to_turning_point_left_front_wheel
             )
             wheel_turnig_speed_left_front_wheel = self.limit_wheel_speed(
-                vel_left_front_wheel / self.wheel_radius
+                vel_left_front_wheel / self.__wheel_radius
             )
-            # alfa_left_front_wheel = math.atan(self.L / turning_radius_left_front_wheel)
-            # alfa_left_front_wheel = math.atan( self.L / turning_radius_middle )
-            # alfa_left_front_wheel = math.atan((omega_base_link * self.L ) / vel_base_link)
-            alfa_left_front_wheel = math.asin((omega_base_link * self.L ) / vel_base_link)
+            # alfa_left_front_wheel = math.atan(self.__L / turning_radius_left_front_wheel)
+            # alfa_left_front_wheel = math.atan( self.__L / turning_radius_middle )
+            # alfa_left_front_wheel = math.atan((omega_base_link * self.__L ) / vel_base_link)
+            alfa_left_front_wheel = math.asin((omega_base_link * self.__L ) / vel_base_link)
         else:
             wheel_turnig_speed_middle_wheel = self.limit_wheel_speed(
-                vel_base_link / self.wheel_radius
+                vel_base_link / self.__wheel_radius
             )
             alfa_middle_wheel = 0.0
 
             wheel_turnig_speed_right_front_wheel = self.limit_wheel_speed(
-                vel_base_link / self.wheel_radius
+                vel_base_link / self.__wheel_radius
             )
             alfa_right_front_wheel = 0.0
 
             wheel_turnig_speed_left_front_wheel = self.limit_wheel_speed(
-                vel_base_link / self.wheel_radius
+                vel_base_link / self.__wheel_radius
             )
             alfa_left_front_wheel = 0.0
         #### END FRONT WHeel Calculations
 
-        if self._verbose:
+        if self.__verbose:
             print("#####################")
             print("@ INPUT VALUES @")
             print("vel_base_link=" + str(vel_base_link))
@@ -290,7 +289,7 @@ class RacecarController(Node):
             right_steering,
             left_steering,
         ]
-        raw_wheel_speed = vel_base_link / self.wheel_radius
+        raw_wheel_speed = vel_base_link / self.__wheel_radius
         # self.throttling_msg.data = [
         #     raw_wheel_speed,
         #     raw_wheel_speed,
@@ -308,7 +307,7 @@ class RacecarController(Node):
         self.steering_msg_middle.data = (round(right_steering, 5) + round(left_steering, 5)) / 2
         self.throttling_msg_middle.data = wheel_turnig_speed_com
 
-        if self._verbose:
+        if self.__verbose:
             self.get_logger().info(f"""
                 raw_wheel_speed : {raw_wheel_speed:.2}
                 alfa_left_front_wheel : {alfa_left_front_wheel:.6}
@@ -325,36 +324,12 @@ def main(args=None):
 
     rclpy.init(args=args)
 
-    # Distance from Front to Rear axel
-    car_wheel_base = 0.325
-
-    # Distance from left to right wheels
-    car_wheel_threat = 0.245
-
-    # Calculated as the  maximum steering angle the inner wheel can do
-    max_abs_steer = 0.7853
-
-    # Wheel Radius (from urdf)
-    wheel_radius = 0.05
-
-    # Radians per second, that with the current wheel radius would make 44 Km/h max linear vel
-    # 최대속도 30km/h 기준
-    # 30 * 1000 / 3600 / 0.05 = 167
-    max_wheel_turn_speed = 167
-
-    racecar_controller = RacecarController(
-        car_wheel_base,
-        car_wheel_threat,
-        max_abs_steer,
-        wheel_radius,
-        max_wheel_turn_speed,
-    )
+    racecar_controller = RacecarController()
 
     rclpy.spin(racecar_controller)
     racecar_controller.destroy_node()
 
     rclpy.shutdown()
-
 
 if __name__ == "__main__":
     main()

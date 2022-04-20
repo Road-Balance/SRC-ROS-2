@@ -7,40 +7,41 @@
 
   <gazebo reference="base_link">
     <material>${body_color}</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>100.2</mu1>
+    <mu2>100.2</mu2>
+    <fdir1 value="1 0 0" />
     <selfCollide>true</selfCollide>
     <gravity>true</gravity>
   </gazebo>
 
   <gazebo reference="right_rear_wheel">
     <material>${wheel_color}</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>1000.0</mu1>
+    <mu2>1000.0</mu2>
     <fdir1 value="1 0 0" />
     <selfCollide>true</selfCollide>
   </gazebo>
 
   <gazebo reference="left_rear_wheel">
     <material>${wheel_color}</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>1000.0</mu1>
+    <mu2>1000.0</mu2>
     <fdir1 value="1 0 0" />
     <selfCollide>true</selfCollide>
   </gazebo>
 
   <gazebo reference="right_front_wheel">
     <material>${wheel_color}</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>1000.0</mu1>
+    <mu2>1000.0</mu2>
     <fdir1 value="1 0 0" />
     <selfCollide>true</selfCollide>
   </gazebo>
 
   <gazebo reference="left_front_wheel">
     <material>${wheel_color}</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>1000.0</mu1>
+    <mu2>1000.0</mu2>
     <fdir1 value="1 0 0" />
     <selfCollide>true</selfCollide>
   </gazebo>

@@ -9,36 +9,37 @@
   </material>
   <gazebo reference="base_link">
     <material>Gazebo/Silver</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>100.2</mu1>
+    <mu2>100.2</mu2>
+    <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
     <gravity>true</gravity>
   </gazebo>
   <gazebo reference="right_rear_wheel">
     <material>Gazebo/Black</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>1000.0</mu1>
+    <mu2>1000.0</mu2>
     <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
   </gazebo>
   <gazebo reference="left_rear_wheel">
     <material>Gazebo/Black</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>1000.0</mu1>
+    <mu2>1000.0</mu2>
     <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
   </gazebo>
   <gazebo reference="right_front_wheel">
     <material>Gazebo/Black</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>1000.0</mu1>
+    <mu2>1000.0</mu2>
     <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
   </gazebo>
   <gazebo reference="left_front_wheel">
     <material>Gazebo/Black</material>
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
+    <mu1>1000.0</mu1>
+    <mu2>1000.0</mu2>
     <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
   </gazebo>
@@ -202,14 +203,11 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="0.100"/>
       <inertia ixx="4E-06" ixy="0" ixz="0" iyy="4E-06" iyz="0" izz="4E-06"/>
-      <geometry>
-        <cylinder length="0.01" radius="0.01"/>
-      </geometry>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder length="0.01" radius="0.01"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/left_steering_hinge.STL"/>
       </geometry>
       <material name="grey"/>
     </visual>
@@ -242,7 +240,7 @@
     </collision>
   </link>
   <joint name="right_front_wheel_joint" type="continuous">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <origin rpy="0 1.5707 0" xyz="0 0 0"/>
     <parent link="right_steering_hinge"/>
     <child link="right_front_wheel"/>
     <axis xyz="0.0 1.0 0.0"/>
@@ -253,14 +251,11 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="0.100"/>
       <inertia ixx="4E-06" ixy="0" ixz="0" iyy="4E-06" iyz="0" izz="4E-06"/>
-      <geometry>
-        <cylinder length="0.01" radius="0.01"/>
-      </geometry>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder length="0.01" radius="0.01"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/left_steering_hinge.STL"/>
       </geometry>
       <material name="grey"/>
     </visual>
@@ -293,7 +288,7 @@
     </collision>
   </link>
   <joint name="left_front_wheel_joint" type="continuous">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <origin rpy="0 1.5707 0" xyz="0 0 0"/>
     <parent link="left_steering_hinge"/>
     <child link="left_front_wheel"/>
     <axis xyz="0.0 1.0 0.0"/>
