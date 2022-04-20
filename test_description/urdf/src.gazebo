@@ -1,53 +1,56 @@
 <?xml version="1.0" ?>
 <robot name="src" xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
-<xacro:property name="body_color" value="Gazebo/Silver" />
+  <xacro:property name="body_color" value="Gazebo/Silver" />
+  <xacro:property name="wheel_color" value="Gazebo/Black" />
+  <xacro:property name="laser_color" value="Gazebo/DarkGrey" />
 
-<gazebo>
-  <plugin name="control" filename="libgazebo_ros_control.so"/>
-</gazebo>
-<gazebo reference="base_link">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-  <gravity>true</gravity>
-</gazebo>
+  <gazebo reference="base_link">
+    <material>${body_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+    <gravity>true</gravity>
+  </gazebo>
 
-<gazebo reference="rear_right_wheel_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="right_rear_wheel">
+    <material>${wheel_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <fdir1 value="1 0 0" />
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="rear_left_wheel_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="left_rear_wheel">
+    <material>${wheel_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <fdir1 value="1 0 0" />
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="front_left_wheel_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="right_front_wheel">
+    <material>${wheel_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <fdir1 value="1 0 0" />
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="front_right_wheel_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="left_front_wheel">
+    <material>${wheel_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <fdir1 value="1 0 0" />
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
-<gazebo reference="laser_1">
-  <material>${body_color}</material>
-  <mu1>0.2</mu1>
-  <mu2>0.2</mu2>
-  <selfCollide>true</selfCollide>
-</gazebo>
+  <gazebo reference="laser">
+    <material>${laser_color}</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <selfCollide>true</selfCollide>
+  </gazebo>
 
   <ros2_control name="GazeboSystem" type="system">
     <hardware>

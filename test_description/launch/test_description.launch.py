@@ -14,7 +14,7 @@ def generate_launch_description():
 
     pkg_path = os.path.join(get_package_share_directory("test_description"))
     rviz_config_file = os.path.join(pkg_path, "rviz", "description.rviz")
-    xacro_file = os.path.join(pkg_path, "urdf", "src.urdf.xacro")
+    xacro_file = os.path.join(pkg_path, "urdf", "src_description.urdf.xacro")
 
     # Get URDF via xacro
     robot_description_content = Command(

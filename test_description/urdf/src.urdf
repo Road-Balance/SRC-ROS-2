@@ -7,9 +7,6 @@
   <material name="silver">
     <color rgba="0.700 0.700 0.700 1.000"/>
   </material>
-  <gazebo>
-    <plugin filename="libgazebo_ros_control.so" name="control"/>
-  </gazebo>
   <gazebo reference="base_link">
     <material>Gazebo/Silver</material>
     <mu1>0.2</mu1>
@@ -17,32 +14,36 @@
     <selfCollide>true</selfCollide>
     <gravity>true</gravity>
   </gazebo>
-  <gazebo reference="rear_right_wheel_1">
-    <material>Gazebo/Silver</material>
+  <gazebo reference="right_rear_wheel">
+    <material>Gazebo/Black</material>
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
+    <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
   </gazebo>
-  <gazebo reference="rear_left_wheel_1">
-    <material>Gazebo/Silver</material>
+  <gazebo reference="left_rear_wheel">
+    <material>Gazebo/Black</material>
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
+    <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
   </gazebo>
-  <gazebo reference="front_left_wheel_1">
-    <material>Gazebo/Silver</material>
+  <gazebo reference="right_front_wheel">
+    <material>Gazebo/Black</material>
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
+    <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
   </gazebo>
-  <gazebo reference="front_right_wheel_1">
-    <material>Gazebo/Silver</material>
+  <gazebo reference="left_front_wheel">
+    <material>Gazebo/Black</material>
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
+    <fdir1 value="1 0 0"/>
     <selfCollide>true</selfCollide>
   </gazebo>
-  <gazebo reference="laser_1">
-    <material>Gazebo/Silver</material>
+  <gazebo reference="laser">
+    <material>Gazebo/DarkGrey</material>
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
     <selfCollide>true</selfCollide>
@@ -126,14 +127,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -151,14 +152,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0 0.089625 -0.050754"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/right_rear_wheel.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/right_rear_wheel.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0 0.089625 -0.050754"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/right_rear_wheel.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/right_rear_wheel.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -167,6 +168,7 @@
     <parent link="base_link"/>
     <child link="right_rear_wheel"/>
     <axis xyz="0.0 1.0 0.0"/>
+    <limit effort="10" velocity="100"/>
   </joint>
   <link name="left_rear_wheel">
     <inertial>
@@ -177,14 +179,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.0 -0.089625 -0.050754"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/left_rear_wheel.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/left_rear_wheel.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.0 -0.089625 -0.050754"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/left_rear_wheel.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/left_rear_wheel.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -193,11 +195,12 @@
     <parent link="base_link"/>
     <child link="left_rear_wheel"/>
     <axis xyz="0.0 1.0 0.0"/>
+    <limit effort="10" velocity="100"/>
   </joint>
   <link name="right_steering_hinge">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-      <mass value="0.0002"/>
+      <mass value="0.100"/>
       <inertia ixx="4E-06" ixy="0" ixz="0" iyy="4E-06" iyz="0" izz="4E-06"/>
       <geometry>
         <cylinder length="0.01" radius="0.01"/>
@@ -227,14 +230,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.275 0.08875 -0.050754"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/right_front_wheel.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/right_front_wheel.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.275 0.08875 -0.050754"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/right_front_wheel.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/right_front_wheel.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -243,11 +246,12 @@
     <parent link="right_steering_hinge"/>
     <child link="right_front_wheel"/>
     <axis xyz="0.0 1.0 0.0"/>
+    <limit effort="10" velocity="100"/>
   </joint>
   <link name="left_steering_hinge">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-      <mass value="0.0002"/>
+      <mass value="0.100"/>
       <inertia ixx="4E-06" ixy="0" ixz="0" iyy="4E-06" iyz="0" izz="4E-06"/>
       <geometry>
         <cylinder length="0.01" radius="0.01"/>
@@ -266,7 +270,7 @@
     <parent link="base_link"/>
     <child link="left_steering_hinge"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10" lower="-0.7853" upper="0.7853" velocity="100"/>
+    <limit effort="10" lower="-1.0" upper="1.0" velocity="100"/>
   </joint>
   <link name="left_front_wheel">
     <inertial>
@@ -277,14 +281,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="-0.275 -0.08875 -0.050754"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/left_front_wheel.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/left_front_wheel.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="-0.275 -0.08875 -0.050754"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/left_front_wheel.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/left_front_wheel.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -293,6 +297,7 @@
     <parent link="left_steering_hinge"/>
     <child link="left_front_wheel"/>
     <axis xyz="0.0 1.0 0.0"/>
+    <limit effort="10" velocity="100"/>
   </joint>
   <link name="laser">
     <inertial>
@@ -303,14 +308,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/laser.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/laser.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="package://test_description/meshes/laser.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/home/kimsooyoung/ros2_ws/install/test_description/share/test_description/meshes/laser.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
