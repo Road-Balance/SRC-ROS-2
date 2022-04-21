@@ -83,7 +83,7 @@ def generate_launch_description():
     # Racecar controller launch
     racecar_control = Node(
         package='src_gazebo_controller',
-        executable='racecar_controller_v2',
+        executable='src_gazebo_controller',
         output='screen',
         parameters=[
             {
