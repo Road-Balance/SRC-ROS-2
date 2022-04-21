@@ -4,5 +4,4 @@
 
 ## TODO
 
-* name change from racecar => src
 * adapt real src Figure
