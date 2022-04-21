@@ -111,6 +111,7 @@ class SRCGazeboController(Node):
 
             self.steering_radius = max(abs(steering_radius_raw), self.__R_Min_baselink)
             # We consider that turning left should be positive
+            # Return the value of the first parameter and the sign of the second parameter
             self.turning_sign = -1 * math.copysign(1, data.angular.z)
             # Going Fowards is positive
             self.linear_sign = math.copysign(1, self.linear_velocity)
@@ -190,21 +191,8 @@ class SRCGazeboController(Node):
             )
 
         #### END REAR WHeel Calculations
-
-        # Step 2: Calculate the Wheel Turning Speed for the Front wheels and the STeering angle
+        # Step 2: Calculate the Wheel Turning Speed for the Front wheels and the Steering angle
         if self.steering_radius >= 0 and vel_base_link != 0:
-            turning_radius_middle = turning_radius_base_link
-            distance_to_turning_point_middle_wheel = math.sqrt(
-                pow(self.__L, 2) + pow(turning_radius_middle, 2)
-            )
-            vel_middle_front_wheel = (
-                omega_base_link * distance_to_turning_point_middle_wheel
-            )
-
-            wheel_turnig_speed_middle_wheel = self.limit_wheel_speed(
-                vel_middle_front_wheel / self.__wheel_radius
-            )
-            alfa_middle_wheel = math.atan( self.__L / turning_radius_middle )
 
             turning_radius_right_front_wheel = turning_radius_right_rear_wheel
             distance_to_turning_point_right_front_wheel = math.sqrt(
@@ -217,6 +205,7 @@ class SRCGazeboController(Node):
             wheel_turnig_speed_right_front_wheel = self.limit_wheel_speed(
                 vel_right_front_wheel / self.__wheel_radius
             )
+
             # alfa_right_front_wheel = math.atan(self.__L / turning_radius_right_front_wheel)
             # alfa_right_front_wheel = math.atan( self.__L / turning_radius_middle )
             # alfa_right_front_wheel = math.atan((omega_base_link * self.__L ) / vel_base_link)
@@ -236,12 +225,8 @@ class SRCGazeboController(Node):
             # alfa_left_front_wheel = math.atan( self.__L / turning_radius_middle )
             # alfa_left_front_wheel = math.atan((omega_base_link * self.__L ) / vel_base_link)
             alfa_left_front_wheel = math.asin((omega_base_link * self.__L ) / vel_base_link)
-        else:
-            wheel_turnig_speed_middle_wheel = self.limit_wheel_speed(
-                vel_base_link / self.__wheel_radius
-            )
-            alfa_middle_wheel = 0.0
 
+        else:
             wheel_turnig_speed_right_front_wheel = self.limit_wheel_speed(
                 vel_base_link / self.__wheel_radius
             )
@@ -251,8 +236,8 @@ class SRCGazeboController(Node):
                 vel_base_link / self.__wheel_radius
             )
             alfa_left_front_wheel = 0.0
-        #### END FRONT WHeel Calculations
 
+        #### END FRONT WHeel Calculations
         if self.__verbose:
             print("#####################")
             print("@ INPUT VALUES @")
@@ -289,12 +274,6 @@ class SRCGazeboController(Node):
             left_steering,
         ]
         raw_wheel_speed = vel_base_link / self.__wheel_radius
-        # self.throttling_msg.data = [
-        #     raw_wheel_speed,
-        #     raw_wheel_speed,
-        #     raw_wheel_speed,
-        #     raw_wheel_speed,
-        # ]
 
         self.throttling_msg.data = [
             wheel_turnig_speed_left_rear_wheel,
