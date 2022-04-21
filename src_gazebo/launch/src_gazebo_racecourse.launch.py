@@ -116,22 +116,9 @@ def generate_launch_description():
     )
 
     # Racecar controller launch
-    racecar_control = Node(
+    src_gazebo_controller = Node(
         package='src_gazebo_controller',
-        # executable='racecar_controller',
-        executable='racecar_controller_v2',
-        output='screen',
-        parameters=[
-            {
-                "verbose": False,
-            }
-        ],
-    )
-
-    racecar_control = Node(
-        package='src_gazebo_controller',
-        # executable='racecar_controller',
-        executable='racecar_controller_v2',
+        executable='src_gazebo_controller',
         output='screen',
         parameters=[
             {
@@ -202,7 +189,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=load_velocity_controller,
-                on_exit=[racecar_control],
+                on_exit=[src_gazebo_controller],
             )
         ),
         RegisterEventHandler(

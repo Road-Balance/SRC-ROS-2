@@ -2,26 +2,13 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import Float64
+from gazebo_msgs.srv import GetEntityState
 
-from std_srvs.srv import Trigger
-from gazebo_msgs.srv import SetEntityState, GetEntityState
-
-import numpy as np
-
-
-# truth_pub=rospy.Publisher('/ground_truth_x', Float64, queue_size=1)
-# noisy_odom_pub = rospy.Publisher('/noisy_odom_x', Float64, queue_size=1)
-
-# get_model_srv = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
-# teleport_service = rospy.ServiceProxy('/reset_model_pose', Trigger)
 
 """
-OdomUtilNode에는 두 Class가 포함되어 있음
-- TeleportClient
-    reset_model_pose service call을 통해 로봇 위치 재설정 
-    teleport_service.py 참고
+OdomUtilNode에는 Class가 포함되어 있음
 - EntityStateClient
-    Gazebo에서 neuronbot2의 x 위치 즉, pose.position.x를 주기적으로 받는다.
+    Gazebo에서 로봇의 x 위치 즉, pose.position.x를 주기적으로 받는다.
     이것이 ground_truth_x가 됨
     ground_truth_x > 10 이면 로봇 위치 재설정
 x 위치 변화량에 따라 noisy_odom을 만든 뒤 noisy_odom_x topic publish를 한다.
@@ -32,48 +19,52 @@ class EntityStateClient(Node):
     def __init__(self, model_name, verbose):
         super().__init__('reset_model_client')
 
-        self._verbose = verbose
-        self._entity_state_client = self.create_client(
+        self.__verbose = verbose
+        self.__entity_state_client = self.create_client(
             GetEntityState, 'get_entity_state'
         )
 
-        while not self._entity_state_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info(' [gazebo/get_entity_state] service not available, waiting again...')
+        while not self.__entity_state_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().warn(' [gazebo/get_entity_state] service not available, waiting again...')
 
-        self._entity_state_req = GetEntityState.Request()
-        self._entity_state_req.name = model_name
+        self.__entity_state_req = GetEntityState.Request()
+        self.__entity_state_req.name = model_name
 
         self.get_logger().info('==== Entity State Service Client Ready ====')
 
     def send_request(self):
         
-        future = self._entity_state_client.call_async(self._entity_state_req)
+        future = self.__entity_state_client.call_async(self.__entity_state_req)
 
-        if self._verbose:
+        if self.__verbose:
             self.get_logger().info('=== Request Sended ===')
         
         return future
 
 class OdomUtilNode(Node):
-
+    """ 
+    0.1초마다 Gazebo에서의 Ground Truth 위치를 갱신받아 topic publish한다.
+    """
     def __init__(self):
         super().__init__('odometry_util_node')
 
-        self.declare_parameter('model_name', 'racecar')
-        self.declare_parameter('alpha', 0.4)
+        self.declare_parameter('model_name', 'src_ackermann')
+        self.__model_name = self.get_parameter('model_name').value
+        
         self.declare_parameter('verbose', False)
+        self.__verbose = self.get_parameter('verbose').value
 
-        self._model_name = self.get_parameter('model_name').value
-        self._alpha = self.get_parameter('alpha').value
-        self._verbose = self.get_parameter('verbose').value
+        self.declare_parameter('update_rate', 10)
+        self.__update_rate = self.get_parameter('update_rate').value
 
-        self._entity_state_client = EntityStateClient(self._model_name, self._verbose)
+        self.__entity_state_client = EntityStateClient(self.__model_name, self.__verbose)
+        self.__timer = self.create_timer( 1 / self.__update_rate, self.timer_callback)
 
-        self._ground_truth_publisher_x = self.create_publisher(
+        self.__ground_truth_publisher_x = self.create_publisher(
             Float64, 'ground_truth_x', 1
         )
 
-        self._ground_truth_publisher_y = self.create_publisher(
+        self.__ground_truth_publisher_y = self.create_publisher(
             Float64, 'ground_truth_y', 1
         )
 
@@ -83,15 +74,26 @@ class OdomUtilNode(Node):
 
         self.gt_x = Float64()
         self.gt_y = Float64()
-
         self.gt_list = [1.0]
 
-        self._timer = self.create_timer(0.1, self.timer_callback)
+    def getMinMaxInfo(self):
+
+        max_gt = max(self.gt_list)
+        min_gt = min(self.gt_list)
+
+        if (self.gt_x.data < min_gt) | (self.gt_x.data > max_gt):
+            self.gt_list.append(self.gt_x.data)
+
+        max_gt = max(self.gt_list)
+        min_gt = min(self.gt_list)
+
+        if(self.__verbose): 
+            self.get_logger().info(f"max_gt : {max_gt}, min_gt : {min_gt}, max_gt - min_gt : {max_gt - min_gt}")
 
     def timer_callback(self):
 
-        state_client_future = self._entity_state_client.send_request()
-        rclpy.spin_until_future_complete(self._entity_state_client, state_client_future)
+        state_client_future = self.__entity_state_client.send_request()
+        rclpy.spin_until_future_complete(self.__entity_state_client, state_client_future)
 
         if state_client_future.done():
             try:
@@ -104,29 +106,17 @@ class OdomUtilNode(Node):
                 ground_truth_x = state_response.state.pose.position.x
                 ground_truth_y = state_response.state.pose.position.y
             finally:
-                if self._verbose:
+                if self.__verbose:
                     self.get_logger().warn('==== Entity Client Execution Done ====')
 
-        if self._verbose:
+        if self.__verbose:
             self.get_logger().info(f"Got ground truth pose.position.x: {ground_truth_x}" )
 
         self.gt_x.data = ground_truth_x
         self.gt_y.data = ground_truth_y
-        
-        max_gt = max(self.gt_list)
-        min_gt = min(self.gt_list)
 
-        if (self.gt_x.data < min_gt) | (self.gt_x.data > max_gt):
-            self.gt_list.append(self.gt_x.data)
-
-        max_gt = max(self.gt_list)
-        min_gt = min(self.gt_list)
-
-        if(self._verbose): 
-            self.get_logger().info(f"max_gt : {max_gt}, min_gt : {min_gt}, max_gt - min_gt : {max_gt - min_gt}")
-
-        self._ground_truth_publisher_x.publish(self.gt_x)
-        self._ground_truth_publisher_y.publish(self.gt_y)
+        self.__ground_truth_publisher_x.publish(self.gt_x)
+        self.__ground_truth_publisher_y.publish(self.gt_y)
 
 def main(args=None):
     rclpy.init(args=args)
