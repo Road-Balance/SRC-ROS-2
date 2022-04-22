@@ -76,3 +76,10 @@ what difference between voxel layer and obstacle layer ?
 VoxelLayer tracks obstacles in 3d, whereas obstacle layer only does two. If you only have a planar laser for instance, then 2d is fine. If you have a 3d sensor or sensors at multiple levels, you may want VoxelLayer.
 ```
 
+회전이 잘 안된다. 지지지직 거림
+
+옆으로 가는 걸 거의 못하네, 스무스하게 해주는 걸 많이 해야 함
+
+최소 속도를 높여야 그나마 가는데, 이 값이 무엇인지 공부하자
+
+현재는 min_approach_linear_velocity로 추정중

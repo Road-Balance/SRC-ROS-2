@@ -105,7 +105,27 @@ ros2 launch src_nav bringup_launch.py
 
 # Real Robot
 
+joy control 
 
+```
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
+
+ros2 launch src_demo joystick_control_foxy.launch.py
+```
+
+SLAM Toolbox
+
+```
+ros2 launch src_slam src_slam.launch.py
+```
+
+Navigation
+
+```
+ros2 launch src_demo src_bringup_nav.launch.py
+ros2 launch src_nav bringup_real_launch.py
+```
 
 # TODO
 - [] 우분투에서 캡쳐 다시하기 (그림자, 카메라 이미지)
