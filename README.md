@@ -87,7 +87,12 @@ ros2 launch src_slam src_slam_gazebo.launch.py
 
 ## AMCL (Localization)
 
+```
+ros2 launch src_gazebo src_gazebo_racecourse.launch.py use_rviz:=false
+ros2 launch src_amcl amcl.launch.py
+```
 
+![image](https://user-images.githubusercontent.com/12381733/164706444-f65bbe6a-73aa-441f-abb7-a1ce057123d4.png)
 
 ## Navigation 
 

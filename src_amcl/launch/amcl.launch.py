@@ -13,8 +13,8 @@ def generate_launch_description():
     # Get the launch directory
     pkg_path = get_package_share_directory('src_amcl')
     map_file_path = os.path.join(pkg_path, 'map', 'racecourse.yaml')
-    param_file_path = os.path.join(pkg_path, 'param', 'neuronbot_params.yaml')
-    # param_file_path = os.path.join(pkg_path, 'param', 'amcl.yaml')
+    param_file_path = os.path.join(pkg_path, 'param', 'amcl.yaml')
+    # param_file_path = os.path.join(pkg_path, 'param', 'amcl_huge_particles.yaml')
 
     namespace = LaunchConfiguration('namespace')
     map_yaml_file = LaunchConfiguration('map')
