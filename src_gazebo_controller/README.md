@@ -16,6 +16,8 @@ We can calculate steering radius && wheel rotational velocity for COM
 
 ![슬라이드3](https://user-images.githubusercontent.com/12381733/164608714-075d64fd-afc7-406a-b378-9301993a8de2.png)
 
+> Care for combination of linear & angular velocity direction. If you confused, refer below images
+
 ## Step 3. Calculate front wheel velocity & steering angle alpha for each joints
 
 There's lots of equations for this `alpha`. I tried all of them and found best one empirically.
