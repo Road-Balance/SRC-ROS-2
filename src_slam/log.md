@@ -92,3 +92,11 @@ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
 ros2 launch cmd_to_src cmd_to_src.launch.py
 ros2 launch src_slam src_slam.launch.py
 ```
+
+# Documentation
+
+save map에다가 경로 넣으면 자동 저장
+
+예를 들어, /home/kimsooyoung/ros2_ws/map/test를 넣으면, test.pgm/test.yaml이 생긴다.
+
+![image](https://user-images.githubusercontent.com/12381733/164704324-b26fb411-e78a-4c69-90b6-bceed81d3976.png)

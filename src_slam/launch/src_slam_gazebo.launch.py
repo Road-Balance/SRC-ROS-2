@@ -18,7 +18,7 @@ def generate_launch_description():
     src_slam_pkg = os.path.join(get_package_share_directory('src_slam'))
 
     slam_params_file = os.path.join(src_slam_pkg, 'config', 'mapper_params_online_async.yaml')
-    rviz_config_file = os.path.join(src_slam_pkg, 'rviz', 'slam_toolbox_real.rviz')
+    rviz_config_file = os.path.join(src_slam_pkg, 'rviz', 'slam_toolbox_gazebo.rviz')
 
     slam_toolbox_with_rviz = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(src_slam_pkg, 'launch', 'online_async_launch.py')),

@@ -67,8 +67,30 @@ ros2 run src_gazebo_controller odom_utility_tools
 
 ackermann steering을 위한 controller 수식은 `readme` 참고
 
+## Sensor Fusion
 
+```
+ros2 launch src_sensor_fusion src_gazebo_racecourse.launch.py
+ros2 launch src_sensor_fusion robot_localization.launch.py
+```
+
+![image](https://user-images.githubusercontent.com/12381733/164702848-1e41dbc1-b5d5-4dca-b10c-0409ef716bf5.png)
+
+## SLAM
+
+```
+ros2 launch src_gazebo src_gazebo_racecourse.launch.py use_rviz:=false
+ros2 launch src_slam src_slam_gazebo.launch.py
+```
+
+![image](https://user-images.githubusercontent.com/12381733/164704324-b26fb411-e78a-4c69-90b6-bceed81d3976.png)
+
+## AMCL (Localization)
+
+
+
+## Navigation 
 
 # TODO
-- [] 우분투에서 캡쳐 다시하기
+- [] 우분투에서 캡쳐 다시하기 (그림자, 카메라 이미지)
 - [] 
