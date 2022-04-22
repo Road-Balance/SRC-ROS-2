@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+#
+# Copyright 2022 RoadBalance Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -5,7 +21,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription, ExecuteProcess, RegisterEventHandler
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, RegisterEventHandler
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import LaunchConfiguration
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -23,13 +41,20 @@ def generate_launch_description():
         os.environ['GAZEBO_MODEL_PATH'] = gazebo_model_path
     print(ansi("yellow"), "If it's your 1st time to download Gazebo model on your computer, it may take few minutes to finish.", ansi("reset"))
 
-    # gazebo
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')   
     src_gazebo_path = os.path.join(get_package_share_directory('src_gazebo'))
     pkg_path = os.path.join(get_package_share_directory('src_sensor_fusion'))
-    world_path = os.path.join(src_gazebo_path, 'worlds', 'racecar_course.world')
+
+    # launch configuration
+    use_rviz = LaunchConfiguration('use_rviz')
+
+    declare_use_rviz = DeclareLaunchArgument(
+        name='use_rviz',
+        default_value='True',
+        description='Whether to start RVIZ')
 
     # Start Gazebo server
+    world_path = os.path.join(src_gazebo_path, 'worlds', 'racecar_course.world')
     start_gazebo_server_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')),
         launch_arguments={'world': world_path}.items()
@@ -106,11 +131,12 @@ def generate_launch_description():
 
     # Launch RViz
     rviz = Node(
+        condition=IfCondition(use_rviz),
         package='rviz2',
         executable='rviz2',
         name='rviz2',
         output='screen',
-        arguments=['-d', rviz_config_file]
+        arguments=['-d', rviz_config_file],
     )
 
     src_odometry = Node(
@@ -125,7 +151,7 @@ def generate_launch_description():
             'has_imu_heading' : True,
             'is_gazebo' : True,
             'wheel_radius' : 0.0508,
-            'base_frame_id' : "base_link",
+            'base_frame_id' : "base_footprint",
             'odom_frame_id' : "odom",
             'enable_odom_tf' : False,
         }],
@@ -140,7 +166,7 @@ def generate_launch_description():
             'laser_scan_topic' : '/scan',
             'odom_topic' : '/odom_rf2o',
             'publish_tf' : False,
-            'base_frame_id' : 'base_link',
+            'base_frame_id' : 'base_footprint',
             'odom_frame_id' : 'odom',
             'init_pose_from_topic' : '',
             'freq' : 10.0}],
@@ -154,13 +180,9 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Wheel odom + Lidar odom Sensor Fusion
-    start_gazebo_server_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')),
-        launch_arguments={'world': world_path}.items()
-    )
-
     return LaunchDescription([
+        declare_use_rviz,
+        
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=spawn_entity,
