@@ -96,6 +96,13 @@ ros2 launch src_amcl amcl.launch.py
 
 ## Navigation 
 
+```
+ros2 launch src_gazebo src_gazebo_racecourse.launch.py use_rviz:=false
+ros2 launch src_nav bringup_launch.py
+```
+
+![image](https://user-images.githubusercontent.com/12381733/164715379-02655e8b-58b4-48e4-a09c-c5f4a97fdef4.png)
+
 # TODO
 - [] 우분투에서 캡쳐 다시하기 (그림자, 카메라 이미지)
 - [] 

@@ -31,6 +31,7 @@ def generate_launch_description():
     my_nav_dir = get_package_share_directory('src_nav')
     my_launch_dir = os.path.join(my_nav_dir, 'launch')
     my_param_dir = os.path.join(my_nav_dir, 'param')
+    # my_param_file = 'src_dwb_params.yaml'
     my_param_file = 'src_regulated_pure_pursuit.yaml'
     my_bt_file = 'navigate_w_replanning_and_recovery.xml'
     my_map_dir = os.path.join(my_nav_dir, 'map')
@@ -92,7 +93,7 @@ def generate_launch_description():
 
     declare_open_rviz_cmd = DeclareLaunchArgument(
         'open_rviz',
-        default_value='false',
+        default_value='true',
         description='Launch Rviz?')
 
     # Specify the actions

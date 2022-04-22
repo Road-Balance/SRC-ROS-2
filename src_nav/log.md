@@ -70,3 +70,9 @@ goal_checker:
     stateful: True
 ```
 
+what difference between voxel layer and obstacle layer ?
+
+```
+VoxelLayer tracks obstacles in 3d, whereas obstacle layer only does two. If you only have a planar laser for instance, then 2d is fine. If you have a 3d sensor or sensors at multiple levels, you may want VoxelLayer.
+```
+
