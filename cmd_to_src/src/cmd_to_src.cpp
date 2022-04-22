@@ -20,10 +20,10 @@ using Float32 = std_msgs::msg::Float32;
 using Imu = sensor_msgs::msg::Imu;
 
 template <typename T>
-inline void in_range(T& input, const T& low_val, const T& max_val){
-  if(input < low_val) 
+inline void in_range(T &input, const T &low_val, const T &max_val) {
+  if (input < low_val)
     input = low_val;
-  if(input > max_val)
+  if (input > max_val)
     input = max_val;
 }
 
@@ -50,7 +50,7 @@ private:
   TwiddleCase twiddle_case_ = CASE_P_1;
 
 public:
-  YawRatePID (const float &k_p = 18.0, const float &k_i = -10.0,
+  YawRatePID(const float &k_p = 18.0, const float &k_i = -10.0,
              const float &k_d = -9.0)
       : Node("yaw_ctl_pid"), k_p(k_p), k_i(k_i), k_d(k_d) {
     d_p = 1.0;
@@ -58,7 +58,7 @@ public:
     d_d = 1.0;
   }
 
-  void twiddle(const float& cur_err) {
+  void twiddle(const float &cur_err) {
     if ((d_p + d_i + d_d) > 0.2) {
       if (cur_err < best_err) {
         best_err = cur_err;
@@ -132,15 +132,18 @@ public:
     k_d = k_d_in;
   }
 
-  std::vector<float> getGain() const { return std::vector<float>{k_p, k_i, k_d}; }
+  std::vector<float> getGain() const {
+    return std::vector<float>{k_p, k_i, k_d};
+  }
 
-  int update(bool use_twiddle, bool sign_change, float object_val, float cur_val) {
+  int update(bool use_twiddle, bool sign_change, float object_val,
+             float cur_val) {
 
     auto cur_err = object_val - cur_val;
     auto diff_err = cur_err - prev_err;
 
     integrate_err += cur_err;
-    if(sign_change){
+    if (sign_change) {
       integrate_err = 0;
       diff_err = 0;
     }
@@ -160,9 +163,8 @@ public:
 
     std::cout << "output : " << int(output) << std::endl;
 
-    std::cout << "\nk_p : " << k_p << 
-        "\n k_i : " << k_i << 
-        "\n k_d : " << k_d << std::endl;
+    std::cout << "\nk_p : " << k_p << "\n k_i : " << k_i << "\n k_d : " << k_d
+              << std::endl;
 
     return output;
   }
@@ -284,37 +286,44 @@ public:
   }
 
   void cmd_vel_cb(const Twist::SharedPtr msg) {
-    src_msg_.speed = msg->linear.x;
+    auto linear_x = msg->linear.x;
+    auto angular_z = msg->angular.z;
+
+    src_msg_.speed = linear_x;
 
     // TODO : move controller into timer cb
 
-    if (fabs(msg->linear.x) >= 0.1){
+    if (fabs(linear_x) >= 0.1) {
       bool sign_change = false;
       int pid_result;
 
-      auto angular_vel = msg->angular.z;
-      if( (prev_angular_vel_ > 0 && angular_vel < 0 ) || ( prev_angular_vel_ < 0 && angular_vel > 0 ) ){
+      if ((prev_angular_vel_ > 0 && angular_z < 0) ||
+          (prev_angular_vel_ < 0 && angular_z > 0)) {
         RCLCPP_INFO(get_logger(), "sign changed");
         sign_change = true;
       }
 
-      if (angular_vel == 0.0)
+      if (angular_z == 0.0)
         pid_result = steering_offset_;
       else {
-        pid_result =
-            steering_offset_ + pid_controller_->update(use_twiddle_, sign_change, msg->angular.z, yaw_speed_);
+        if (linear_x < 0)
+          angular_z *= -1;
+        pid_result = steering_offset_ +
+                     pid_controller_->update(use_twiddle_, sign_change,
+                                             angular_z, yaw_speed_);
       }
 
       in_range(pid_result, 0, 200);
 
       src_msg_.steering = pid_result;
-      prev_angular_vel_ = angular_vel;
+      prev_angular_vel_ = angular_z;
     }
     // src_msg_.steering = steering_offset_;
     else
       src_msg_.steering = steering_offset_;
 
-    // RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02 ok
+    // RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02
+    // ok
 
     // src_msg_.steering =
     //     -((msg->angular.z) / 2 * steering_offset_) + steering_offset_;
