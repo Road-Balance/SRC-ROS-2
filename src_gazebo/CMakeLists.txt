@@ -19,6 +19,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rqt_robot_steering REQUIRED)
 
+# src_ackermann.urdf에 로컬 정보가 들어가므로 src_gazebo/test_description은 cba했다가 다시 cbp 해줘야 할 것임
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
