@@ -7,6 +7,17 @@ Environment Setup
 * Install Gazebo
 * Dependency Packages
 
+```
+sudo apt install ros-foxy-nav2* -y
+sudo apt install ros-foxy-ros2_control* -y
+
+cd ~/ros2_ws
+rosdinstall foxy
+
+src_control_message clone
+cbp src_control_message && rosfoxy
+```
+
 ## Simplified SRC Description
 
 * robot state publisher & joint state publisher => robot description
@@ -118,6 +129,13 @@ SLAM Toolbox
 
 ```
 ros2 launch src_slam src_slam.launch.py
+```
+
+remote rviz view
+
+```
+ros2 launch src_slam only_rviz_foxy.launch.py
+ros2 run teleop_twist_keyboard teleop_twist_keyboard 
 ```
 
 Navigation
