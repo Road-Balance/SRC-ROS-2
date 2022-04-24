@@ -34,10 +34,16 @@ def generate_launch_description():
     )
 
     # x y z yaw pitch roll frame_id child_frame_id period_in_ms
-    static_transform_publisher = Node(
+    static_transform_publisher_laser = Node(
         package = "tf2_ros", 
         executable = "static_transform_publisher",
         arguments=["0.24", "0", "0.14", "3.1415", "0", "0", "base_link", "laser"]
+    )
+
+    static_transform_publisher_nav_footprint = Node(
+        package = "tf2_ros", 
+        executable = "static_transform_publisher",
+        arguments=["0", "0", "0", "-3.1415", "0", "0", "laser", "nav_footprint"]
     )
 
     cmd_to_src = Node(
@@ -68,7 +74,8 @@ def generate_launch_description():
     return LaunchDescription([
         mw_ahrs_node,
         rplidar_driver,
-        static_transform_publisher,
+        static_transform_publisher_nav_footprint,
+        static_transform_publisher_laser,
         cmd_to_src,
         src_odom,
     ])
