@@ -47,6 +47,8 @@ def generate_launch_description():
         name='cmd_to_src',
         output='screen',
         parameters=[{
+            # calibartion required values
+            "scale" : 14,
             "p_gain" : 122.0,
             'i_gain' : 3.0,
             'd_gain' : 1.0,
