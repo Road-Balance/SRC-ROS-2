@@ -83,15 +83,7 @@ private:
     /// (usefull only has_imu_heading_ is activated) get raw heading angle from imu 
     double heading_angle;
 
-    /// Wheel separation, wrt the midpoint of the wheel width:
-    double wheel_separation_h_;
-
-    /// Wheel radius (assuming it's the same for the left and right wheels):
-    double wheel_radius_;
-
-    /// Wheel separation and radius calibration multipliers:
-    double wheel_separation_h_multiplier_;
-    double wheel_radius_multiplier_;
+    /// Wheel steer calibration multipliers:
     double steer_pos_multiplier_;
 
     // open loop variables
@@ -106,8 +98,6 @@ private:
 
     // Front wheel steering pose (radian)
     float front_hinge_pos;
-
-    int velocity_rolling_window_size_;
 
     /// Timeout to consider cmd_vel commands old:
     double cmd_vel_timeout_;

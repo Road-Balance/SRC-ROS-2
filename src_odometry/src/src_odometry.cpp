@@ -25,27 +25,30 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
   is_gazebo_ = declare_parameter("is_gazebo", false);
   RCLCPP_INFO(get_logger(), "is_gazebo_ : %s", is_gazebo_ == true ? "true" : "false");
 
-  wheel_separation_h_ = declare_parameter("wheel_separation_h_", 0.325);
-  RCLCPP_INFO(get_logger(), "wheel_separation_h_ : %f", wheel_separation_h_);
+  auto wheel_separation_h = declare_parameter("wheel_separation_h", 0.325);
+  RCLCPP_INFO(get_logger(), "wheel_separation_h : %f", wheel_separation_h);
 
-  wheel_separation_h_multiplier_ = declare_parameter("wheel_separation_h_multiplier", 1.1);
-  RCLCPP_INFO(get_logger(), "wheel_separation_h_multiplier : %f", wheel_separation_h_multiplier_);
+  auto wheel_separation_h_multiplier = declare_parameter("wheel_separation_h_multiplier", 1.1);
+  RCLCPP_INFO(get_logger(), "wheel_separation_h_multiplier : %f", wheel_separation_h_multiplier);
 
-  wheel_radius_ = declare_parameter("wheel_radius", 0.0508);
-  RCLCPP_INFO(get_logger(), "wheel_radius : %f", wheel_radius_);
+  auto wheel_radius = declare_parameter("wheel_radius", 0.0508);
+  RCLCPP_INFO(get_logger(), "wheel_radius : %f", wheel_radius);
+
+  auto encoder_resolution = declare_parameter("encoder_resolution", 150);
+  RCLCPP_INFO(get_logger(), "encoder_resolution : %d", encoder_resolution);
 
   // imu 쓴다면 사용하지는 않는 값임
-  wheel_radius_multiplier_ = declare_parameter("wheel_radius_multiplier", 1.0);
-  RCLCPP_INFO(get_logger(), "wheel_radius_multiplier : %f", wheel_radius_multiplier_);
+  auto wheel_radius_multiplier = declare_parameter("wheel_radius_multiplier", 1.0);
+  RCLCPP_INFO(get_logger(), "wheel_radius_multiplier : %f", wheel_radius_multiplier);
 
   // imu 쓴다면 사용하지는 않는 값임
   steer_pos_multiplier_ = declare_parameter("steer_pos_multiplier", 1.0);
   RCLCPP_INFO(get_logger(), "steer_pos_multiplier : %f", steer_pos_multiplier_);
 
-  velocity_rolling_window_size_ = declare_parameter("velocity_rolling_window_size", 10);
-  RCLCPP_INFO(get_logger(), "velocity_rolling_window_size : %f", velocity_rolling_window_size_);
+  auto velocity_rolling_window_size = declare_parameter("velocity_rolling_window_size", 10);
+  RCLCPP_INFO(get_logger(), "velocity_rolling_window_size : %f", velocity_rolling_window_size);
 
-  odometry_.setVelocityRollingWindowSize(velocity_rolling_window_size_);
+  odometry_.setVelocityRollingWindowSize(velocity_rolling_window_size);
 
   base_frame_id_ = declare_parameter("base_frame_id", "base_link");
   RCLCPP_INFO(get_logger(), "base_frame_id_ : %s", base_frame_id_.c_str());
@@ -56,10 +59,10 @@ SRCOdometry::SRCOdometry() : Node("ackermann_odometry")
   enable_odom_tf_ = declare_parameter("enable_odom_tf", true);
   RCLCPP_INFO(get_logger(), "enable_odom_tf_ : %s", enable_odom_tf_ == true ? "true" : "false");
 
-  const double ws_h = wheel_separation_h_multiplier_ * wheel_separation_h_;
-  const double wr = wheel_radius_multiplier_ * wheel_radius_;
+  const double ws_h = wheel_separation_h_multiplier * wheel_separation_h;
+  const double wr = wheel_radius_multiplier * wheel_radius;
 
-  odometry_.setWheelParams(ws_h, wr);
+  odometry_.setWheelParams(ws_h, wr, static_cast<uint>(encoder_resolution));
 
   RCLCPP_INFO(this->get_logger(), "Ackermann Odometry Node created");
 

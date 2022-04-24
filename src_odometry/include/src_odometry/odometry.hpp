@@ -149,21 +149,13 @@ namespace ackermann_steering_controller
     }
 
     /**
-     * \brief Sets the wheel parameters: radius and separation
-     * \param wheel_separation Seperation between left and right wheels [m]
-     * \param wheel_radius     Wheel radius [m]
-     */
-    /// TODO : void setWheelParams(const double& wheel_reparation_h, const double& wheel_radius);
-    void setWheelParams(double wheel_reparation_h, double wheel_radius);
-
-    /**
-     * @brief Set the Encoder Resolution object
+     * @brief Sets the wheel parameters: radius, separation, encoder resolution
      * 
-     * @param encoder_resolution 
-     * In real robot, it has own encoder resolution, if 150 encoder for 1 cycle set it as 150
+     * @param wheel_separation_h Seperation between left and right wheels [m]
+     * @param wheel_radius       Wheel radius [m]
+     * @param encoder_resolution encoder value for one wheel cycle [uint]
      */
-    /// TODO: void setEncoderResolution(const uint& encoder_resolution);
-    void setEncoderResolution(uint encoder_resolution);
+    void setWheelParams(const double& wheel_separation_h, const double& wheel_radius, const uint& encoder_resolution);
 
     /**
      * \brief Velocity rolling window size setter
