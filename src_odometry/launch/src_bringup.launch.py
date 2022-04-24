@@ -49,9 +49,9 @@ def generate_launch_description():
         parameters=[{
             # calibartion required values
             "scale" : 14,
-            "p_gain" : 122.0,
-            'i_gain' : 3.0,
-            'd_gain' : 1.0,
+            "p_gain" : 80.0,
+            'i_gain' : 0.5,
+            'd_gain' : 0.0,
             'use_twiddle' : False,
         }],
     )

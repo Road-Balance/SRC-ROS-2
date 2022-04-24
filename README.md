@@ -125,6 +125,12 @@ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
 ros2 launch src_demo joystick_control_foxy.launch.py
 ```
 
+PID Tuning
+
+```
+
+```
+
 SLAM Toolbox
 
 ```
@@ -146,8 +152,8 @@ ros2 launch src_nav bringup_real_launch.py
 
 # remote version
 ros2 launch src_demo src_bringup_nav.launch.py
-ros2 launch src_nav bringup_real_launch.py open_rviz=false
 
+ros2 launch src_nav bringup_real_launch.py open_rviz:=false
 ros2 launch src_nav rviz_view_launch.py
 ```
 

@@ -191,6 +191,10 @@ private:
 
   float accel_;
   float deaccel;
+
+  double linear_x_;
+  double angular_z_;
+  
   float prev_angular_vel_;
 
   bool use_twiddle_;
@@ -289,43 +293,45 @@ public:
     // RCLCPP_INFO(get_logger(), "angular_z : %f", yaw_speed_);
   }
 
-  void cmd_vel_cb(const Twist::SharedPtr msg) {
-    auto linear_x = msg->linear.x;
-    auto angular_z = msg->angular.z;
+  void update_steering(){
 
-    // 
-    src_msg_.speed = linear_x;
-
-    // TODO : move controller into timer cb
-
-    if (fabs(linear_x) >= 0.1) {
+    if (fabs(linear_x_) >= 0.1) {
       bool sign_change = false;
       int pid_result;
 
-      if ((prev_angular_vel_ > 0 && angular_z < 0) ||
-          (prev_angular_vel_ < 0 && angular_z > 0)) {
+      if ((prev_angular_vel_ > 0 && angular_z_ < 0) ||
+          (prev_angular_vel_ < 0 && angular_z_ > 0)) {
         RCLCPP_INFO(get_logger(), "sign changed");
         sign_change = true;
       }
 
-      if (angular_z == 0.0)
+      if (angular_z_ == 0.0)
         pid_result = steering_offset_;
       else {
-        if (linear_x < 0)
-          angular_z *= -1;
         pid_result = steering_offset_ +
                      pid_controller_->update(use_twiddle_, sign_change,
-                                             angular_z, yaw_speed_);
+                                             angular_z_, yaw_speed_);
       }
 
       in_range(pid_result, 0, 200);
 
       src_msg_.steering = pid_result;
-      prev_angular_vel_ = angular_z;
+      prev_angular_vel_ = angular_z_;
     }
     // src_msg_.steering = steering_offset_;
     else
       src_msg_.steering = steering_offset_;
+  }
+
+  void cmd_vel_cb(const Twist::SharedPtr msg) {
+    linear_x_ = msg->linear.x;
+    angular_z_ = msg->angular.z;
+
+    src_msg_.speed = linear_x_;
+    src_msg_.direction = src_msg_.speed >= 0 ? 1 : 0;
+
+    if (linear_x_ < 0)
+      angular_z_ *= -1;
 
     // RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02
     // ok
@@ -334,8 +340,6 @@ public:
     //     -((msg->angular.z) / 2 * steering_offset_) + steering_offset_;
 
     // TODO: Light On Off mode
-
-    src_msg_.direction = src_msg_.speed >= 0 ? 1 : 0;
   }
 
   void accel_vel_cb(const Float32::SharedPtr msg) {
@@ -343,7 +347,10 @@ public:
     src_msg_.deaccel = msg->data;
   }
 
-  void timer_callback() { src_msg_pub_->publish(src_msg_); }
+  void timer_callback() {
+    update_steering(); 
+    src_msg_pub_->publish(src_msg_); 
+  }
 };
 
 int main(int argc, char **argv) {
