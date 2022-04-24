@@ -111,25 +111,25 @@ controller_server:
     FollowPath:
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       desired_linear_vel: 0.5 #
-      lookahead_dist: 0.7
-      min_lookahead_dist: 0.3
-      max_lookahead_dist: 1.0
-      lookahead_time: 1.5
-      rotate_to_heading_angular_vel: 1.8
-      transform_tolerance: 0.1
       use_velocity_scaled_lookahead_dist: false
-      min_approach_linear_velocity: 0.2 #
+      min_lookahead_dist: 0.3 # useless
+      max_lookahead_dist: 1.0 # useless
+      lookahead_time: 1.5 # useless
+      lookahead_dist: 0.7
+      use_rotate_to_heading: false
+      rotate_to_heading_angular_vel: 1.8 # useless
+      rotate_to_heading_min_angle: 0.785 # useless
+      allow_reversing: true
+      max_angular_accel: 3.2 # useless
+      min_approach_linear_velocity: 0.2
       max_allowed_time_to_collision_up_to_carrot: 1.0
-      use_regulated_linear_velocity_scaling: true
+      use_regulated_linear_velocity_scaling: false
+      regulated_linear_scaling_min_radius: 0.9 # useless
       use_cost_regulated_linear_velocity_scaling: false
-      regulated_linear_scaling_min_radius: 0.9
       regulated_linear_scaling_min_speed: 0.25
-      use_rotate_to_heading: true
-      allow_reversing: false
-      rotate_to_heading_min_angle: 0.785
-      max_angular_accel: 3.2
       max_robot_pose_search_dist: 10.0
-      use_interpolation: false
+      use_interpolation: true # 이거 한 번 바꿔봐
+      transform_tolerance: 0.1
 
 controller_server_rclcpp_node:
   ros__parameters:
