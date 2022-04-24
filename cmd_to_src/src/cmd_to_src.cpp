@@ -221,7 +221,11 @@ public:
     pub_timer_ = this->create_wall_timer(
         20ms, std::bind(&CmdToSRC::timer_callback, this));
 
-    // paramter
+    // TODO : paramter reformatting
+    // has_imu_heading_ = declare_parameter("has_imu_heading", true);
+    // RCLCPP_INFO(get_logger(), "has_imu_heading_ : %s", has_imu_heading_ == true ? "true" : "false");
+
+
     this->declare_parameter("accel_scale", 5.0);
     accel_ = this->get_parameter("accel_scale").as_double();
 
@@ -289,6 +293,7 @@ public:
     auto linear_x = msg->linear.x;
     auto angular_z = msg->angular.z;
 
+    // 
     src_msg_.speed = linear_x;
 
     // TODO : move controller into timer cb
