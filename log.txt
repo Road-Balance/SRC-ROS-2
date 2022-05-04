@@ -27,3 +27,19 @@ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
 ros2 launch src_demo joystick_control_foxy.launch.py
 ros2 launch src_odometry src_bringup_new.launch.py 
 ```
+
+2022 05 04 log
+
+```
+ros2 launch src_odometry src_bringup.launch.py 
+```
+
+# TODO
+-0.05 +0.05 오가면 변경 시마다 빠르게 전환되었다가 점차 느려지는 현상 발생
+=> 속도 변환 시 pwm을 나누기 2가 아니라 현재 속도에 비례하여 일정 수 만큼 작아지도록 고침
+
+ros2 run rqt_robot_steering rqt_robot_steering --force-discover
+
+0.1 정도 속도에서는 가다말다 한다.
+=> 실제 pwm도 오락가락 했음
+
