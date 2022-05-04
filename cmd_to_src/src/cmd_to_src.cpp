@@ -190,7 +190,7 @@ private:
   uint steering_offset_ = 20;
 
   float accel_;
-  float deaccel;
+  float deaccel_;
 
   double linear_x_;
   double angular_z_;
@@ -225,31 +225,27 @@ public:
     pub_timer_ = this->create_wall_timer(
         20ms, std::bind(&CmdToSRC::timer_callback, this));
 
-    // TODO : paramter reformatting
-    // has_imu_heading_ = declare_parameter("has_imu_heading", true);
-    // RCLCPP_INFO(get_logger(), "has_imu_heading_ : %s", has_imu_heading_ == true ? "true" : "false");
+    accel_ = declare_parameter("accel_scale", 5.0);
+    RCLCPP_INFO(get_logger(), "accel : %f", accel_);
 
+    deaccel_ = declare_parameter("deaccel_scale", 5.0);
+    RCLCPP_INFO(get_logger(), "deaccel : %f", deaccel_);
 
-    this->declare_parameter("accel_scale", 5.0);
-    accel_ = this->get_parameter("accel_scale").as_double();
+    scale = declare_parameter("scale", 19);
+    RCLCPP_INFO(get_logger(), "scale : %d", scale);
 
-    this->declare_parameter("deaccel_scale", 5.0);
-    deaccel = this->get_parameter("deaccel_scale").as_double();
+    auto p_gain_ = declare_parameter("p_gain", 18.0);
+    RCLCPP_INFO(get_logger(), "p_gain : %f", p_gain_);
 
-    this->declare_parameter("scale", 9);
-    scale = this->get_parameter("scale").as_int();
+    auto i_gain_ = declare_parameter("i_gain", 0.0);
+    RCLCPP_INFO(get_logger(), "i_gain : %f", i_gain_);
 
-    this->declare_parameter("p_gain", 18.0);
-    auto p_gain_ = this->get_parameter("p_gain").as_double();
+    auto d_gain_ = declare_parameter("d_gain", 18.0);
+    RCLCPP_INFO(get_logger(), "d_gain : %f", d_gain_);
 
-    this->declare_parameter("i_gain", 0.0);
-    auto i_gain_ = this->get_parameter("i_gain").as_double();
+    use_twiddle_ = declare_parameter("use_twiddle", true);
+    RCLCPP_INFO(get_logger(), "use_twiddle : %s", use_twiddle_ == true ? "true" : "false");
 
-    this->declare_parameter("d_gain", 0.0);
-    auto d_gain_ = this->get_parameter("d_gain").as_double();
-
-    this->declare_parameter("use_twiddle", false);
-    use_twiddle_ = this->get_parameter("use_twiddle").as_bool();
 
     src_msg_.speed = 0.0;
     src_msg_.steering = 0;
@@ -257,7 +253,7 @@ public:
     src_msg_.direction = true;
     src_msg_.lcd_msg = "";
     src_msg_.accel = accel_;
-    src_msg_.deaccel = deaccel;
+    src_msg_.deaccel = deaccel_;
     src_msg_.scale = scale;
 
     prev_time = this->get_clock()->now();
@@ -295,7 +291,7 @@ public:
 
   void update_steering(){
 
-    if (fabs(linear_x_) >= 0.1) {
+    if (fabs(linear_x_) >= 0.02) {
       bool sign_change = false;
       int pid_result;
 
