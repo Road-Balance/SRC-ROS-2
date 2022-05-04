@@ -46,11 +46,9 @@ def generate_launch_description():
         arguments=["0", "0", "0", "-3.1415", "0", "0", "laser", "nav_footprint"]
     )
 
-    cmd_to_src = Node(
-        package='cmd_to_src',
-        executable='cmd_to_src',
-        name='cmd_to_src',
-        output='screen'
+    cmd_to_src_pkg = os.path.join(get_package_share_directory('cmd_to_src'))
+    cmd_to_src = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(cmd_to_src_pkg, 'launch', 'cmd_to_src.launch.py')),
     )
 
     src_odom = Node(

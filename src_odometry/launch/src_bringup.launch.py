@@ -5,6 +5,9 @@ from launch.actions import TimerAction
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription
+
 def generate_launch_description():
 
     mw_ahrs_node = Node(
@@ -41,19 +44,9 @@ def generate_launch_description():
         }],
     )
 
-    cmd_to_src = Node(
-        package='cmd_to_src',
-        executable='cmd_to_src',
-        name='cmd_to_src',
-        output='screen',
-        parameters=[{
-            # calibartion required values
-            "scale" : 14,
-            "p_gain" : 80.0,
-            'i_gain' : 0.5,
-            'd_gain' : 0.0,
-            'use_twiddle' : False,
-        }],
+    cmd_to_src_pkg = os.path.join(get_package_share_directory('cmd_to_src'))
+    cmd_to_src = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(cmd_to_src_pkg, 'launch', 'cmd_to_src.launch.py')),
     )
 
     return LaunchDescription([

@@ -1,6 +1,9 @@
 import os
 
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription
 from launch import LaunchDescription
+
 from launch_ros.actions import Node
 
 def generate_launch_description():
@@ -19,11 +22,9 @@ def generate_launch_description():
         output='screen'
     )
 
-    cmd_to_src = Node(
-        package='cmd_to_src',
-        executable='cmd_to_src',
-        name='cmd_to_src',
-        output='screen'
+    cmd_to_src_pkg = os.path.join(get_package_share_directory('cmd_to_src'))
+    cmd_to_src = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(cmd_to_src_pkg, 'launch', 'cmd_to_src.launch.py')),
     )
 
     return LaunchDescription([
