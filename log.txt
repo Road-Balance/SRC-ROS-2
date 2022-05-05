@@ -31,7 +31,7 @@ ros2 launch src_odometry src_bringup_new.launch.py
 2022 05 04 log
 
 ```
-ros2 launch src_odometry src_bringup.launch.py 
+ros2 launch src_odometry src_bringup.launch.py
 ```
 
 # TODO
@@ -43,3 +43,15 @@ ros2 run rqt_robot_steering rqt_robot_steering --force-discover
 0.1 정도 속도에서는 가다말다 한다.
 => 실제 pwm도 오락가락 했음
 
+2022 05 05 log
+
+micro-ros단의 주기를 더 느리게 해보자. 40ms => 80ms
+
+무언가에 걸려서 못넘어가는 경우, 이를 보상하기 위해 갑자기 빨라져버리는 현상이 발생하며, 
+이는 특히 회전이 걸려있을 시 위험하다.
+
+navigation이 되기는 한다.
+대신 이러한 점들이 고쳐져야 함
+- 가속 문제 (가속이 너무 천천히 된다.)
+- 각속도 제어 문제 (현재는 각속도가 이리저리 oscillation이 생기고 있다.)
+- 최대 속도 제한 주기 (현재 너무 빠르게 움직인다.
