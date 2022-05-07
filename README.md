@@ -35,7 +35,7 @@ ros2 launch src_description src_description.launch.py
 * SRC spawn & ros2_control launch
 
 ```
-ros2 launch src_gazebo src_gazebo_empty_world.launch.py
+ros2 launch src_gazebo empty_world.launch.py
 ```
 
 ![image](https://user-images.githubusercontent.com/12381733/164446956-0b621647-d80b-4c97-909c-9325354dd427.png)
@@ -47,7 +47,7 @@ ros2 launch src_gazebo src_gazebo_empty_world.launch.py
 * rviz launch
 
 ```
-ros2 launch src_gazebo src_gazebo_racecourse.launch.py
+ros2 launch src_gazebo racecourse.launch.py
 ```
 
 ![image](https://user-images.githubusercontent.com/12381733/164447235-754808f0-bf47-4b63-88f7-92846a81f026.png)
@@ -81,7 +81,7 @@ ackermann steering을 위한 controller 수식은 `readme` 참고
 ## Sensor Fusion
 
 ```
-ros2 launch src_sensor_fusion src_gazebo_racecourse.launch.py
+ros2 launch src_sensor_fusion racecourse.launch.py
 ros2 launch src_sensor_fusion robot_localization.launch.py
 ```
 
@@ -90,7 +90,7 @@ ros2 launch src_sensor_fusion robot_localization.launch.py
 ## SLAM
 
 ```
-ros2 launch src_gazebo src_gazebo_racecourse.launch.py use_rviz:=false
+ros2 launch src_gazebo racecourse.launch.py use_rviz:=false
 ros2 launch src_slam src_slam_gazebo_slam_toolbox.launch.py 
 ros2 launch src_slam src_slam_gazebo_cartographer.launch.py use_sim_time:=true
 ```
@@ -100,7 +100,7 @@ ros2 launch src_slam src_slam_gazebo_cartographer.launch.py use_sim_time:=true
 ## AMCL (Localization)
 
 ```
-ros2 launch src_gazebo src_gazebo_racecourse.launch.py use_rviz:=false
+ros2 launch src_gazebo racecourse.launch.py use_rviz:=false
 ros2 launch src_amcl amcl.launch.py
 ```
 
@@ -109,8 +109,16 @@ ros2 launch src_amcl amcl.launch.py
 ## Navigation 
 
 ```
-ros2 launch src_gazebo src_gazebo_racecourse.launch.py use_rviz:=false
+ros2 launch src_gazebo racecourse.launch.py use_rviz:=false
 ros2 launch src_nav bringup_launch.py
+```
+
+obstable avoidance
+
+```
+ros2 launch src_gazebo caffee_world.launch.py use_rviz:=false
+ros2 launch src_nav caffee_bringup_launch.py 
+ros2 service call /global_costmap/clear_entirely_global_costmap nav2_msgs/srv/ClearEntireCostmap request:\ {}\
 ```
 
 ![image](https://user-images.githubusercontent.com/12381733/164715379-02655e8b-58b4-48e4-a09c-c5f4a97fdef4.png)
@@ -160,4 +168,5 @@ ros2 launch src_nav rviz_view_launch.py
 
 # TODO
 - [] 우분투에서 캡쳐 다시하기 (그림자, 카메라 이미지)
-- [] 
+- [] 빌드 종속성 모두 확인 - Docker에서
+- [] 장애물 회피용 param 최적화
