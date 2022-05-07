@@ -24,7 +24,7 @@ cbp src_control_message && rosfoxy
 * rviz launch
 
 ```
-ros2 launch src_description src_description.launch.py
+ros2 launch src_description src_description.launch.py   
 ```
 
 ![image](https://user-images.githubusercontent.com/12381733/164446136-6d672a84-7492-4b1e-980c-d7bd01c17c86.png)
@@ -91,7 +91,8 @@ ros2 launch src_sensor_fusion robot_localization.launch.py
 
 ```
 ros2 launch src_gazebo src_gazebo_racecourse.launch.py use_rviz:=false
-ros2 launch src_slam src_slam_gazebo.launch.py
+ros2 launch src_slam src_slam_gazebo_slam_toolbox.launch.py 
+ros2 launch src_slam src_slam_gazebo_cartographer.launch.py use_sim_time:=true
 ```
 
 ![image](https://user-images.githubusercontent.com/12381733/164704324-b26fb411-e78a-4c69-90b6-bceed81d3976.png)
