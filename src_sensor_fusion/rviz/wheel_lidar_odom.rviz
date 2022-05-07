@@ -6,9 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Lidar Odometry1
         - /Lidar Odometry1/Shape1
-        - /Filtered Odometry1
         - /Filtered Odometry1/Shape1
       Splitter Ratio: 0.5
     Tree Height: 581
@@ -296,25 +294,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 5.842304229736328
+      Distance: 10.667019844055176
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 8.799088478088379
-        Y: 1.788519024848938
-        Z: 1.8921024799346924
+        X: 4.133706569671631
+        Y: 1.4231833219528198
+        Z: -0.051911335438489914
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7697968482971191
+      Pitch: 1.399796724319458
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.451750755310059
+      Yaw: 4.731752872467041
     Saved: ~
 Window Geometry:
   Displays:
@@ -330,5 +328,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1367
-  X: 515
-  Y: 389
+  X: 270
+  Y: 273
