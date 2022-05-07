@@ -10,14 +10,10 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 def generate_launch_description():
+
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-
     open_rviz = LaunchConfiguration('open_rviz', default='true')
-
-    rviz_config_dir = os.path.join(
-            get_package_share_directory('src_nav'),
-            'rviz',
-            'nav2_hanyang_view.rviz')
+    rviz_config_file = LaunchConfiguration('rviz_config')
 
     return LaunchDescription([
 
@@ -31,11 +27,16 @@ def generate_launch_description():
             default_value='true',
             description='Launch Rviz?'),
 
+        DeclareLaunchArgument(
+            'rviz_config',
+            default_value=os.path.join(get_package_share_directory('src_nav'), 'rviz', 'nav2_default_view.rviz'),
+            description='Launch Rviz?'),
+
         Node(
             package='rviz2',
             executable='rviz2',
             name='rviz2',
-            arguments=['-d', rviz_config_dir],
+            arguments=['-d', rviz_config_file],
             parameters=[{'use_sim_time': use_sim_time}],
             condition=IfCondition(LaunchConfiguration("open_rviz"))
             # output='log'
