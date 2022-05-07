@@ -15,20 +15,22 @@
 # limitations under the License.
 
 import os
-import xacro
 
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription, ExecuteProcess, RegisterEventHandler
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, RegisterEventHandler
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import LaunchConfiguration
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 from osrf_pycommon.terminal_color import ansi
 
+import xacro
 
 def generate_launch_description():
 
@@ -39,9 +41,18 @@ def generate_launch_description():
         os.environ['GAZEBO_MODEL_PATH'] = gazebo_model_path
     print(ansi("yellow"), "If it's your 1st time to download Gazebo model on your computer, it may take few minutes to finish.", ansi("reset"))
 
-    pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
-    world_path = os.path.join(pkg_path, 'worlds', 'racecar_course.world')
+    # gazebo
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')   
+    pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
+    world_path = os.path.join(pkg_path, 'worlds', 'caffee.world')
+
+    # launch configuration
+    use_rviz = LaunchConfiguration('use_rviz')
+
+    declare_use_rviz = DeclareLaunchArgument(
+        name='use_rviz',
+        default_value='True',
+        description='Whether to start RVIZ')
 
     # Start Gazebo server
     start_gazebo_server_cmd = IncludeLaunchDescription(
@@ -55,8 +66,9 @@ def generate_launch_description():
     )
 
     # Robot State Publisher
+    pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
     urdf_file = os.path.join(pkg_path, 'urdf', 'src_ackermann.urdf')
-    
+
     doc = xacro.parse(open(urdf_file))
     xacro.process_doc(doc)
     robot_description = {'robot_description': doc.toxml()}
@@ -79,8 +91,17 @@ def generate_launch_description():
     spawn_entity = Node(
         package='gazebo_ros', 
         executable='spawn_entity.py',
-        output='screen',
-        arguments=['-topic', 'robot_description', '-entity', 'racecar'],
+        arguments=[
+            '-topic', 'robot_description',
+            '-entity', 'src_ackermann',
+            '-x', '3.3',
+            '-y', '10.0',
+            '-z', '0.2',
+            '-R', '0.0',
+            '-P', '0.0',
+            '-Y', '-1.5707',
+        ],
+        output='screen'
     )
 
     # ROS 2 controller
@@ -106,9 +127,9 @@ def generate_launch_description():
     )
 
     # Racecar controller launch
-    racecar_control = Node(
+    src_gazebo_controller = Node(
         package='src_gazebo_controller',
-        executable='racecar_controller',
+        executable='src_gazebo_controller',
         output='screen',
         parameters=[
             {
@@ -117,19 +138,34 @@ def generate_launch_description():
         ],
     )
 
-    rf2o_laser_odometry = Node(
-        package='rf2o_laser_odometry',
-        executable='rf2o_laser_odometry_node',
-        name='rf2o_laser_odometry',
+    rviz_config_file = os.path.join(pkg_path, 'rviz', 'gazebo_racecourse.rviz')
+
+    # Launch RViz
+    rviz = Node(
+        condition=IfCondition(use_rviz),
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file]
+    )
+
+    src_odometry = Node(
+        package='src_odometry',
+        executable='src_odometry',
+        name='src_odometry',
         output='log',
         parameters=[{
-            'laser_scan_topic' : '/scan',
-            'odom_topic' : '/odom_rf2o',
-            'publish_tf' : True,
-            'base_frame_id' : 'base_link',
-            'odom_frame_id' : 'odom',
-            'init_pose_from_topic' : '',
-            'freq' : 10.0}],
+            "verbose" : False,
+            'publish_rate' : 50,
+            'open_loop' : False,
+            'has_imu_heading' : True,
+            'is_gazebo' : True,
+            'wheel_radius' : 0.0508,
+            'base_frame_id' : "base_footprint",
+            'odom_frame_id' : "odom",
+            'enable_odom_tf' : True,
+        }],
     )
 
     # rqt robot steering
@@ -139,21 +175,10 @@ def generate_launch_description():
         name='rqt_robot_steering',
         output='screen'
     )
-    
-    # Ground Truth odom from gazebo
-    odom_utility_tools = Node(
-        package='src_gazebo_controller',
-        executable='odom_utility_tools',
-        name='odom_utility_tools',
-        output='screen',
-        parameters=[
-            {
-                "verbose": False,
-            }
-        ]
-    )
 
     return LaunchDescription([
+        declare_use_rviz,
+        
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=spawn_entity,
@@ -175,7 +200,19 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=load_velocity_controller,
-                on_exit=[racecar_control],
+                on_exit=[src_gazebo_controller],
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_velocity_controller,
+                on_exit=[src_odometry],
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_velocity_controller,
+                on_exit=[rviz],
             )
         ),
         start_gazebo_server_cmd,
@@ -183,7 +220,5 @@ def generate_launch_description():
         robot_state_publisher,
         joint_state_publisher,
         spawn_entity,
-        rf2o_laser_odometry,
         rqt_robot_steering,
-        odom_utility_tools,
     ])
