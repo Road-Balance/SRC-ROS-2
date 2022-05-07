@@ -41,7 +41,7 @@ def generate_launch_description():
         launch_arguments={'world': world_path}.items()
     )
 
-    # Start Gazebo client    
+    # Start Gazebo client
     start_gazebo_client_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py'))
     )
