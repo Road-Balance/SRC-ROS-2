@@ -161,8 +161,8 @@ ros2 launch src_nav bringup_real_launch.py
 
 # remote version
 ros2 launch src_demo src_bringup_nav.launch.py
-
 ros2 launch src_nav bringup_real_launch.py open_rviz:=false
+
 ros2 launch src_nav rviz_view_launch.py
 ```
 

@@ -93,14 +93,22 @@ static void subscription_callback(const void *msgin) {
 ```
 - joy_to_cmd에 의해 accel, deaccel value들이 제한되고 있었다.
 
+Fixed
 - min_x_velocity_threshold : 0.1로 확 키웠더니 일정한 속도를 내뱉었다.
 - desired_linear_vel : 0.5 였는데 너무 빨라서 좀 줄였다.
 - use_cost_regulated_linear_velocity_scaling : true
-
-- min_y_velocity_threshold : 좀 더 올려보자.
+- 도착 했는데 멈추지 못하고 계속 가는 문제 => ssh 
+  - yaw tolerance를 키워줘보았다. 0.5 => 1.507
 - 일정한 속도가 된 것이 누구 덕분인지 알아내기 controller_frequency or min_x_velocity_threshold
+  - controller_frequency => 20 no problem 
+  - min_x_velocity_threshold => 0.01 no problem 이지만 다시 1.0으로 롤백
+- min_theta_velocity_threshold : 좀 더 올려보자.
+  - 0.05 => 0.1 odom에서 받아들일 때 0.1 보다 작은 단위는 무시하겠다는 뜻임 0.11 = 0.1 조금 나아졌지만 역시 PID는 잡아야 함
+
+TODO
 - Yaw control : PID tuning
-- 도착 했는데 멈추지 못하고 계속 가는 문제 => ssh
+
 - min_approach_linear_velocity : 목표 접근 시 속도 => 0.05 ro 줄여보자.
+- allow_reversing not works 
 
 [] 센서류 전부 사용 확인법 & rviz2로 확인하기 & 영상
