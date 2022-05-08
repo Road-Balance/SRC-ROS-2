@@ -30,12 +30,17 @@ def generate_launch_description():
     # Get the launch directory
     my_nav_dir = get_package_share_directory('src_nav')
     my_launch_dir = os.path.join(my_nav_dir, 'launch')
+    
     my_param_dir = os.path.join(my_nav_dir, 'param')
-    # my_param_file = 'src_dwb_params_real.yaml'
+    # my_param_file = 'src_dwb_params.yaml'
     my_param_file = 'src_regulated_pure_pursuit_real.yaml'
-    my_bt_file = 'navigate_w_replanning_time.xml'
+    
+    my_bt_file = 'navigate_w_replanning_and_recovery.xml'
+
     my_map_dir = os.path.join(my_nav_dir, 'map')
     my_map_file = 'src_hit_editted.yaml'
+
+    rviz_config = os.path.join(my_nav_dir, 'rviz', 'nav2_hanyang_view.rviz')
 
     # Create the launch configuration variables
     namespace = LaunchConfiguration('namespace')
@@ -135,6 +140,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(os.path.join(my_launch_dir, 'rviz_view_launch.py')),
             launch_arguments={'use_sim_time': use_sim_time,
                               'open_rviz': open_rviz,
+                              'rviz_config': rviz_config,
                               'map_subscribe_transient_local': 'true'}.items()),
                              
     ])
