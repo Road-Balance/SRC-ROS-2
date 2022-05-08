@@ -189,8 +189,8 @@ private:
   SRCMsg src_msg_;
   uint steering_offset_ = 20;
 
-  float accel_;
-  float deaccel_;
+  // double accel_;
+  // double deaccel_;
 
   double linear_x_;
   double angular_z_;
@@ -223,12 +223,12 @@ public:
         std::bind(&CmdToSRC::accel_vel_cb, this, std::placeholders::_1));
 
     pub_timer_ = this->create_wall_timer(
-        20ms, std::bind(&CmdToSRC::timer_callback, this));
+        100ms, std::bind(&CmdToSRC::timer_callback, this));
 
-    accel_ = declare_parameter("accel_scale", 5.0);
+    auto accel_ = declare_parameter("accel_scale", 5.0);
     RCLCPP_INFO(get_logger(), "accel : %f", accel_);
 
-    deaccel_ = declare_parameter("deaccel_scale", 5.0);
+    auto deaccel_ = declare_parameter("deaccel_scale", 5.0);
     RCLCPP_INFO(get_logger(), "deaccel : %f", deaccel_);
 
     scale = declare_parameter("scale", 19);
