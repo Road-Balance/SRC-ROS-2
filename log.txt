@@ -54,4 +54,53 @@ navigation이 되기는 한다.
 대신 이러한 점들이 고쳐져야 함
 - 가속 문제 (가속이 너무 천천히 된다.)
 - 각속도 제어 문제 (현재는 각속도가 이리저리 oscillation이 생기고 있다.)
-- 최대 속도 제한 주기 (현재 너무 빠르게 움직인다.
+- 최대 속도 제한 주기 (현재 너무 빠르게 움직인다.)
+
+2022 05 08 log
+
+- joystick 으로 움직일 시 가다 멈추다 하는 현상 발견, 천천히 속도 올리면 안그런다.
+- cmd_to_src 100ms period
+
+=> 그런데 사실 cmd_vel pub 주기는 큰 상관 없다.
+
+```
+// twist message cb
+static void subscription_callback(const void *msgin) {
+
+  const src_control_message__msg__SRCMsg *msg_sub = static_cast<const src_control_message__msg__SRCMsg *>(msgin);
+
+  if (msg_sub != NULL) {
+
+    digitalWrite(LIGHT_PIN, msg_sub->light); // Light 
+
+    myServo.write(msg_sub->steering); // Steering Setup
+
+    if (dir_old == 1){
+      digitalWrite(dir_m1pin, HIGH);  //M1 dir
+      // digitalWrite(dir_m2pin, HIGH); //M2 dir
+    }
+    else if (dir_old == -1){
+      digitalWrite(dir_m1pin, LOW); //M1 dir
+      // digitalWrite(dir_m2pin, LOW);  //M2 dir
+    }
+
+    if (ENCODER_STATE == INITIAL_STATE)
+      ENCODER_STATE = FIRST_SUB;
+    else
+      ENCODER_STATE = PUB_ODOM;
+  }
+}
+```
+- joy_to_cmd에 의해 accel, deaccel value들이 제한되고 있었다.
+
+- min_x_velocity_threshold : 0.1로 확 키웠더니 일정한 속도를 내뱉었다.
+- desired_linear_vel : 0.5 였는데 너무 빨라서 좀 줄였다.
+- use_cost_regulated_linear_velocity_scaling : true
+
+- min_y_velocity_threshold : 좀 더 올려보자.
+- 일정한 속도가 된 것이 누구 덕분인지 알아내기 controller_frequency or min_x_velocity_threshold
+- Yaw control : PID tuning
+- 도착 했는데 멈추지 못하고 계속 가는 문제 => ssh
+- min_approach_linear_velocity : 목표 접근 시 속도 => 0.05 ro 줄여보자.
+
+[] 센서류 전부 사용 확인법 & rviz2로 확인하기 & 영상
