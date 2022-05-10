@@ -128,7 +128,7 @@ controller_server:
       use_cost_regulated_linear_velocity_scaling: true
       regulated_linear_scaling_min_speed: 0.25 # useless
       max_robot_pose_search_dist: 10.0
-      use_interpolation: true # 이거 한 번 바꿔봐
+      use_interpolation: true # recommended
       transform_tolerance: 0.1
 
 controller_server_rclcpp_node:

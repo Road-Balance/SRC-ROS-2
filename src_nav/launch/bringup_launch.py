@@ -32,6 +32,7 @@ def generate_launch_description():
     my_launch_dir = os.path.join(my_nav_dir, 'launch')
     
     my_param_dir = os.path.join(my_nav_dir, 'param')
+    
     # my_param_file = 'src_dwb_params.yaml'
     my_param_file = 'src_regulated_pure_pursuit.yaml'
     
