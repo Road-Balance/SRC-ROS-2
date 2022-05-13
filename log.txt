@@ -114,3 +114,40 @@ TODO
 [] micro ros 연결 시 잘 안되는 경우 해결
 [] twiddle
 [] 
+
+
+Camera logs
+
+```
+v4l2-ctl -d /dev/cams/c920 --list-formats-ext
+
+ioctl: VIDIOC_ENUM_FMT
+	Type: Video Capture
+
+	[0]: 'YUYV' (YUYV 4:2:2)
+		Size: Discrete 640x480
+			Interval: Discrete 0.033s (30.000 fps)
+			Interval: Discrete 0.042s (24.000 fps)
+			Interval: Discrete 0.050s (20.000 fps)
+			Interval: Discrete 0.067s (15.000 fps)
+			Interval: Discrete 0.100s (10.000 fps)
+			Interval: Discrete 0.133s (7.500 fps)
+			Interval: Discrete 0.200s (5.000 fps)
+```
+
+```
+ros2 launch src_demo usb_cam.launch.py 
+ros2 run rqt_image_view rqt_image_view 
+```
+
+```
+$ ros2 topic list
+/camera_info
+/image_raw
+/image_raw/compressed
+/image_raw/compressedDepth
+/image_raw/theora
+/parameter_events
+/rosout
+```
+

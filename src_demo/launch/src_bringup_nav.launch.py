@@ -68,6 +68,11 @@ def generate_launch_description():
     cmd_to_src = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(cmd_to_src_pkg, 'launch', 'cmd_to_src.launch.py')),
     )
+
+    this_pkg_path = os.path.join(get_package_share_directory('src_demo'))
+    usb_cam_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(this_pkg_path, 'launch', 'cam_test.launch.py')),
+    )
     
     return LaunchDescription([
         mw_ahrs_node,
@@ -75,5 +80,6 @@ def generate_launch_description():
         static_transform_publisher_nav_footprint,
         static_transform_publisher_laser,
         cmd_to_src,
+        usb_cam_launch,
         src_odom,
     ])
