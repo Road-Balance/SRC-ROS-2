@@ -1,6 +1,6 @@
-usb_cam_node_exe:
+/**:
   ros__parameters:
-    video_device: "/dev/cam/c920"
+    video_device: "/dev/cams/c920"
     framerate: 30.0
     io_method: "mmap"
     frame_id: "camera"
