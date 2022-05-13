@@ -110,7 +110,6 @@ TODO
 - allow_reversing 해도 뒤로는 안가는 문제
 - min_approach_linear_velocity : 목표 접근 시 속도 => 0.05 ro 줄여보자.
 
-[] 센서류 전부 사용 확인법 & rviz2로 확인하기 & 영상
 [] micro ros 연결 시 잘 안되는 경우 해결
 [] twiddle
 [] 
