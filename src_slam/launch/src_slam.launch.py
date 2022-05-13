@@ -79,6 +79,7 @@ def generate_launch_description():
         rplidar_driver,
         src_bringup,
         static_transform_publisher,
+
         # rf2o_laser_odometry,
         slam_toolbox_with_rviz,
     ])

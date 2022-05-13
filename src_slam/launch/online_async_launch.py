@@ -13,13 +13,13 @@ def generate_launch_description():
     pkg_path = os.path.join(get_package_share_directory("src_slam"))
 
     # launch configuration
-    use_rviz = LaunchConfiguration('use_rviz')
+    open_rviz = LaunchConfiguration('open_rviz')
     use_sim_time = LaunchConfiguration('use_sim_time')
     slam_params_file = LaunchConfiguration('slam_params_file')
     rviz_config_file = LaunchConfiguration('rviz_config_file')
 
-    declare_use_rviz = DeclareLaunchArgument(
-        name='use_rviz',
+    declare_open_rviz = DeclareLaunchArgument(
+        name='open_rviz',
         default_value='True',
         description='Whether to start RVIZ'
     )
@@ -60,7 +60,7 @@ def generate_launch_description():
 
     # Launch RViz
     rviz = Node(
-        condition=IfCondition(use_rviz),
+        condition=IfCondition(open_rviz),
         package='rviz2',
         executable='rviz2',
         name='rviz2',
@@ -70,7 +70,7 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
-    ld.add_action(declare_use_rviz)
+    ld.add_action(declare_open_rviz)
     ld.add_action(declare_rviz_config_file)
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_slam_params_file_cmd)
