@@ -17,6 +17,7 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import TimerAction
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
@@ -76,6 +77,10 @@ def generate_launch_description():
     return LaunchDescription([
         joint_state_publisher, 
         robot_state_publisher, 
-        joint_state_publisher_gui, 
-        rviz
-    ])  
+        joint_state_publisher_gui,
+
+        TimerAction(    
+            period=2.0,
+            actions=[rviz]
+        ),
+    ])
