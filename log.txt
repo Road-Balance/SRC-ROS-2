@@ -150,3 +150,28 @@ $ ros2 topic list
 /rosout
 ```
 
+# Docker img Setup
+
+sudo apt install ros-foxy-
+- xacro
+- joint-state-publisher
+- joint-state-publisher-gui
+- rqt-robot-steering
+- controller-manager
+- ros2-control
+- ros2-controllers
+- gazebo-ros2-control-*
+- git clone -b foxy https://github.com/ros-controls/ros2_control_demos.git
+cbp diffbot_description
+cbp ros2_control_test_nodes
+cbp rrbot_description
+cbp ros2_control_demo_hardware
+cbp ros2_control_demo_bringup
+cbp ros2_control_demos
+
+cbp src_gazebo_controller
+
+- robot-localization
+- slam-toolbox
+- cartographer
+- nav2
