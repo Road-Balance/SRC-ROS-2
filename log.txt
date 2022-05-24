@@ -152,24 +152,31 @@ $ ros2 topic list
 
 # Docker img Setup
 
-sudo apt install ros-foxy-
-- xacro
-- joint-state-publisher
-- joint-state-publisher-gui
-- rqt-robot-steering
-- controller-manager
-- ros2-control
-- ros2-controllers
-- gazebo-ros2-control-*
-- git clone -b foxy https://github.com/ros-controls/ros2_control_demos.git
-cbp diffbot_description
-cbp ros2_control_test_nodes
-cbp rrbot_description
-cbp ros2_control_demo_hardware
-cbp ros2_control_demo_bringup
-cbp ros2_control_demos
+sudo apt install ros-foxy-xacro
+sudo apt install ros-foxy-joint-state-publisher
+sudo apt install ros-foxy-robot-state-publisher
+sudo apt install ros-foxy-joint-state-publisher-gui 
+sudo apt install ros-foxy-rqt-robot-steering
+sudo apt install ros-foxy-controller-manager
+sudo apt install ros-foxy-ros2-control
+sudo apt install ros-foxy-hardware-interface
+sudo apt install ros-foxy-gazebo-* -y
+sudo apt install ros-foxy-slam-toolbox
+sudo apt install ros-foxy-slam-toolbox
+sudo apt install ros-foxy-cartographer* -y
+sudo apt install ros-foxy-robot-localization -y
 
-cbp src_gazebo_controller
+ros2 run rqt_robot_steering rqt_robot_steering  --force-discover
+
+
+git clone -b foxy https://github.com/ros-controls/ros2_control_demos.git
+cbp diffbot_description && rosfoxy
+cbp ros2_control_test_nodes && rosfoxy
+cbp rrbot_description && rosfoxy
+cbp ros2_control_demo_hardware && rosfoxy
+cbp ros2_control_demo_bringup && rosfoxy
+cbp ros2_control_demos && rosfoxy
+cbp src_gazebo_controller && rosfoxy
 
 - robot-localization
 - slam-toolbox
