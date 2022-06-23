@@ -27,8 +27,10 @@ def generate_launch_description():
     src_slam_pkg = os.path.join(get_package_share_directory('src_slam'))
     
     serial_port = "/dev/rplidar"
+    # rplidar_launch_file = "rplidar_a3_launch.py"
+    rplidar_launch_file = "rplidar_launch.py"
     rplidar_driver = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(rplidar_ros2_pkg, 'launch', 'rplidar_a3_launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(rplidar_ros2_pkg, 'launch', rplidar_launch_file)),
         launch_arguments={'serial_port': serial_port}.items()
     )
 
