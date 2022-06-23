@@ -24,6 +24,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, RegisterEventHandler
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
+from launch.actions import TimerAction
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -198,12 +199,18 @@ def generate_launch_description():
                 on_exit=[src_odometry],
             )
         ),
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=load_velocity_controller,
-                on_exit=[rviz],
-            )
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=load_velocity_controller,
+        #         on_exit=[rviz],
+        #     )
+        # ),
+
+        TimerAction(    
+            period=7.0,
+            actions=[rviz]
         ),
+
         start_gazebo_server_cmd,
         start_gazebo_client_cmd,
         robot_state_publisher,

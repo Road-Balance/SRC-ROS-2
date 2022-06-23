@@ -110,7 +110,6 @@ TODO
 - allow_reversing 해도 뒤로는 안가는 문제
 - min_approach_linear_velocity : 목표 접근 시 속도 => 0.05 ro 줄여보자.
 
-[] 센서류 전부 사용 확인법 & rviz2로 확인하기 & 영상
 [] micro ros 연결 시 잘 안되는 경우 해결
 [] twiddle
 [] 
@@ -151,3 +150,35 @@ $ ros2 topic list
 /rosout
 ```
 
+# Docker img Setup
+
+sudo apt install ros-foxy-xacro
+sudo apt install ros-foxy-joint-state-publisher
+sudo apt install ros-foxy-robot-state-publisher
+sudo apt install ros-foxy-joint-state-publisher-gui 
+sudo apt install ros-foxy-rqt-robot-steering
+sudo apt install ros-foxy-controller-manager
+sudo apt install ros-foxy-ros2-control
+sudo apt install ros-foxy-hardware-interface
+sudo apt install ros-foxy-gazebo-* -y
+sudo apt install ros-foxy-slam-toolbox
+sudo apt install ros-foxy-slam-toolbox
+sudo apt install ros-foxy-cartographer* -y
+sudo apt install ros-foxy-robot-localization -y
+
+ros2 run rqt_robot_steering rqt_robot_steering  --force-discover
+
+
+git clone -b foxy https://github.com/ros-controls/ros2_control_demos.git
+cbp diffbot_description && rosfoxy
+cbp ros2_control_test_nodes && rosfoxy
+cbp rrbot_description && rosfoxy
+cbp ros2_control_demo_hardware && rosfoxy
+cbp ros2_control_demo_bringup && rosfoxy
+cbp ros2_control_demos && rosfoxy
+cbp src_gazebo_controller && rosfoxy
+
+- robot-localization
+- slam-toolbox
+- cartographer
+- nav2
