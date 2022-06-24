@@ -143,12 +143,9 @@ PID Tuning
 SLAM Toolbox
 
 ```
-ros2 launch src_slam src_slam.launch.py
-```
+ros2 launch src_slam src_slam.launch.py open_rviz:=false
 
-remote rviz view
-
-```
+# remote rviz view
 ros2 launch src_slam only_rviz_foxy.launch.py
 ros2 run teleop_twist_keyboard teleop_twist_keyboard 
 ```
@@ -160,9 +157,12 @@ ros2 launch src_demo src_bringup_nav.launch.py
 ros2 launch src_nav bringup_real_launch.py
 
 # remote version
+
+# SRC launch
 ros2 launch src_demo src_bringup_nav.launch.py
 ros2 launch src_nav bringup_real_launch.py open_rviz:=false
 
+# Remote launch
 ros2 launch src_nav rviz_view_launch.py
 ```
 
