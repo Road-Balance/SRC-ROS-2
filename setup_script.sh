@@ -13,6 +13,8 @@ sudo apt install ros-$ROS_DISTRO-joint-state-publisher-gui -y
 sudo apt install ros-$ROS_DISTRO-joint-state-publisher -y
 sudo apt install ros-$ROS_DISTRO-robot-state-publisher -y
 sudo apt install ros-$ROS_DISTRO-rqt-robot-steering -y
+sudo apt install ros-$ROS_DISTRO-controller-manager -y
+sudo apt install ros-$ROS_DISTRO-ros2-control* -y
 
 sudo apt install ros-$ROS_DISTRO-nav2-* -y
 sudo apt install ros-$ROS_DISTRO-slam-toolbox -y
