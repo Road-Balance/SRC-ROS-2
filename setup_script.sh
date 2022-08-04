@@ -18,6 +18,8 @@ sudo apt install ros-$ROS_DISTRO-ros2-control* -y
 
 sudo apt install ros-$ROS_DISTRO-nav2-* -y
 sudo apt install ros-$ROS_DISTRO-slam-toolbox -y
+sudo apt install ros-$ROS_DISTRO-cartographer -y
+sudo apt install ros-$ROS_DISTRO-cartographer-ros -y
 sudo apt install ros-$ROS_DISTRO-teleop-twist-keyboard -y
 sudo apt install ros-$ROS_DISTRO-gazebo-ros-pkgs
 sudo apt install ros-$ROS_DISTRO-robot-localization -y
