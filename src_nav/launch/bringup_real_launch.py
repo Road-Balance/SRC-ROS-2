@@ -38,7 +38,8 @@ def generate_launch_description():
     my_bt_file = 'navigate_w_replanning_and_recovery.xml'
 
     my_map_dir = os.path.join(my_nav_dir, 'map')
-    my_map_file = 'src_hit_editted.yaml'
+    # my_map_file = 'src_hit_editted.yaml'
+    my_map_file = 'hy_map_editted.yaml'
 
     rviz_config = os.path.join(my_nav_dir, 'rviz', 'nav2_hanyang_view.rviz')
 
@@ -137,7 +138,7 @@ def generate_launch_description():
                               'map_subscribe_transient_local': 'true'}.items()),
                               
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(my_launch_dir, 'rviz_view_launch.py')),
+            PythonLaunchDescriptionSource(os.path.join(my_launch_dir, 'rviz_view_foxy_launch.py')),
             launch_arguments={'use_sim_time': use_sim_time,
                               'open_rviz': open_rviz,
                               'rviz_config': rviz_config,
