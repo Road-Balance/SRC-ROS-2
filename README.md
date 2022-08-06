@@ -143,11 +143,17 @@ PID Tuning
 SLAM Toolbox
 
 ```
+# LattePanda
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
 ros2 launch src_slam src_slam.launch.py open_rviz:=false
 
 # remote rviz view
 ros2 launch src_slam only_rviz_foxy.launch.py
+
 ros2 run teleop_twist_keyboard teleop_twist_keyboard 
+# or
+ros2 launch src_demo joystick_control_foxy.launch.py
 ```
 
 Navigation
@@ -157,6 +163,9 @@ ros2 launch src_demo src_bringup_nav.launch.py
 ros2 launch src_nav bringup_real_launch.py
 
 # remote version
+
+
+
 
 # SRC launch
 ros2 launch src_demo src_bringup_nav.launch.py
