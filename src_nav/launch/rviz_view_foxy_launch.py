@@ -29,7 +29,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'rviz_config',
-            default_value=os.path.join(get_package_share_directory('src_nav'), 'rviz', 'nav2_default_view.rviz'),
+            default_value=os.path.join(get_package_share_directory('src_nav'), 'rviz', 'nav2_default_view_foxy.rviz'),
             description='Launch Rviz?'),
 
         Node(

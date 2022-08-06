@@ -173,6 +173,7 @@ ros2 launch src_nav bringup_real_launch.py open_rviz:=false
 
 # Remote launch
 ros2 launch src_nav rviz_view_launch.py
+ros2 launch src_nav rviz_view_foxy_launch.py
 ```
 
 # TODO
