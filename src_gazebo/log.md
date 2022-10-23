@@ -109,3 +109,8 @@ sensor_msgs/msg/JointState => 이걸 받아서 odometry를 만들자.
 
 실제 SRC는 servo 각도와 (피드백 없음) / 뒷바퀴 엔코더로 odom을 만든다.
 
+# Ubuntu Desktop Error
+
+```
+[spawner.py-9] [ERROR] [1650724737.764791709] [spawner_velocity_controller]: Controller manager not available
+```

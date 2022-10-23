@@ -5,6 +5,9 @@ from launch.actions import TimerAction
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription
+
 def generate_launch_description():
 
     mw_ahrs_node = Node(
@@ -25,23 +28,29 @@ def generate_launch_description():
 
     src_odom = Node(
         package='src_odometry',
-        executable='src_odom',
-        name='src_odom',
+        executable='src_odometry',
+        name='src_odometry',
         output='log',
         parameters=[{
-            'imu_topic_name' : 'imu/data',
-            'encoder_topic_name' : '/encoder_value',
-            'publish_tf' : True,
-            'update_rate' : 50,
+            "verbose" : False,
+            'publish_rate' : 50,
+            'open_loop' : False,
+            'has_imu_heading' : True,
+            'is_gazebo' : False,
+            'wheel_radius' : 0.0508,
             'base_frame_id' : "base_link",
             'odom_frame_id' : "odom",
-            'wheel_radius' : 0.0508,
-            "encoder_resolution" : 150,
-            "verbose" : False,
+            'enable_odom_tf' : True,
         }],
+    )
+
+    cmd_to_src_pkg = os.path.join(get_package_share_directory('cmd_to_src'))
+    cmd_to_src = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(cmd_to_src_pkg, 'launch', 'cmd_to_src.launch.py')),
     )
 
     return LaunchDescription([
         mw_ahrs_node,
         src_odom,
+        cmd_to_src,
     ])

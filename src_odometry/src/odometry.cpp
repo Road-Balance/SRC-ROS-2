@@ -158,14 +158,10 @@ namespace ackermann_steering_controller
     integrate_fun_(linear * dt, angular * dt);
   }
 
-  void Odometry::setWheelParams(double wheel_separation_h, double wheel_radius)
+  void Odometry::setWheelParams(const double& wheel_separation_h, const double& wheel_radius, const uint& encoder_resolution)
   {
     wheel_separation_h_ = wheel_separation_h;
     wheel_radius_ = wheel_radius;
-  }
-
-  void Odometry::setEncoderResolution(uint encoder_resolution)
-  {
     encoder_resolution_ = encoder_resolution;
   }
 

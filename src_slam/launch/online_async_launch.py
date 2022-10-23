@@ -2,17 +2,27 @@ import os
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
+    
     pkg_path = os.path.join(get_package_share_directory("src_slam"))
 
+    # launch configuration
+    open_rviz = LaunchConfiguration('open_rviz')
     use_sim_time = LaunchConfiguration('use_sim_time')
     slam_params_file = LaunchConfiguration('slam_params_file')
     rviz_config_file = LaunchConfiguration('rviz_config_file')
+
+    declare_open_rviz = DeclareLaunchArgument(
+        name='open_rviz',
+        default_value='True',
+        description='Whether to start RVIZ'
+    )
 
     declare_use_sim_time_argument = DeclareLaunchArgument(
         'use_sim_time',
@@ -50,6 +60,7 @@ def generate_launch_description():
 
     # Launch RViz
     rviz = Node(
+        condition=IfCondition(open_rviz),
         package='rviz2',
         executable='rviz2',
         name='rviz2',
@@ -59,6 +70,7 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
+    ld.add_action(declare_open_rviz)
     ld.add_action(declare_rviz_config_file)
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_slam_params_file_cmd)

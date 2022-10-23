@@ -19,6 +19,14 @@ using SRCMsg = src_control_message::msg::SRCMsg;
 using Float32 = std_msgs::msg::Float32;
 using Imu = sensor_msgs::msg::Imu;
 
+template <typename T>
+inline void in_range(T &input, const T &low_val, const T &max_val) {
+  if (input < low_val)
+    input = low_val;
+  if (input > max_val)
+    input = max_val;
+}
+
 /// TODO : friend class CmdToSRC;
 class YawRatePID : public rclcpp::Node {
 public:
@@ -42,7 +50,7 @@ private:
   TwiddleCase twiddle_case_ = CASE_P_1;
 
 public:
-  YawRatePID (const float &k_p = 18.0, const float &k_i = -10.0,
+  YawRatePID(const float &k_p = 18.0, const float &k_i = -10.0,
              const float &k_d = -9.0)
       : Node("yaw_ctl_pid"), k_p(k_p), k_i(k_i), k_d(k_d) {
     d_p = 1.0;
@@ -50,7 +58,7 @@ public:
     d_d = 1.0;
   }
 
-  void twiddle(const float& cur_err) {
+  void twiddle(const float &cur_err) {
     if ((d_p + d_i + d_d) > 0.2) {
       if (cur_err < best_err) {
         best_err = cur_err;
@@ -122,44 +130,41 @@ public:
     k_p = k_p_in;
     k_i = k_i_in;
     k_d = k_d_in;
-
-    RCLCPP_INFO(get_logger(), "kp : %f / ki : %f / kd : %f", k_p, k_i, k_d);
   }
 
-  std::vector<float> getGain() { return std::vector<float>{k_p, k_i, k_d}; }
+  std::vector<float> getGain() const {
+    return std::vector<float>{k_p, k_i, k_d};
+  }
 
-  int update(bool use_twiddle, bool sign_change, float object_val, float cur_val) {
+  int update(bool use_twiddle, bool sign_change, float object_val,
+             float cur_val) {
 
     auto cur_err = object_val - cur_val;
     auto diff_err = cur_err - prev_err;
 
     integrate_err += cur_err;
-    if(sign_change)
+    if (sign_change) {
       integrate_err = 0;
+      diff_err = 0;
+    }
 
-    if (integrate_err > 10)
-      integrate_err = 10;
-    if (integrate_err < -10)
-      integrate_err = -10;
+    in_range(integrate_err, -10.0f, 10.0f);
 
     if (use_twiddle)
       twiddle(cur_err);
 
     prev_err = cur_err;
+
     RCLCPP_INFO(get_logger(), "cur_err : %f", cur_err);
 
     int output = -k_p * cur_err - k_i * integrate_err - k_d * diff_err;
 
-    if (output > 30)
-      output = 30;
-    if (output < -30)
-      output = -30;
+    in_range(output, -30, 30);
 
     std::cout << "output : " << int(output) << std::endl;
 
-    std::cout << "\nk_p : " << k_p << 
-        "\n k_i : " << k_i << 
-        "\n k_d : " << k_d << std::endl;
+    std::cout << "\nk_p : " << k_p << "\n k_i : " << k_i << "\n k_d : " << k_d
+              << std::endl;
 
     return output;
   }
@@ -184,8 +189,12 @@ private:
   SRCMsg src_msg_;
   uint steering_offset_ = 20;
 
-  float accel_;
-  float deaccel;
+  // double accel_;
+  // double deaccel_;
+
+  double linear_x_;
+  double angular_z_;
+  
   float prev_angular_vel_;
 
   bool use_twiddle_;
@@ -214,29 +223,29 @@ public:
         std::bind(&CmdToSRC::accel_vel_cb, this, std::placeholders::_1));
 
     pub_timer_ = this->create_wall_timer(
-        20ms, std::bind(&CmdToSRC::timer_callback, this));
+        100ms, std::bind(&CmdToSRC::timer_callback, this));
 
-    // paramter
-    this->declare_parameter("accel_scale", 5.0);
-    accel_ = this->get_parameter("accel_scale").as_double();
+    auto accel_ = declare_parameter("accel_scale", 5.0);
+    RCLCPP_INFO(get_logger(), "accel : %f", accel_);
 
-    this->declare_parameter("deaccel_scale", 5.0);
-    deaccel = this->get_parameter("deaccel_scale").as_double();
+    auto deaccel_ = declare_parameter("deaccel_scale", 5.0);
+    RCLCPP_INFO(get_logger(), "deaccel : %f", deaccel_);
 
-    this->declare_parameter("scale", 9);
-    scale = this->get_parameter("scale").as_int();
+    scale = declare_parameter("scale", 19);
+    RCLCPP_INFO(get_logger(), "scale : %d", scale);
 
-    this->declare_parameter("p_gain", 18.0);
-    auto p_gain_ = this->get_parameter("p_gain").as_double();
+    auto p_gain_ = declare_parameter("p_gain", 18.0);
+    RCLCPP_INFO(get_logger(), "p_gain : %f", p_gain_);
 
-    this->declare_parameter("i_gain", 0.0);
-    auto i_gain_ = this->get_parameter("i_gain").as_double();
+    auto i_gain_ = declare_parameter("i_gain", 0.0);
+    RCLCPP_INFO(get_logger(), "i_gain : %f", i_gain_);
 
-    this->declare_parameter("d_gain", 0.0);
-    auto d_gain_ = this->get_parameter("d_gain").as_double();
+    auto d_gain_ = declare_parameter("d_gain", 18.0);
+    RCLCPP_INFO(get_logger(), "d_gain : %f", d_gain_);
 
-    this->declare_parameter("use_twiddle", false);
-    use_twiddle_ = this->get_parameter("use_twiddle").as_bool();
+    use_twiddle_ = declare_parameter("use_twiddle", true);
+    RCLCPP_INFO(get_logger(), "use_twiddle : %s", use_twiddle_ == true ? "true" : "false");
+
 
     src_msg_.speed = 0.0;
     src_msg_.steering = 0;
@@ -244,7 +253,7 @@ public:
     src_msg_.direction = true;
     src_msg_.lcd_msg = "";
     src_msg_.accel = accel_;
-    src_msg_.deaccel = deaccel;
+    src_msg_.deaccel = deaccel_;
     src_msg_.scale = scale;
 
     prev_time = this->get_clock()->now();
@@ -280,47 +289,53 @@ public:
     // RCLCPP_INFO(get_logger(), "angular_z : %f", yaw_speed_);
   }
 
-  void cmd_vel_cb(const Twist::SharedPtr msg) {
-    src_msg_.speed = msg->linear.x;
+  void update_steering(){
 
-    // TODO : move controller into timer cb
-
-    if (fabs(msg->linear.x) >= 0.1){
+    if (fabs(linear_x_) >= 0.02) {
       bool sign_change = false;
       int pid_result;
 
-      auto angular_vel = msg->angular.z;
-      if( (prev_angular_vel_ > 0 && angular_vel < 0 ) || ( prev_angular_vel_ < 0 && angular_vel > 0 ) ){
+      if ((prev_angular_vel_ > 0 && angular_z_ < 0) ||
+          (prev_angular_vel_ < 0 && angular_z_ > 0)) {
         RCLCPP_INFO(get_logger(), "sign changed");
         sign_change = true;
       }
 
-      if (angular_vel == 0.0)
+      if (angular_z_ == 0.0)
         pid_result = steering_offset_;
-      else
-        pid_result =
-            steering_offset_ + pid_controller_->update(use_twiddle_, sign_change, msg->angular.z, yaw_speed_);
-      
-      if(pid_result < 0)
-        pid_result = 0;
-      if(pid_result > 200)
-        pid_result = 200;
+      else {
+        pid_result = steering_offset_ +
+                     pid_controller_->update(use_twiddle_, sign_change,
+                                             angular_z_, yaw_speed_);
+      }
+
+      in_range(pid_result, 0, 200);
 
       src_msg_.steering = pid_result;
-      prev_angular_vel_ = angular_vel;
+      prev_angular_vel_ = angular_z_;
     }
-      // src_msg_.steering = steering_offset_;
+    // src_msg_.steering = steering_offset_;
     else
       src_msg_.steering = steering_offset_;
+  }
 
-    // RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02 ok
+  void cmd_vel_cb(const Twist::SharedPtr msg) {
+    linear_x_ = msg->linear.x;
+    angular_z_ = msg->angular.z;
+
+    src_msg_.speed = linear_x_;
+    src_msg_.direction = src_msg_.speed >= 0 ? 1 : 0;
+
+    if (linear_x_ < 0)
+      angular_z_ *= -1;
+
+    // RCLCPP_INFO(get_logger(), "steering : %d", src_msg_.steering); // dt 0.02
+    // ok
 
     // src_msg_.steering =
     //     -((msg->angular.z) / 2 * steering_offset_) + steering_offset_;
 
     // TODO: Light On Off mode
-
-    src_msg_.direction = src_msg_.speed >= 0 ? 1 : 0;
   }
 
   void accel_vel_cb(const Float32::SharedPtr msg) {
@@ -328,7 +343,10 @@ public:
     src_msg_.deaccel = msg->data;
   }
 
-  void timer_callback() { src_msg_pub_->publish(src_msg_); }
+  void timer_callback() {
+    update_steering(); 
+    src_msg_pub_->publish(src_msg_); 
+  }
 };
 
 int main(int argc, char **argv) {

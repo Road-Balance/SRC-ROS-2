@@ -114,7 +114,7 @@
     </visual>
   </link>
 
-  <joint name="right_steering_hinge_joint" type="continuous">
+  <joint name="right_steering_hinge_joint" type="revolute">
     <!-- <origin xyz="0.325 -0.100 0" rpy="0 1.5708 0" /> -->
     <origin xyz="0.325 -0.1225 0" rpy="0 1.5708 0" />
     <parent link="chassis" />

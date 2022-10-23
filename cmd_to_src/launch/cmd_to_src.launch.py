@@ -11,10 +11,14 @@ def generate_launch_description():
         name='cmd_to_src',
         output='screen',
         parameters=[{
-            "p_gain" : 122.0,
-            'i_gain' : 3.0,
-            'd_gain' : 1.0,
-            'use_twiddle' : False,
+            "accel_scale" : 0.5,
+            "deaccel_scale" : 0.5,
+            "scale" : 40, # linear 하지 못하다. 0.1에서는 좀 못미치고, 0.4에서는 넘어버린다.
+            # "p_gain" : 95.0,
+            "p_gain" : 80.0,
+            "i_gain" : 2.0,
+            "d_gain" : 0.5,
+            "use_twiddle" : False,
         }],
     )
 

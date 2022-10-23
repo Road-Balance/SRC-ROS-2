@@ -176,12 +176,14 @@ public:
   }
 
   void pub_accel() {
+    // Tune acc / deacc values for your favorite
+
     // if (joy_keys.btn_updown == 1.0 && prev_joy_keys.btn_updown == 0.0)
     //   accel.data += 0.125f;
     // if (joy_keys.btn_updown == -1.0 && prev_joy_keys.btn_updown == 0.0)
     //   accel.data -= 0.125f;
 
-    accel_pub->publish(accel);
+    // accel_pub->publish(accel);
   }
 };
 

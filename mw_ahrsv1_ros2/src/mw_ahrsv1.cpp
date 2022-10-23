@@ -1,3 +1,4 @@
+/// 각도 말고 다른 값들도 받기 
 #include <string>
 #include <memory>
 #include <unistd.h>

@@ -11,7 +11,7 @@ def generate_launch_description():
     pkg_path = os.path.join(get_package_share_directory('src_sensor_fusion'))
 
     # Start robot localization using an Extended Kalman filter
-    robot_localization_file_path = os.path.join(pkg_path, 'config', 'ekf.yaml') 
+    robot_localization_file_path = os.path.join(pkg_path, 'config', 'imu_ekf.yaml') 
     
     robot_localization = Node(
         package='robot_localization',
@@ -21,7 +21,8 @@ def generate_launch_description():
         parameters=[
             robot_localization_file_path, 
             {'use_sim_time': True}
-        ]
+        ],
+        # remappings=[("odometry/filtered", "odom")],
     )
 
     return LaunchDescription([

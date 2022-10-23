@@ -67,7 +67,7 @@ PID
 
 ```
 ros2 launch cmd_to_src cmd_to_src.launch.py
-ros2 launch src_odometry src_bringup_new.launch.py
+ros2 launch src_odometry src_bringup.launch.py
 ```
 
 Gazebo SLAM
@@ -82,4 +82,31 @@ ros2 launch src_slam src_slam_gazebo.launch.py
 - [] cartographer
 - [] 3D SLAM 도 할 수 있을까??
 - [] etc...
+
+SLAM
+
+```
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
+
+ros2 launch src_slam src_slam.launch.py
+```
+
+Navigation 
+
+```
+docker run -it --rm --name micro-ros-foxy --net=host -v /dev:/dev --privileged tge1375/sw-micro-ros:0.0.4
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
+
+ros2 launch src_demo src_bringup_nav.launch.py
+ros2 launch src_nav bringup_real_launch.py
+```
+
+# Documentation
+
+save map에다가 경로 넣으면 자동 저장
+
+예를 들어, /home/kimsooyoung/ros2_ws/map/test를 넣으면, test.pgm/test.yaml이 생긴다.
+
+![image](https://user-images.githubusercontent.com/12381733/164704324-b26fb411-e78a-4c69-90b6-bceed81d3976.png)
 
