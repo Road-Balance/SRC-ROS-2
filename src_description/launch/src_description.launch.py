@@ -1,8 +1,10 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import TimerAction
 from launch import LaunchDescription
 from launch_ros.actions import Node
+
 
 from launch.substitutions import (
     Command,
@@ -58,8 +60,11 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        TimerAction(
+            period=3.0,
+            actions=[rviz]
+        ),
         joint_state_publisher, 
         robot_state_publisher, 
         joint_state_publisher_gui, 
-        rviz
     ])  
