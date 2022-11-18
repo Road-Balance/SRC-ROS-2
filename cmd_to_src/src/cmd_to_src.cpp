@@ -187,7 +187,6 @@ private:
 
   // TODO: src_msg params & yaml file (for accel, daccel, etc...)
   SRCMsg src_msg_;
-  uint steering_offset_ = 20;
 
   // double accel_;
   // double deaccel_;
@@ -199,7 +198,8 @@ private:
 
   bool use_twiddle_;
   unsigned int scale;
-
+  unsigned int steering_offset_;
+  
   std::shared_ptr<YawRatePID> pid_controller_;
 
 public:
@@ -233,6 +233,9 @@ public:
 
     scale = declare_parameter("scale", 19);
     RCLCPP_INFO(get_logger(), "scale : %d", scale);
+    
+    steering_offset_ = declare_parameter("steering_offset", 20);
+    RCLCPP_INFO(get_logger(), "steering_offset : %d", steering_offset_);
 
     auto p_gain_ = declare_parameter("p_gain", 18.0);
     RCLCPP_INFO(get_logger(), "p_gain : %f", p_gain_);
