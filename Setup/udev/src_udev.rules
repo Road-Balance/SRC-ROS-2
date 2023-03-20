@@ -8,6 +8,9 @@ KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="077
 KERNEL=="ttyACM*", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04**", MODE:="0777", SYMLINK+="teensy4.0"
 KERNEL=="hidraw*", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="04**", MODE:="0777", SYMLINK+="teensy4.0"
 
+# Nano RP2040 
+KERNEL=="ttyACM*", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="00**", MODE:="0777", SYMLINK+="rp2040"
+
 # Logitech Webcam C920
 SUBSYSTEM=="video4linux", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="08**", ATTR{index}=="0", MODE="0777", GROUP="video", SYMLINK+="cams/c920"
 
