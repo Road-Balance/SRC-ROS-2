@@ -182,3 +182,9 @@ cbp src_gazebo_controller && rosfoxy
 - slam-toolbox
 - cartographer
 - nav2
+
+2023 07 04
+갑자기 slam toolbox가 안된다.
+=> sudo apt upgrade 했다.
+
+된다!!
