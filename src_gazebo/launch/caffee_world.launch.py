@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 2022 RoadBalance Inc.
+# Copyright 2023 RoadBalance Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 import os
 
+from osrf_pycommon.terminal_color import ansi
+
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
@@ -23,12 +25,12 @@ from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, RegisterEventHandler
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+
+from launch.actions import TimerAction
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-
-from osrf_pycommon.terminal_color import ansi
 
 import xacro
 
@@ -65,13 +67,17 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py'))
     )
 
-    # Robot State Publisher
-    pkg_path = os.path.join(get_package_share_directory('src_gazebo'))
-    urdf_file = os.path.join(pkg_path, 'urdf', 'src_ackermann.urdf')
-
-    doc = xacro.parse(open(urdf_file))
-    xacro.process_doc(doc)
-    robot_description = {'robot_description': doc.toxml()}
+    # Get URDF via xacro
+    robot_description_content = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution(
+                [FindPackageShare("src_gazebo"), "urdf", "src_body_new.urdf.xacro"]
+            ),
+        ]
+    )
+    robot_description = {"robot_description": robot_description_content}
 
     robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -89,7 +95,7 @@ def generate_launch_description():
 
     # Spawn Robot
     spawn_entity = Node(
-        package='gazebo_ros', 
+        package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=[
             '-topic', 'robot_description',
@@ -131,11 +137,7 @@ def generate_launch_description():
         package='src_gazebo_controller',
         executable='src_gazebo_controller',
         output='screen',
-        parameters=[
-            {
-                "verbose": False,
-            }
-        ],
+        parameters=[],
     )
 
     rviz_config_file = os.path.join(pkg_path, 'rviz', 'gazebo_racecourse.rviz')
@@ -215,6 +217,7 @@ def generate_launch_description():
                 on_exit=[rviz],
             )
         ),
+        
         start_gazebo_server_cmd,
         start_gazebo_client_cmd,
         robot_state_publisher,
