@@ -38,7 +38,6 @@ def generate_launch_description():
         description='Full path to the ROS2 parameters file to use for the slam_toolbox node'
     )
 
-
     declare_rviz_config_file = DeclareLaunchArgument(
         'rviz_config_file',
         default_value=os.path.join(
@@ -74,6 +73,7 @@ def generate_launch_description():
     ld.add_action(declare_rviz_config_file)
     ld.add_action(declare_use_sim_time_argument)
     ld.add_action(declare_slam_params_file_cmd)
+
     ld.add_action(start_async_slam_toolbox_node)
     ld.add_action(rviz)
 
