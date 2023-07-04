@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 2022 RoadBalance Inc.
+# Copyright 2023 RoadBalance Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -104,9 +104,10 @@ def generate_launch_description():
                     '-y', '0.0',
                     '-z', '0.06',
                     '-Y', '0.0',
-                    '-entity', 'src_body'
+                    '-entity', 'rlcar'
                 ],
-        output='screen')
+        output='screen'
+    )
 
     # ROS 2 controller
     load_forward_position_controller = Node(
