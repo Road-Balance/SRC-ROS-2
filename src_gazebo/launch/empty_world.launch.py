@@ -150,6 +150,25 @@ def generate_launch_description():
         arguments=['-d', rviz_config_file]
     )
 
+    # car-like robot odometry node 
+    src_odometry = Node(
+        package='src_odometry',
+        executable='src_odometry',
+        name='src_odometry',
+        output='log',
+        parameters=[{
+            "verbose" : False,
+            'publish_rate' : 50,
+            'open_loop' : False,
+            'has_imu_heading' : True,
+            'is_gazebo' : True,
+            'wheel_radius' : 0.0508,
+            'base_frame_id' : "base_footprint",
+            'odom_frame_id' : "odom",
+            'enable_odom_tf' : True,
+        }],
+    )
+
     # rqt robot steering
     rqt_robot_steering = Node(
         package='rqt_robot_steering',
@@ -183,6 +202,12 @@ def generate_launch_description():
             event_handler=OnProcessExit(
                 target_action=load_velocity_controller,
                 on_exit=[src_gazebo_controller],
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_velocity_controller,
+                on_exit=[src_odometry],
             )
         ),
 

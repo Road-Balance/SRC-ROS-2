@@ -122,9 +122,9 @@ void SRCOdometry::jointstateCallback(const JointState::SharedPtr msg)
     if (msg->position[i] == 0)
       break;
 
-    if (strcmp(msg->name[i].c_str(), "left_rear_wheel_joint") == 0)
+    if (strcmp(msg->name[i].c_str(), "lr_wheel_joint") == 0)
       left_rear_wheel_joint = msg->position[i];
-    if (strcmp(msg->name[i].c_str(), "right_rear_wheel_joint") == 0)
+    if (strcmp(msg->name[i].c_str(), "rr_wheel_joint") == 0)
       right_rear_wheel_joint = msg->position[i];
   }
 
