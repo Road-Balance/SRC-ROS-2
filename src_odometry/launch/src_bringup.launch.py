@@ -38,6 +38,8 @@ def generate_launch_description():
             'has_imu_heading' : True,
             'is_gazebo' : False,
             'wheel_radius' : 0.0508,
+            # TODO
+            # 'encoder_resolution' : 450,
             'base_frame_id' : "base_link",
             'odom_frame_id' : "odom",
             'enable_odom_tf' : True,
