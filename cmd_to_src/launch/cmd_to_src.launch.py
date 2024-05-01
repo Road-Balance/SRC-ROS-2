@@ -17,7 +17,7 @@ def generate_launch_description():
             "p_gain" : 80.0, # 95.0
             "i_gain" : 2.0,
             "d_gain" : 0.5,
-            "steering_offset" : 28,
+            "steering_offset" : 36,
             "use_twiddle" : False,
         }],
     )

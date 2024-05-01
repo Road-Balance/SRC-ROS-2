@@ -15,4 +15,6 @@ KERNEL=="ttyACM*", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="00**", MODE:="077
 SUBSYSTEM=="video4linux", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="08**", ATTR{index}=="0", MODE="0777", GROUP="video", SYMLINK+="cams/c920"
 
 # MW-AHRSv1
-KERNEL=="ttyUSB*", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="23**", MODE:="0777", SYMLINK+="MWAHRs"
+# KERNEL=="ttyUSB*", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="23**", MODE:="0777", SYMLINK+="MWAHRs"
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="75**", MODE:="0777", SYMLINK+="MWAHRs"
+
