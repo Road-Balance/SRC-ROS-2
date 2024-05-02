@@ -22,13 +22,13 @@ def generate_launch_description():
     )
 
     # Rplidar Driver
-    rplidar_ros2_pkg = os.path.join(get_package_share_directory('rplidar_ros2'))
+    rplidar_ros2_pkg = os.path.join(get_package_share_directory('rplidar_ros'))
     src_odometry_pkg = os.path.join(get_package_share_directory('src_odometry'))
     src_slam_pkg = os.path.join(get_package_share_directory('src_slam'))
     
     serial_port = "/dev/rplidar"
     # rplidar_launch_file = "rplidar_a3_launch.py"
-    rplidar_launch_file = "rplidar_launch.py"
+    rplidar_launch_file = "rplidar_a2m8_launch.py"
     rplidar_driver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(rplidar_ros2_pkg, 'launch', rplidar_launch_file)),
         launch_arguments={'serial_port': serial_port}.items()
@@ -43,6 +43,7 @@ def generate_launch_description():
         package = "tf2_ros", 
         executable = "static_transform_publisher",
         arguments=["0.24", "0", "0.14", "3.1415", "0", "0", "base_link", "laser"]
+        # arguments=["0.24", "0", "0.14", "0", "0", "0", "base_link", "laser"]
     )
 
     # Rviz
