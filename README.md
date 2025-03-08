@@ -1,5 +1,9 @@
 # SRC-ROS-2
 
+> Ackermann Driving Autonomous Robot Platform 
+
+![image](./img/src2.gif)
+
 Environment Setup 
 
 * Ubuntu 20.04
@@ -17,6 +21,10 @@ rosdinstall foxy
 src_control_message clone
 cbp src_control_message && rosfoxy
 ```
+
+## CAD Designed from Fusion 360
+
+![image](./img/src_cad.jpg)
 
 ## Simplified SRC Description
 
@@ -38,7 +46,7 @@ ros2 launch src_description src_description.launch.py
 ros2 launch src_gazebo empty_world.launch.py
 ```
 
-![image](https://user-images.githubusercontent.com/12381733/164446956-0b621647-d80b-4c97-909c-9325354dd427.png)
+![image](./img/src_gazebo.gif)
 
 ## SRC Simulation 2 - SRC & MIT Racecourse
 
@@ -134,11 +142,7 @@ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/teensy4.0
 ros2 launch src_demo joystick_control_foxy.launch.py
 ```
 
-PID Tuning
-
-```
-
-```
+> PID Tuning Requried
 
 SLAM Toolbox
 
@@ -161,11 +165,6 @@ Navigation
 ```
 ros2 launch src_demo src_bringup_nav.launch.py
 ros2 launch src_nav bringup_real_launch.py
-
-# remote version
-
-
-
 
 # SRC launch
 ros2 launch src_demo src_bringup_nav.launch.py
